@@ -1,0 +1,131 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Vamos Começar
+
+Neste primeiro capítulo, vamos preparar para o "Entrance Quiz". O foco aqui é o que você precisa para instalar os softwares (*R* e *RStudio*) e tentar alguns exercícios básicos que vai facilitar nosso trabalho presencial na Sustentare.
+
+## Historia de R e Porque Precisamos Ele
+
+### Historia
+
+O antigo Bell Labs de ATT em Nova Jersey foi uma fonte rica das linguagens de computação. C e seus derivativos vêm de lá. S, uma linguagem que permitiu que cientistas do laboratório podem pôr estatística no contexto de computação sem precisar programar do início todas as funções necessárias para executar análises estatísticas como tinha sido necessário em Fortran ou Cobol ou Pascal. Quando o Bell Labs foi desmembrado ao final da década dos 1980s, S tornou um produto comercial (que ainda existe). 
+
+Nos anos 1990s, Ross Ihaka e Robert Gentleman de Nova Zelândia criou um derivativo *open-source* da S, que eles chamaram "R", continuando a tradição de Bell Labs de dar às linguagens nomes de uma letra só. Ihaka e Gentleman disponibilizaram a R em 1999. Agora, estamos usando versão 3.5.0. R tem uma comunidade extremamente ativa. Desenvolvedores e usuários contribuíram com mais de 12.500 pacotes com funções e conjuntos de dados adicionais. Esses pacotes abrangem todas as áreas em que possamos pensar, de análise de finanças quantitativas até astrofísica até microbiologia. R realmente tornou na última década uma das mais importantes linguagens de computação.
+
+Nas faculdades em quase todo o mundo, R é a ferramenta de pesquisa mais popular hoje. E a presença dela nas empresas está crescendo diariamente. 
+
+Uma das razões que explica este crescimento forte da R é que fica *open-source*. Portanto, pode adquirir **de graça**, sim--livre de custo. **Custo zero** (para aqueles que não acreditaram a primeira vez). 
+
+### Porque Professor Jim Usa R
+
+Eu tenho uma longa história com programas como SPSS, Stata, SAS e mesmo Graphpad Prism. Comecei de usar SPSS quando ainda estava nos cartões IBM e os computadores eram os IBM 360s (aliás, os anos 60). Tudo bem. Usei várias versões de todos esses outros programas, mas sempre eu estava um pouco insatisfeito. Em 2012, descobri R e percebi que minhas insatisfações com SPSS, etc. tiveram solução. A vantagem grande de R sobre os outros programas é que você pode controlar absolutamente a sequência das operações (passos) em sua análise. Você escreve um programa num *script* (i.e., pequeno programa) e o R vai executar exatamente o que você o mandou fazer. E amanhã vai executar uma nova análise com exatamente o mesmo resultado que ontem.
+
+### Problemas com os Tradicionais Programas da Análise de Dados
+
+Com todas as caixas de diálogo e menus, os programas da análise de dados distanciam você dos detalhes e passos da análise e da limpeza dos dados. E mais, se você não clicar nas opções exatas na terça da análise que você fez inicialmente na segunda, vai produzir um resultado diferente. Pior ainda, essas caixas oferecem muitas opções que você não entende (porque você é um administrador, biólogo, arquiteto, etc., mas não um estatístico) e como resultado, a análise não faz sentido e você não pode realmente explicar as conclusões.
+
+Como disse Prof. Sacha Eskamp da Universidade de Amsterdã:
+
+> *You can only do what the buttons say you can do.* [^1] [Você pode fazer somente o que os botões dizem que você pode fazer.]
+
+[^1]: Baker, Monya, "Code Alert", **Nature**, Vol 541, 26/1/2017, p. 563 - 565. 
+
+## Software -- *Open-Source* vs. Comercial
+
+Além disso, o custo desses programas é absurdamente caro. Mesmo nas edições para estudantes, o preço frequentemente fica acima do que os alunos podem pagar. Como efeito colateral, essa encoraja a proliferação das cópias não autorizadas. Onde fica a ética em ciência ou negócios quando alunos precisam começar a carreira roubando software? Faz muito tempo, softwares *open-source* eram de baixa qualidade. Mas, não mais. Existem equivalentes para os softwares pagos em quase todas as áreas em que precisamos programas. O mundo dos softwares *open-source* realmente mudou. Fora do Microsoft Word®, eu raramente uso softwares pagos. 
+
+## R vs. Python
+
+Uma alternativa para R com um conceito paralelo de programação das análises é a linguagem *Python*. Lançado em 1991 pelo holandês Guido van Rossum, Python tirou o nome do grupo comédico inglês "Monty Python's Flying Circus", não da espécie da serpente. Ela é uma linguagem de alto nível interpretada, exatamente como R. Mas, Python foi desenhada como uma linguagem geral em contraste a R, que tem sua origem em estatística. Para executar até estatística básica em Python, precisa também aprender a programação de vários módulos como Pandas, necessários para representação dos conjuntos de dados em Python.
+
+Por isto e a preferência minha para R, esta matéria vai focar em R. Entretanto, R e Python estão tornando mais compatíveis. Talvez em 2 anos, para aprender análise de dados, vai aprender os dois idiomas juntos.
+
+Para vocês que gostariam de aprender mais um pouco sobre Python, posso recomendar os seguintes recursos:
+
+- Downey, **Think Python** (http://greenteapress.com/wp/think-python-2e/)
+- Lancaster & Webster **Python For The Life Sciences: A gentle introduction to Python for Life Scientists** (Leanpub, mas custa US$34)
+- Severance, **Python for Everybody** (http://do1.dr-chuck.com/pythonlearn/EN_us/pythonlearn.pdf)  
+
+## Aprendizagem de R, É Difícil?
+
+É bastante fácil aprender os elementos básicos de R, inclusive, especificar vetores e conjuntos de dados (que chamamos em R, *dataframes* ou *tibbles*), executar funções básicas de estatística e matemática. No primeiro fim de semana, nós vamos construir e executar várias simulações Monte Carlo, [^2] uma tarefa que precisa habilidade de construir e especificar dados e fazer uma análise. 
+
+[^2]: Irizzary, Rafael, **Introduction to Data Science**, (https://rafalab.github.io/dsbook), Ch. 26.3.
+
+Então, nas fases iniciais de aprender R, você não vai sofrer muito. Mais tarde, quando você quer utilizar pacotes e funções mais avançados, esses precisarão bastante foco e concentração para programar corretamente. Mas, esta fase seria para um outro dia.
+
+Como as outras linguagens de programação, você escrever comandos numa forma que o programa entende, um depois do outro com uma sintaxe abreviada que segue as regras da função que você está executando. Por exemplo, se queremos achar a média de 100 números aleatórios entre 1 e 1000, podemos dizer o seguinte:
+
+```{r code_ex1, echo = TRUE, eval = FALSE}
+set.seed(1)
+dados <- runif(100, min = 0, max = 1000)
+media <- mean(dados)
+```
+
+Este exemplo funciona. (O resultado é 517.847.) Quando você instala R, pode executar os comandos. Vou mostrar como. Mas, o ponto aqui é mostrar para vocês que o código precisa ser escrito exatamente como o programa demanda. Como vocês provavelmente já sabem, o computador é uma máquina de adição grande e estúpida (*"a computer is a big, dumb adding machine"*). Ele faz exatamente o que você comanda ele fazer.
+
+## Advertência Importante
+
+Vai ser imprescindível que vocês investem um pouco de tempo no curso antes que as aulas presenciais iniciam em julho. Primeiro, precisam instalar os softwares nos seus laptops (e trazerem para a sala de aula). Segundo, precisa ler um pouco do material que vou sugerir aqui. E, terceiro, talvez podem experimentar um curso de R básico no Internet, pelo menos algumas lições para não ficar totalmente perdido na primeira aula.
+
+## Instalação dos Softwares
+
+### Instalação do R
+
+Você pode achar R no site seguinte:
+
+>  https://cran.r-project.org/
+
+CRAN é o grupo oficial que mantem R e garanta que todos os componentes funcionam sozinhos e juntos. Esta é uma razão que R está tornando muito popular -- a qualidade do produto é muito alta. Figura 1 mostra a tela principal de R.
+
+![R - Página Inicial](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/CRAN_screen.png)
+ 
+ Verifique que a versão é 3.5.0, com o codinome de "Joy in Playing". 
+ 
+Existem versões para Windows, MacOS (o novo nome de OSX) e para vários sabores de Linux. Na parte superior da tela, clique no link que é apropriado para seu sistema operacional e seguir as instruções para download do software. Vou detalhar aqui alguns dos passos para Windows e para MacOS.
+
+### Instalação de R para os Windows
+
+1. Clique no link "Download R for Windows"
+
+2. Na próxima tela, clique no link "base"
+
+![R Instalação em Windows](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/CRAN_win_screen_1.png)
+
+3. Clique no link: "Download R 3.5.0 for Windows"
+
+O site vai fazer o download do programa como é normal para os downloads. Você pode instalar o programa seguindo seu procedimento normal e R vai depositar no Desktop um ícone.
+
+### Instalação do RStudio
+
+Primeiro, porque precisamos este programa? RStudio dá asas para R. Ao nível mais básico, RStudio é nossa interface para R. É um programa baseado num editor de texto onde você escreve os scripts que vai desenvolver para R. Mas, é realmente o canivete suíço de R. Lá pode gerenciar os arquivos, estabelecer projetos que colocam todos os arquivos de um projeto junto, fazer controle de versões, e ver seus resultados, relatórios, etc. Em todas nossas aulas, vou usar RStudio para controlar todas as demonstrações de programação, e RStudio é o software em que fiz toda a documentação da matéria.  RStudio também é de graça. Existe uma versão comercial, mas vocês não precisam ela.
+
+Para instalar, navegue diretamente á página https://www.rstudio.com/products/rstudio/download/, que permite que você evita muita informação desnecessária. 
+
+Esta tela tem muita informação. Então precisa rolar para baixo até que você chega nos "Installers for Supported Platforms". Parece como a figura seguinte:
+
+![RStudio Installers](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/RStudio_download.png)
+
+Agora, pode fazer o download para o sistema operacional seu e instalar o programa seguindo as instruções no módulo de instalação. 
+
+Se vocês precisam ajuda adicional com a instalação, coloquei um vídeo no meu canal de YouTube chamado "MAD CD Instalar R". Para alcançar o canal, vá para: https://www.youtube.com/channel/UCbvgZ8RYeTtgjhAKE-jub5A
+
+## Iniciando RStudio
+
+No seu Desktop ou nos menus clique no ícone de RStudio (não o ícone de R) duas vezes. RStudio vai abrir e R vai abrir automaticamente dentro de RStudio. Num dos painéis (normalmente o painel no lado esquerdo) vai aparecer o *Console*, onde R executa as funções. No lado direto têm dois painéis. Naquele para cima são várias abas relacionadas aos variáveis que R guarda na memória ativa do computador e comandos que você executa. No painel inferior, têm abas que mostram informação sobre os arquivos na pasta "*working directory*", o lugar onde R acha os arquivos (data, programas) que você quer executar, os pacotes que você tem no computador e as páginas de assistência ("*Help*") para R. Vou falar sobre todos esse tópicos mais tarde. Utilizando as Preferências (no item de menu de "RStudio"), você pode controlar a aparência da tela). 
+
+O painel de Console mostrará que a versão atual (3.5.0) de R está carregado e pronta para operação.
+
+![Tela Inicial](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/opening_screen.png)
+
+## Instalar os Pacotes Necessários
+
+Durante o curso, nós vamos usar vários pacotes com funções adicionais à coleção das funções no R básico ("*Base R*"). Vocês podem instalar os mais importantes através de um script que já preparei para você. Trabalhando com o script vai permitir que vocês começam de aprender como usar o R. O script tem o nome "instalar_pacotes.R". 
+
+
+
+
+
