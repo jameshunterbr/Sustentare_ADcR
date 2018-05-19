@@ -3,6 +3,7 @@ output:
   pdf_document: default
   html_document: default
 ---
+
 # Vamos Começar
 
 Neste primeiro capítulo, vamos preparar para o "Entrance Quiz". O foco aqui é o que você precisa para instalar os softwares (*R* e *RStudio*) e tentar alguns exercícios básicos que vai facilitar nosso trabalho presencial na Sustentare.
@@ -81,7 +82,7 @@ Você pode achar R no site seguinte:
 
 CRAN é o grupo oficial que mantem R e garanta que todos os componentes funcionam sozinhos e juntos. Esta é uma razão que R está tornando muito popular -- a qualidade do produto é muito alta. Figura 1 mostra a tela principal de R.
 
-![R - Página Inicial](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/CRAN_screen.png)
+![R - Página Inicial](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/CRAN_screen.png)
  
  Verifique que a versão é 3.5.0, com o codinome de "Joy in Playing". 
  
@@ -93,7 +94,7 @@ Existem versões para Windows, MacOS (o novo nome de OSX) e para vários sabores
 
 2. Na próxima tela, clique no link "base"
 
-![R Instalação em Windows](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/CRAN_win_screen_1.png)
+![R Instalação em Windows](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/CRAN_win_screen_1.png)
 
 3. Clique no link: "Download R 3.5.0 for Windows"
 
@@ -107,7 +108,7 @@ Para instalar, navegue diretamente á página https://www.rstudio.com/products/r
 
 Esta tela tem muita informação. Então precisa rolar para baixo até que você chega nos "Installers for Supported Platforms". Parece como a figura seguinte:
 
-![RStudio Installers](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/RStudio_download.png)
+![RStudio Installers](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/RStudio_download.png)
 
 Agora, pode fazer o download para o sistema operacional seu e instalar o programa seguindo as instruções no módulo de instalação. 
 
@@ -119,11 +120,73 @@ No seu Desktop ou nos menus clique no ícone de RStudio (não o ícone de R) dua
 
 O painel de Console mostrará que a versão atual (3.5.0) de R está carregado e pronta para operação.
 
-![Tela Inicial](~/Documents/Sustentare/Data_Analysis_with_R/dat_anal_w_R/opening_screen.png)
+![Tela Inicial](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/opening_screen.png)
 
 ## Instalar os Pacotes Necessários
 
 Durante o curso, nós vamos usar vários pacotes com funções adicionais à coleção das funções no R básico ("*Base R*"). Vocês podem instalar os mais importantes através de um script que já preparei para você. Trabalhando com o script vai permitir que vocês começam de aprender como usar o R. O script tem o nome "instalar_pacotes.R". 
+
+O seguinte é o texto do arquivo. É muito simples. Só 2 comandos. Um que especifica os pacotes que vamos instalar e uma função que faz o trabalho (`install.packages()`). 
+
+O primeiro comando, especificando uma lista de pacotes para carregar, usei 2 comandos importantes para R. Eu quero usar o nome `pacotes` para referir à lista dos 29 pacotes. Não quero teclar eles cada vez preciso usar. Chato. Então, estou *designando* a palavra `pacotes` para ficar no lugar da lista inteira. Faço isso com o simbolo de uma seta pontado para a esquerda "`<-`", composto do caráter "`<`" e o hífen "`-`". Este é chamada o operador *assignment* e não é equivalente ao sinal de "`=`", que é uma condição lógica (uma coisa sendo igual a uma outra). Entretanto, R quer ser tão amigável que permite que você usa o sinal "=" para designação. 
+
+Uma dica sobre o operador de designação. Só usa o "`<-`" e não o "`=`". Em algum momento, você vai confundir os 2 usos de "`=`". Todos nós fazemos. Desenvolve o hábito agora de usar o "`<-`" e pode evitar esse erro. 
+
+O segundo comando nesta expressão é o `c()`. Este função quer dizer "concatenar" ou colocar os itens que seguem num vetor. Os itens podem ser qualquer tipo de dado que R reconhece. No capítulo X, exploraremos os tipos de dados que pode usar em R. Outra novidade é que agora você viu um **vetor**. Um vetor é um matriz, mas de uma dimensão só. Depois que você executa esta função, vai ver na janela de *Environment* a variável `pacotes` e que ela é do tipo "caráter" (`chr`) e tem elementos 1 até 29.
+
+![Vetor `pacotes`](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/vetor_pacotes.png)
+
+Na função `install.packages(pacotes)`, R vai inserir o conteúdo do vetor `pacotes` no lugar da palavra e assim executar.
+
+```{r inst_packs, eval = FALSE, echo = TRUE}
+pacotes <- c("tidyverse", "car", "caret", "caTools", "data.table", 
+             "DescTools", "devtools", "gapminder", "ggpubr", "ggvis", 
+             "gmodels", "kableExtra", "knitr", "lattice", "lpSolve", 
+             "lubridate", "magrittr", "nortest", "nycflights13", "outliers", 
+             "pROC", "psych", "RColorBrewer", "Rcpp", "readxl", "ROCR",   
+             "shiny", "titanic", "yarrr")
+
+install.packages(pacotes)
+```
+
+### Localização do Arquivo `instalar_pacotes.R`
+
+Um dos recursos mais importantes para todos os programadores de computador é GitHub. É a face pública do sistema de controle de versões `git`. Git permite que você sempre tem todas as versões de seus programas ou scripts mantidas no seu computador (numa forma eficiente) para que você voltar para versões anteriores quando você está explorando e corrigindo erros que todo programador faz. GitHub tem repositórios onde são guardados os arquivos de um projeto. Nós vamos falar dos projetos (um recurso poderoso de RStudio) perto do final do curso. 
+
+Nosso curso tem um *repo* (como pessoas referem aos repositórios): **Sustentare ADcR -- Matéria da Análise de Dados com R para Escola Sustentare**, que você pode achar aqui: https://github.com/jameshunterbr/Sustentare_ADcR
+
+![GitHub Repo](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/github_repo.png)
+
+Se você clica no nome de arquivo, você irá à tela seguinte, onde vai ver o código dos dois comandos. 
+
+![Código Instalar](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/instal_pac_file.png)
+
+Aqui, só precisa clicar no botão **Raw** e fazer um "right-click" (botão secondário do mouse) na tela seguinte. Você pode salvar o arquivo para seu *working directory* usando o botão **Save Page As ...**. Esta tela mostra o comando no Firefox e os comandos de seu browser talvez são um pouco diferentes. 
+
+![Save Page As](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/save_page_as.png)
+
+### O Que É Um *Working Directory*?
+
+O *Working Directory* ("pasta de trabalho") é o lugar onde R espera achar todos os arquivos que vai precisar (dados e scripts). Você pode achar ele em RStudio clicando o itém do *toolbar* da aba *Files* chamado *More/Go To Working Directory* e RStudio vai levar você lá. Se o *Working Directory* não é a pasta que você esperou, pode navegar na lista dos arquivos para a pasta que quer usar como o *Working Directory*.
+
+### Instalar os Pacotes
+
+O próximo passo é carregar o programa com os comandos e executá-lo. Para carregar, só precisa clicar no nome do arquivo `instalar_pacotes.R` e ele vai abrir numa janela acima do Console.
+
+![Janela Programas](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/inst_pac_janela.png)
+
+Para executar o programa, você pode clicar na palavra *Source* na barra acima do programa. Vai precisar um pouco de tempo, mas vai carregar no seu computador esses pacotes e outros em que eles dependem para funcionar.
+
+## Prontos para Trabalhar
+
+Fizemos a instalação dos softwares e a maioria dos pacotes que vamos usar durante o curso. Finalmente é a hora de usar R, que vamos fazer no próximo capítulo. Mas primeiro vamos relembrar os pontos importantes deste processo inicial:
+
+  1.  Fizemos o download do web da R e da RStudio e instalamos os programas
+  2.  Aprendemos o que é o *Working Directory*
+  3.  Aprendemos o que é o operador de designação (`<-`)
+  4.  Aprendemos o que é um vetor
+  5.  Aprendemos a função `c()`
+  6.  Aprendemos que o comando para instalar pacotes é `install.package()`
 
 
 
