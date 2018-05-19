@@ -1,12 +1,3 @@
----
-title: Análise de Dados com R -- Vamos Começar
-author: "James R. Hunter"
-date: "`r Sys.Date()`"
-output:
-  pdf_document: default
-  html_document: default
----
-
 # Vamos Começar
 
 Neste primeiro capítulo, vamos preparar para o "Entrance Quiz". O foco aqui é o que você precisa para instalar os softwares (*R* e *RStudio*) e tentar alguns exercícios básicos que vai facilitar nosso trabalho presencial na Sustentare.
