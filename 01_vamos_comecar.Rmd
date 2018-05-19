@@ -1,4 +1,7 @@
 ---
+title: Análise de Dados com R -- Vamos Começar
+author: "James R. Hunter"
+date: "`r Sys.Date()`"
 output:
   pdf_document: default
   html_document: default
@@ -128,16 +131,6 @@ Durante o curso, nós vamos usar vários pacotes com funções adicionais à col
 
 O seguinte é o texto do arquivo. É muito simples. Só 2 comandos. Um que especifica os pacotes que vamos instalar e uma função que faz o trabalho (`install.packages()`). 
 
-O primeiro comando, especificando uma lista de pacotes para carregar, usei 2 comandos importantes para R. Eu quero usar o nome `pacotes` para referir à lista dos 29 pacotes. Não quero teclar eles cada vez preciso usar. Chato. Então, estou *designando* a palavra `pacotes` para ficar no lugar da lista inteira. Faço isso com o simbolo de uma seta pontado para a esquerda "`<-`", composto do caráter "`<`" e o hífen "`-`". Este é chamada o operador *assignment* e não é equivalente ao sinal de "`=`", que é uma condição lógica (uma coisa sendo igual a uma outra). Entretanto, R quer ser tão amigável que permite que você usa o sinal "=" para designação. 
-
-Uma dica sobre o operador de designação. Só usa o "`<-`" e não o "`=`". Em algum momento, você vai confundir os 2 usos de "`=`". Todos nós fazemos. Desenvolve o hábito agora de usar o "`<-`" e pode evitar esse erro. 
-
-O segundo comando nesta expressão é o `c()`. Este função quer dizer "concatenar" ou colocar os itens que seguem num vetor. Os itens podem ser qualquer tipo de dado que R reconhece. No capítulo X, exploraremos os tipos de dados que pode usar em R. Outra novidade é que agora você viu um **vetor**. Um vetor é um matriz, mas de uma dimensão só. Depois que você executa esta função, vai ver na janela de *Environment* a variável `pacotes` e que ela é do tipo "caráter" (`chr`) e tem elementos 1 até 29.
-
-![Vetor `pacotes`](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/vetor_pacotes.png)
-
-Na função `install.packages(pacotes)`, R vai inserir o conteúdo do vetor `pacotes` no lugar da palavra e assim executar.
-
 ```{r inst_packs, eval = FALSE, echo = TRUE}
 pacotes <- c("tidyverse", "car", "caret", "caTools", "data.table", 
              "DescTools", "devtools", "gapminder", "ggpubr", "ggvis", 
@@ -148,6 +141,18 @@ pacotes <- c("tidyverse", "car", "caret", "caTools", "data.table",
 
 install.packages(pacotes)
 ```
+
+### Nosso Primeiro Programa
+
+O primeiro comando, especificando uma lista de pacotes para carregar, usei 2 comandos importantes para R. Eu quero usar o nome `pacotes` para referir à lista dos 29 pacotes. Não quero teclar eles cada vez preciso usar. Chato. Então, estou *designando* a palavra `pacotes` para ficar no lugar da lista inteira. Faço isso com o simbolo de uma seta pontado para a esquerda "`<-`", composto do caráter "`<`" e o hífen "`-`". Este é chamada o operador *assignment* e não é equivalente ao sinal de "`=`", que é uma condição lógica (uma coisa sendo igual a uma outra). Entretanto, R quer ser tão amigável que permite que você usa o sinal "=" para designação. 
+
+Uma dica sobre o operador de designação. Só usa o "`<-`" e não o "`=`". Em algum momento, você vai confundir os 2 usos de "`=`". Todos nós fazemos. Desenvolve o hábito agora de usar o "`<-`" e pode evitar esse erro. 
+
+O segundo comando nesta expressão é o `c()`. Este função quer dizer "concatenar" ou colocar os itens que seguem num vetor. Os itens podem ser qualquer tipo de dado que R reconhece. No capítulo X, exploraremos os tipos de dados que pode usar em R. Outra novidade é que agora você viu um **vetor**. Um vetor é um matriz, mas de uma dimensão só. Depois que você executa esta função, vai ver na janela de *Environment* a variável `pacotes` e que ela é do tipo "caráter" (`chr`) e tem elementos 1 até 29.
+
+![Vetor `pacotes`](~/Documents/Sustentare/Data_Analysis_with_R/dawR1/vetor_pacotes.png)
+
+Na função `install.packages(pacotes)`, R vai inserir o conteúdo do vetor `pacotes` no lugar da palavra e assim executar.
 
 ### Localização do Arquivo `instalar_pacotes.R`
 
@@ -187,6 +192,8 @@ Fizemos a instalação dos softwares e a maioria dos pacotes que vamos usar dura
   4.  Aprendemos o que é um vetor
   5.  Aprendemos a função `c()`
   6.  Aprendemos que o comando para instalar pacotes é `install.package()`
+  7.  Temos um repo no GitHub: https://github.com/jameshunterbr/Sustentare_ADcR
+  8.  Temos um canal no YouTube: https://www.youtube.com/channel/UCbvgZ8RYeTtgjhAKE-jub5A
 
 
 
