@@ -9,6 +9,6 @@ pacotes <- c("tidyverse", "car", "caret", "caTools", "data.table",
              "gmodels", "kableExtra", "knitr", "lattice", "lpSolve", 
              "lubridate", "magrittr", "nortest", "nycflights13", "outliers", 
              "pROC", "psych", "RColorBrewer", "Rcpp", "readxl", "ROCR",   
-             "shiny", "stylr", "titanic", "yarrr")
+             "shiny", "styler", "titanic", "yarrr")
 
 install.packages(pacotes)
