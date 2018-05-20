@@ -4,18 +4,67 @@ Agora que instalamos os softwares mas antes de começar análises com R, aqui s�
 
 ## Cursos
 
-O site DataCamp oferece uma série dos cursos excelentes sobre R (e Python também). Eles começam com os conceitos mais básicos e alcançam nivéis mais avançados. Os professores são excelentes e todos têm um monte de exercícios para ajudar você fixar os conceitos e as técnicas na suas cabeças. O primeiro desses cursos é "Introduction to R". Ele é de graça e ensinará todos os tipos de dados essenciais para operação em R. Ajudaria muito se você fez este curso antes do início de nossas aulas em julho. O curso está sendo dado em inglês. O link para este curso: https://www.datacamp.com/courses/free-introduction-to-r
+O site DataCamp oferece uma série dos cursos excelentes sobre R (e Python também). Eles começam com os conceitos mais básicos e alcançam níveis mais avançados. Os professores são excelentes e todos têm um monte de exercícios para ajudar você fixar os conceitos e as técnicas na suas cabeças. O primeiro desses cursos é "Introduction to R". Ele é de graça e ensinará todos os tipos de dados essenciais para operação em R. Ajudaria muito se você fez este curso antes do início de nossas aulas em julho. O curso está sendo dado em inglês. O link para este curso: https://www.datacamp.com/courses/free-introduction-to-r
 
 
 ```{r datacamp_main, echo = FALSE, fig.align='center', fig.cap = "R Tela Inicial"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/datacamp1.png")
 ```
 
-A maioria dos cursos de DataCamp são pagos, mas tem o primeiro cápitulo de graça. Este daria para você uma idéia se você quer investir no resto do curso. Recomendo dois cursos sobre R por duas razões. Primeiro, o conteúdo é necessário para aprender R. Segundo, o ensino é excelente. Os cursos são:
+A maioria dos cursos de DataCamp são pagos, mas tem o primeiro capitulo de graça. Este daria para você uma ideia se você quer investir no resto do curso. Recomendo dois cursos sobre R por duas razões. Primeiro, o conteúdo é necessário para aprender R. Segundo, o ensino é excelente. Os cursos são:
 
-- **Manipulate Data in R with `dplyr` (Garrett Grolemund)** - Usar os 'verbos' de pacote `dplyr` para manusiar dados. `dplyr` é um dos componentes principais do *Tidyverse*, um grupo de pacotes e funções que facilita o manuseio dos dados, sua importação de Excel para R, e desenvolvimento dos modelos de análise. O nosso curso vai usar as funções do Tidyverse em quase todas as análises porque é um sistema que mais permite que você entenda mais facilmente o que você está fazendo. Grolemund é um dos gurus de RStudio e co-autor com o inventor da Tidyverse, Hadley Wickham. O curso está em inglês e é pago, mas pode fazer o primeiro cápitulo sem cobrança.
+- **Manipulate Data in R with `dplyr` (Garrett Grolemund)** - Usar os 'verbos' de pacote `dplyr` para manusear dados. `dplyr` é um dos componentes principais do *Tidyverse*, um grupo de pacotes e funções que facilita o manuseio dos dados, sua importação de Excel para R, e desenvolvimento dos modelos de análise. O nosso curso vai usar as funções do Tidyverse em quase todas as análises porque é um sistema que mais permite que você entenda mais facilmente o que você está fazendo. Grolemund é um dos gurus de RStudio e co-autor com o inventor da Tidyverse, Hadley Wickham. O curso está em inglês e é pago, mas pode fazer o primeiro capitulo sem cobrança.
 
-- **Introduction to the Tidyverse (David Robinson)** - Um outro olhar nos mesmos conceitos do Tidyverse por um dos melhores professores no mundo de R de hoje. Recomendo os 2 cursos porque um reforça a aprendizagem do outro. Também, um curso pago com o primeiro cápitulo de graça.
+- **Introduction to the Tidyverse (David Robinson)** - Um outro olhar nos mesmos conceitos do Tidyverse por um dos melhores professores no mundo de R de hoje. Recomendo os 2 cursos porque um reforça a aprendizagem do outro. Também, um curso pago com o primeiro capitulo de graça.
 
-Além de DataCamp, HarvardX (parte do sistema dos cursos à distancia edX) oferece uma série dos cursos sobre o uso de R na Ciência dos Dados, PH125. Os primeiros dois cursos neste série: [Data Science: R Basics] (https://www.edx.org/course/data-science-r-basics) e [Data Science: Visualization] (https://www.edx.org/course/data-science-visualization-harvardx-ph125-2x). O professor dos dois é Rafael Irizzary, Chefe de Departmento de Biostatistics do Hospital Dana-Farber de Cancer em Boston e Professor em Harvard. Estes cursos são um pouco mais avançados que aqueles de DataCamp, mas pode seguir facilmente. Você pode fazer cursos de edX de graça em modo de "auditar", que quer dizer que você não recebe certificado se você completa o curso. Tenho maior respeito para Prof. Irizzary.
+Além de DataCamp, **HarvardX** (parte do sistema dos cursos à distancia edX) oferece uma série dos cursos sobre o uso de R na Ciência dos Dados, PH125. Os primeiros dois cursos neste série: [Data Science: R Basics] (https://www.edx.org/course/data-science-r-basics) e [Data Science: Visualization] (https://www.edx.org/course/data-science-visualization-harvardx-ph125-2x). O professor dos dois é Rafael Irizzary, Chefe de Departamento de Bioestatística do Hospital Dana-Farber de Câncer em Boston e Professor em Harvard. Estes cursos são um pouco mais avançados que aqueles de DataCamp, mas pode seguir facilmente. Você pode fazer cursos de edX de graça em modo de "auditar", que quer dizer que você não recebe certificado se você completa o curso.
 
+## Livros --- R, Programação e Análise dos Dados
+
+Os livros seguintes são alguns entre meus preferidos. Você pode download alguns desses de graça. Aqui, preço não é um indicador de qualidade.
+
+  - Irizzary, **Introduction to Data Science** (https://rafalab.github.io/dsbook; texto para cursos de HarvardX)
+  - Ismay, **Getting Used To R, Rstudio, and R Markdown** (https://bookdown.org)
+  - Kabacoff, **R in Action: Data analysis and graphics with R, 2e** (Manning)
+  - Peng, **R Programming for Data Science** (Leanpub & Bookdown)
+  - Peng, Kross & Anderson, **Mastering Software Development in R** (Leanpub & Bookdown)
+  - Phillips, **YaRrr!: The Pirate's Guide to R** (http://www.thepiratesguidetor.com)
+  - Wickham & Grolemund, **R for Data Science** (http://r4ds.had.co.nz ou O'Reilly)
+  - Zumel & Mount, **Practical Data Science with R** (Manning)
+
+Se você querem só escolher um, sugiro **R for Data Science** pelo inventor do Tidyverse que pode ler de graça na Internet. Se for dois, o segundo seria ou **Getting Used To R, Rstudio, and R Markdown** ou **R Programming for Data Science** ou **Introduction to Data Science**. 
+
+Todos os livros de Bookdown pode ser achados (de graça): https://bookdown.org/ 
+
+## *Cheatsheets*
+
+RStudio publica uma série de "*cheatsheets*", resumos dos comandos e funções de vários aspectos de programação com R. São excelentes e você deve guardar eles onde pode consultar eles rapidamente. Colocando todos os elementos das funções no lugar certo na ordem certa não é fácil. *Cheatsheets* tiram muito do sofrimento. Pode achar eles aqui: https://www.rstudio.com/resources/cheatsheets/
+
+## Sites
+
+Existem muito sites e blogs além de CRAN e RStudio (que apresentei no último capitulo) que são focados em R. Aqui vou listar só poucos que podem ajudar você resolver duvidas sobre comandos e funções de R. Não hesite de usar eles. Em geral, são muito bons e tem respostas às suas perguntas.
+
+  - **R Bloggers** (https://www.r-bloggers.com/) um compêndio de 750 blogs sobre R; destila os melhores posts desses blogs. Tem coisas interessantes quase todos os dias.
+  - **MAD-Stat** (https://madstatbr.wordpress.com/) o blog meu sobre R, estatística e bioestatística
+  
+  - **Stack Overflow** (https://stackoverflow.com/questions/tagged/r) um centro de esperteza em R e outros assuntos. Pode fazer perguntas depois que você escaneia se alguém respondeu para a mesma pergunta anterior. Se você quer postar no site, siga as recomendações sobre qual informação precisa dar para alguém responder. Os "experts" aqui não têm muito paciência infelizmente. Entretanto, este é o lugar onde vai achar respostas valiosas e vale a pena procurar uma solução aqui.
+  
+## Canal de Vídeo
+
+Como eu disse no último capitulo, coloco vídeos nesse canal para ajudar você com questões que não são suficientemente explicadas em outros recursos. Se você tem uma duvida sobre um ponto, pode pedir que eu faça um vídeo sobre ele e vou postar. Para lembrar, o canal fica aqui: https://www.youtube.com/channel/UCbvgZ8RYeTtgjhAKE-jub5A
+
+## Sistema de Ajuda de R e RStudio
+
+O sistema de ajuda de R é muito completo. Toda função tem uma tela de ajuda. Uma das abas no RStudio (na janela a direta para baixo) é "*Help*" e você rapidamente ficará acostumado a consultar para achar a gramatica correta de usar nas funções. Mas, lembre que a documentação foi escrito por programadores, não romancistas ou jornalistas. Talvez pode ser difícil de entender as vezes. 
+
+Começa com suas duvidas no sistema de *Help*, mas procure outros fontes de help se você não entende o texto lá facilmente. 
+
+Se você tem uma pergunta e não acha uma solução facilmente ou recebe um mensagem de erro incompreensível, não hesite de copiar e colar a duvida ou mensagem em Google. Quase todas as duvidas que você pode ter já foram perguntadas por outros iniciantes de R e Google vai mandar você ver soluções uteis em Stack Overflow, R Bloggers e muito outros sites.
+
+## Um Pensamento Final --- Perguntas
+
+Pergunte bastante. Você não aprenda sem ter duvidas e perguntar para outros para ajudar resolver elas. Lembre que se você tem uma duvida, provavelmente outros tem a mesma duvida. Você não é só ajudando si mesmo; você está ajudando o grupo inteiro. **Não existem perguntas burras.** Como disse Carl Sagan (o astrofisico famoso que chefiou a versão original do programa de televisão "Cosmos": [^3]
+  
+>There are naive questions, tedious questions, ill-phrased questions, questions put after inadequate self-criticism. But every question is a cry to understand the world. **There is no such thing as a dumb question.** 
+
+[^3]: Carl Sagan, **The Demon-Haunted World: Science as a Candle in the Dark**, p. 303.

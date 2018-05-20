@@ -1,0 +1,66 @@
+# Primeiros Exercícios
+
+Finalmente, estamos prontos para pôr R em operação. Vamos iniciar com alguns exercícios e terminar esta capitulo com a manipulação e análise exploratório de um dataset interessante.
+
+## O Que São Dados?
+
+Parece que esta deve ser uma pergunta simples. Mas, vamos esclarecer no contexto dos dados em R. No primeiro capitulo expliquei o conceito de designação e mostrei o simbolo `<-` que usamos invés de sinal de igualdade (`=`) para associar um nome com alguns valores. Esses valores podem ser numericos ou texto, podem ser até listas ou matrices. Mas, sempre usamos a convenção 
+
+> <nome do objeto> **<-** <definição do objeto> 
+
+onde a definição é os valores são o conteúdo do objeto.
+
+## Exemplos de *Assignment*
+
+```{r assign1}
+x <- 5
+x
+```
+
+Aqui a letra `x` vai ter o valor 5. `x` vai ter a definição de 5. Podemos colocar na tela simplesmente colocando o nome do objeto. Este objeto nós podemos também chamar uma *variável*.
+
+```{r assign2}
+x <- 3 + 2
+x
+```
+
+Neste exemplo, `x` terá também o valor 5, mas esta vez ganha este valor através da operação de adição
+
+```{r assign3}
+x <- 1 == 0
+x
+```
+
+Esta vez, demos a `x` o valor que é o resultado de um teste lógico. O resultado é também um valor lógico: 1 não igual a 0, então o resultado deve ser `FALSE`. 
+
+```{r assign4}
+x <- sqrt(675.3)
+x
+```
+
+Também, nós podemos usar funções para definir o valor de `x`. Aqui usei o raiz quadrado. Mas, têm muitas outras funções que você pode utilizar. 
+
+A definição de uma variável pode ser um pouco mais complicado ainda. Vamos fazer um cálculo usando nossos dados do primeiro capitulo. Aqui é o código (no formato levemente alterado):
+
+```{r code_ex1}
+set.seed(1)
+dados <- runif(100, min = 0, max = 1000)
+m <- sum(dados)/length(dados)
+m
+```
+
+Aqui, temos três linhas que fazem operações e a quarta que relata o resultado. Vamos olhar em cada uma e ver o que faz.
+
+`set.seed(1)`: set.seed() é um comando que fornece às funções que calculam valores aleatóricos a instrução de sempre iniciar o cálculo no mesmo posição. Pode aceitar qualquer número inteiro como argumento. Aqui usei `1`. Mas, podia ter usado `43` ou `2018`. Qualquer número que está usado vai produzir uma série de números aleatórios diferentes.
+
+`dados <- runif(100, min = 0, max = 1000)`: dados é uma variável que vai receber 100 valores aleatórios entre 0 e 1000 (`min` e `max`). Estes valores são baseados na distribuição de números "uniforme", que quer dizer que todos os números entre os 2 limites têm uma chance igual de ser selecionados. O resultado `dados` vai ser um vetor com os 100 números.
+
+`m <- sum(dados)/length(dados)`: para calcular `m`, nós vamos somar os 100 valores e dividir (`/`) o resultado pelo número de valores na variável (neste caso 100). Este é a mesma coisa que pedir a média de uma série de números, utilizando o cálculo que você vai lembrar de seu curso de estatística:
+
+$$\mu = \frac{\sum_{i=1}^{n}x_{i}}{n}$$ 
+
+`m`: finalmente, indicando o nome da variável imprimirá o valor na tela.
+
+## Questões de Estilo
+
+Como você apresenta o código vai facilitar o seu entendimento do que você fez tanto quanto o entendimento de uma outra pessoa que precisa trabalhar com este código. Então, vale a pena seguir umas regras consistentes
