@@ -1,7 +1,7 @@
 --- 
 title: "MAD -- Análise de Dados em R"
 author: "James R. Hunter"
-date: "`r Sys.Date()`"
+date: ""
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
@@ -9,11 +9,13 @@ link-citations: yes
 github-repo: rstudio/bookdown-demo
 description: "Matéria de Análise de Dados (MAD): Curso para Disciplina de IOT na Escola Sustentare"
 ---
-# MAD -- Análise de Dados em R
+# Prefácio
 
-![](/Users/jameshunter/Documents/MAD/course_logo_3_small.png)
+```{r MADlogo, echo = FALSE, fig.align='center', fig.height = 2, fig.width = 2, fig.cap = "Matéria de Análise de Dados"}
+knitr::include_graphics("~/Documents/MAD/course_logo_3_small.png")
+```
 
 
-Nos capitulos seguintes, nós vamos aprender a linguagem de estatística e programação R e sua utilização na análise de dados. O "approach" seria bem prática. Vamos começar com a instalação do software necessário, continuar com operações básicas em R, e seguir todos os passos de um projeto de análise de dados até um relatório final. No longo do caminho à conclusão da matéria, você terá muitas oportunidades para práticar suas habilidades.
+Nos capítulos seguintes, nós vamos aprender a linguagem de estatística e programação R e sua utilização na análise de dados. O "approach" seria bem prática. Vamos começar com a instalação do software necessário, continuar com operações básicas em R, e seguir todos os passos de um projeto de análise de dados até um relatório final. No longo do caminho à conclusão da matéria, você terá muitas oportunidades para praticar suas habilidades.
 
-Deixe-me anotar aqui que estou escrevendo e desenvolvendo todos os materiais da matéria em R, no formato *R Markdown*: apostila, slides, etc. R com RStudio tem uma gama de recursos super abrangente. Nós vamos ver neste curso rápido só uma porção pequena deles.
+Deixe-me ressaltar aqui que estou escrevendo e desenvolvendo todos os materiais da matéria em R, no formato *R Markdown*: apostila, slides, etc. R com RStudio tem uma gama de recursos super abrangente. Nós vamos ver neste curso rápido só uma pequena porção deles.

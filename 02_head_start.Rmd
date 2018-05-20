@@ -1,0 +1,21 @@
+# A Head Start -- Recursos para Curso
+
+Agora que instalamos os softwares mas antes de começar análises com R, aqui são recursos que você pode usar para acelerar sua aprendizagem de R. Já mencionei alguns como o canal YouTube, mas aqui é uma lista sistematizada que você pode consultar para achar ajuda no desenvolvimento das suas habilidades em R.
+
+## Cursos
+
+O site DataCamp oferece uma série dos cursos excelentes sobre R (e Python também). Eles começam com os conceitos mais básicos e alcançam nivéis mais avançados. Os professores são excelentes e todos têm um monte de exercícios para ajudar você fixar os conceitos e as técnicas na suas cabeças. O primeiro desses cursos é "Introduction to R". Ele é de graça e ensinará todos os tipos de dados essenciais para operação em R. Ajudaria muito se você fez este curso antes do início de nossas aulas em julho. O curso está sendo dado em inglês. O link para este curso: https://www.datacamp.com/courses/free-introduction-to-r
+
+
+```{r datacamp_main, echo = FALSE, fig.align='center', fig.cap = "R Tela Inicial"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/datacamp1.png")
+```
+
+A maioria dos cursos de DataCamp são pagos, mas tem o primeiro cápitulo de graça. Este daria para você uma idéia se você quer investir no resto do curso. Recomendo dois cursos sobre R por duas razões. Primeiro, o conteúdo é necessário para aprender R. Segundo, o ensino é excelente. Os cursos são:
+
+- **Manipulate Data in R with `dplyr` (Garrett Grolemund)** - Usar os 'verbos' de pacote `dplyr` para manusiar dados. `dplyr` é um dos componentes principais do *Tidyverse*, um grupo de pacotes e funções que facilita o manuseio dos dados, sua importação de Excel para R, e desenvolvimento dos modelos de análise. O nosso curso vai usar as funções do Tidyverse em quase todas as análises porque é um sistema que mais permite que você entenda mais facilmente o que você está fazendo. Grolemund é um dos gurus de RStudio e co-autor com o inventor da Tidyverse, Hadley Wickham. O curso está em inglês e é pago, mas pode fazer o primeiro cápitulo sem cobrança.
+
+- **Introduction to the Tidyverse (David Robinson)** - Um outro olhar nos mesmos conceitos do Tidyverse por um dos melhores professores no mundo de R de hoje. Recomendo os 2 cursos porque um reforça a aprendizagem do outro. Também, um curso pago com o primeiro cápitulo de graça.
+
+Além de DataCamp, HarvardX (parte do sistema dos cursos à distancia edX) oferece uma série dos cursos sobre o uso de R na Ciência dos Dados, PH125. Os primeiros dois cursos neste série: [Data Science: R Basics] (https://www.edx.org/course/data-science-r-basics) e [Data Science: Visualization] (https://www.edx.org/course/data-science-visualization-harvardx-ph125-2x). O professor dos dois é Rafael Irizzary, Chefe de Departmento de Biostatistics do Hospital Dana-Farber de Cancer em Boston e Professor em Harvard. Estes cursos são um pouco mais avançados que aqueles de DataCamp, mas pode seguir facilmente. Você pode fazer cursos de edX de graça em modo de "auditar", que quer dizer que você não recebe certificado se você completa o curso. Tenho maior respeito para Prof. Irizzary.
+
