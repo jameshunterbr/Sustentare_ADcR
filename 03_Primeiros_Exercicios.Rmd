@@ -308,4 +308,43 @@ str(dados[, 1:5])
 
 ## Análise de Dados de Inflamação
 
-Vamos fazer um resumo dos dados e olhar em alguns gráficos para poder entender os dados melhor e ver se podemos tirar conclusões sobre o novo tratamento. 
+Vamos fazer um resumo dos dados e olhar em alguns gráficos para poder entender os dados melhor e preparar para tirar conclusões sobre o novo tratamento. Só para esta apresentação dos dados e das funções, vamos limitar os resumos aos dias 20 até dia 25. Mas os gráficos incluirá todos os dias (variáveis). Uma função básica para resumir dados é `summary()` que relata os valores seguintes:
+
+- valor mínimo da variável (`min`)
+- 1º quartil (25º percentil)
+- mediana (50º percentil) (`median`)
+- 3º quartil (75º percentil)
+- valor máximo (`max`)
+
+Também, existem muito outros resumos dos dados em R básico e os pacotes que já fez o download. Durante o curso, vai encontrar vários desses pacotes e funções. O que `summary()` não relata que é muito important é uma medida de variabilidade. Normalmente, usamos o desvio padrão para medir isso. Precisamos calcular isso separadamente de `summary()` usando a função `sd()` (*standard deviation*). Vamos calcular um resumo dos dados depois de fazer o subset que queremos.
+
+Mas, para fazer este cálculo de `sd()`, podemos usar um loop, mas tem outra maneira de conseguir a mesma coisa usando a função precisamos usar uma função que permite que o cálculo de uma função em um número de variáveis em uma operação. A família das funções `map()` calcula uma função (neste caso `sd()`) para todas as variáveis de nosso subset das variáveis. A função é muito simples e flexível. `map()` normalmente produz um tipo de dados chamado uma lista. Nós não queremos isso; queremos um vetor dos desvios padrão. Para conseguir isso, nós usamos o variante `map_dbl()` que produz um vetor dos números reais. Porque estamos colocando isso numa expressão *tidy* em que o pipe entrega o subset (`sub_dados`) para a função `map_dbl()`, a expressão só precisa o nome de função que queremos calcular (`sd`) sem os parênteses. 
+
+```{r}
+sub_dados <- dados %>% 
+  select(dia20:dia25)
+glimpse(sub_dados)
+summary(sub_dados)
+sub_dados %>% map_dbl(sd)
+```
+
+
+## Gráficos do Conjunto dos Dados
+
+Com um conjunto de dados intensivo, olhando nas tabelas e resumos não ajuda muito no entendimento do que dizem os dados. Gráficos comunicam melhor. Primeiro, queremos ver a tendência da inflamação no decorrer do estudo. Cresceu, diminiu, quando, por quanto? Para descobrir isso, podemos calcular a média para cada dia e mostrar isso num gráfico de dispersão (*scatter plot*). Para este gráfico, nós vamos ficar com o plotagem simples de base R. Apesar isso, o gráfico seria o resultado de um expressão *tidy* que calcula as médias dos dias e entregam eles para a função `plot()`. Os argumentos incluidos aqui para a plotagem tem a ver com a apresentação, como títulos, estilo de cárater, etc.
+
+```{r graf_scat, fig.height = 4, fig.width = 5, fig.cap = "Gráfico de Dispersão", message = FALSE}
+
+dados %>% 
+  map_dbl(mean) %>% plot(type = "p", pch = 19, 
+                         main = "Inflamação por Dia\ncom Novo Tratamento",
+                         xlab = "Dia",
+                         ylab = "Grau de Inflamação") 
+```
+
+## Whew! Final da Introdução
+
+Em pouco tempo, você já fez bastante com R. Vale a pena de tentar os blocos de código em casa e talvez ler a apostila mais de uma vez. Ao final do curso, este documento seria muito maior, com minhas notas para todas as aulas gravadas aqui também. Vai ser um pequeno livro sobre R. 
+
+Você olhou em cálculos simples e um conjunto de dados mais avançado. Você viu várias funções. Quando estamos juntos, nós vamos aplicar estas técnicas e muitas outras para problemas relacionados aos negócios e o IoT. Se você tem alguns assuntos que quer que eu cobra nas aulas, por favor entre em contato. Estou sempre aberto às sugestões.
+
