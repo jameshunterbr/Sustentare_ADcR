@@ -1,6 +1,6 @@
 # Primeiros Exercícios
 
-Finalmente, estamos prontos para pôr R em operação. Vamos iniciar com alguns exercícios e terminar esta capitulo com a manipulação e análise exploratório de um dataset interessante.
+Finalmente, estamos prontos para pôr R em operação. Vamos iniciar com alguns exercícios e terminar esta capitulo com a manipulação e análise exploratório de um dataset interessante. Seria um boa prática para você replicar estes exemplos no seu R.
 
 ## O Que São Dados?
 
@@ -59,8 +59,56 @@ Aqui, temos três linhas que fazem operações e a quarta que relata o resultado
 
 $$\mu = \frac{\sum_{i=1}^{n}x_{i}}{n}$$ 
 
+Também, podemos usar a função `mean(dados)` para conseguir o mesmo resultado.
+
 `m`: finalmente, indicando o nome da variável imprimirá o valor na tela.
 
 ## Questões de Estilo
 
-Como você apresenta o código vai facilitar o seu entendimento do que você fez tanto quanto o entendimento de uma outra pessoa que precisa trabalhar com este código. Então, vale a pena seguir umas regras consistentes
+Como você apresenta o código vai facilitar o seu entendimento do que você fez tanto quanto o entendimento de uma outra pessoa que precisa trabalhar com este código. Então, vale a pena seguir umas regras consistentes. Assim, tudo mundo (e R) vai entender o código que você escreveu. Vamos fazer um outro exemplo para mostrar este ponto.
+
+```{r peso, echo = TRUE}
+## 1ª Versão
+peso <- 55  ## Pessoa pesa 55 kg.
+
+## 2ª Versão
+peso_kg <- 55 ## Mais claro
+
+## Pode Converter à Libra
+peso_lb <- peso_kg * 2.2
+peso_lb
+
+```
+
+O primeiro ponto a ressaltar é que este código tem muitos comentários. Fazemos comentários em R utilizando o sinal `#` ("hashtag"). R não interpreta qualquer cárater depois do primeiro `#` numa linha de código. Este pode ocorrer numa linha sozinha como `## 1ª Versão` ou depois de um operação como na segunda linha (`peso <- 55 ## Pessoa pesa 55 kg.`).
+
+A primeira versão do assignment não é muito claro. Se não tivesse o comentário sobre `55 kg`, como você saberia que estavamos falando de conversão entre kilos e libras. A segunda versão esclarece diretamente no nome da variável `peso_kg`. E a linha que faz a conversão também tem um bon nome que explica claramente o que é este valor.
+
+Frequentemente, pessoas gostam de usar nomes muito breves, mas não muito claros com `x`, `i` ou `n24`. É muito melhor usar nomes que explicam o que contem a variável que de enfatizar brevidade.
+
+Tem muitos outros aspetos de estilo que está sendo padronizado no mundo de programação de R. Uma guia para um estilo claro de programação foi desenvolvido pelo Hadley Wickham de RStudio e pode ser achado aqui: http://style.tidyverse.org/. O pacote `styler` que você carregou na instalação criou "Addins" no RStudio que pode acessar do itém na barra para cima. Esses opções permite que R em si coloca seu código no estilo correto seguindo as normas da guia de Wickham.
+
+```{r styler, echo = FALSE, fig.align='center', fig.cap = "Styler Addins"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/style_addin.png")
+```
+
+## Conjunto dos Dados Mais Complicado
+
+Neste exercício, que estou adaptando do curriculo do grupo "Software Carpentry", [^4] trata de dados médicos sobre tratamentos para artrite e a inflamação que a doença causa. Para nossos fins de aprender R, podemos aprender 
+
+- Como inserir dados nos objetos R
+- Como manipular esses dados
+- Gráficos básicos
+- Resumos descritivos de dados
+- Funções em R
+- Loops
+
+[^4]: Agradeço Software Carpentry para uso desses dados. (http://swcarpentry.github.io/)
+
+Você trabalha num laboratório farmaceutico que está desenvolvendo um novo tratamento para artrite. Você precisa avaliar os resultados de uma teste deste tratamento para ver se cumpriu os objetivos que a empresa fez para ele. Você recebe o arquivo "inflammation-01.csv", um arquivo de Excel gravado no formato csv (*comma separated values*). Você precisa colocar este arquivo no seu *working directory* e carregar os dados na memoria onde R pode operar neles. 
+
+### Passo 1 --- Definir o *Working Directory*
+
+
+ 
+
