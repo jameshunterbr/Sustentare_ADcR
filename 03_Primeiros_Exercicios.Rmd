@@ -94,7 +94,9 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/style
 
 ## Conjunto dos Dados Mais Complicado
 
-Neste exercício, que estou adaptando do curriculo do grupo "Software Carpentry", [^4] trata de dados médicos sobre tratamentos para artrite e a inflamação que a doença causa. Para nossos fins de aprender R, podemos aprender 
+Neste exercício, que estou adaptando do currículo do grupo "Software Carpentry", [^4] trata de dados médicos sobre tratamentos para artrite e a inflamação que a doença causa. Ele mostra a avaliação de inflamação de 60 pacientes diariamente durante 40 dias. 
+
+Para nossos fins de aprender R, podemos aprender 
 
 - Como inserir dados nos objetos R
 - Como manipular esses dados
@@ -103,12 +105,207 @@ Neste exercício, que estou adaptando do curriculo do grupo "Software Carpentry"
 - Funções em R
 - Loops
 
-[^4]: Agradeço Software Carpentry para uso desses dados. (http://swcarpentry.github.io/)
+[^4]: Agradeço Software Carpentry pelo uso desses dados. (http://swcarpentry.github.io/)
 
-Você trabalha num laboratório farmaceutico que está desenvolvendo um novo tratamento para artrite. Você precisa avaliar os resultados de uma teste deste tratamento para ver se cumpriu os objetivos que a empresa fez para ele. Você recebe o arquivo "inflammation-01.csv", um arquivo de Excel gravado no formato csv (*comma separated values*). Você precisa colocar este arquivo no seu *working directory* e carregar os dados na memoria onde R pode operar neles. 
+Você trabalha num laboratório farmaceutico que está desenvolvendo um novo tratamento para artrite. Você precisa avaliar os resultados de uma teste deste tratamento para ver se cumpriu os objetivos que a empresa fez para ele. Você recebe o arquivo "inflamacao.csv", um arquivo de Excel gravado no formato csv (*comma separated values*). Você precisa colocar este arquivo no seu *working directory* e carregar os dados na memoria onde R pode operar neles. 
 
-### Passo 1 --- Definir o *Working Directory*
+### Passo 1 --- Definir o *Working Directory* ("Pasta Ativa")
 
+Primeiro, precisamos definir onde queremos colocar o arquivo. Nós lembramos do capitulo 1 que R procura arquivos na pasta ativa (minha tradução de *working directory*; estou aberto às sugestões). Este onde colocamos o arquivo dos dados que vamos download de GitHub. 
 
+> Sugiro que você cria uma pasta "ADcR" ou outro nome para curso e colocar todos os arquivos lá. Assim, pode designar ela para ser a pasta ativa para seu trabalho.
+
+Mas, qual pasta R considera agora como a pasta ativa? Podemos usar o comando `getwd()` para determinar isto.
+
+```{r wd}
+getwd()
+```
+
+Este é um bom momento para comentar porque sempre usamos `()` depois do nome da função. Com os parênteses, R vai executar a função. Sem eles, vai imprimir para a tela o código (ou seja, o conteúdo) da função como ele faz para todas as variáveis ou outros objetos. A figura seguinte mostra a diferença para esta função no meu computador. A pasta ativa vai ser diferente no seu.
+
+```{r getwd, echo = FALSE, fig.align='center', fig.cap = "getwd vs. getwd()"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/getwd.png")
+```
+
+Se a pasta ativa não é a pasta do curso, temos que mudar para a pasta correta. Para fazer a mudança, usamos a função `setwd()`, com a indicação da pasta que queremos dentro dos parênteses. Se você segue minha sugestão do nome da pasta, vai ser assim.
+
+```{r setwd}
+setwd("~/ADcR")
+```
+
+Se a aba "*Files*" não está mostrando esta pasta atualmente, pode navegar para a pasta clicando em qualquer nome na janela em cor (invés de preto ou branco).
+
+### Passo 2 --- Carregar o Tidyverse
+
+Neste exercício e em todo o curso, nós vamos usar as funções do Tidyverse. Estas funções existem em vários pacotes. O pacote `tidyverse` é uma coleção dessas outras pacotes e vai carregar eles. Apesar que existem outros pacotes no Tidyverse, aqueles carregados pelo `tidyverse` são os mais importantes e eles permitem que nós podemos ler arquivos, manipular dados, fazer análises e visualizar gráficos. Antes de desenhar gráficos, nós vamos carregar um outro pacote `ggpubr` que simplifica os comandos gráficos utilizando a tecnologia `ggplot`, que é um dos componentes centrais do Tidyverse.
+
+Para carregar pacotes que já temos instalados no computador, usamos a função `library()` com o nome do pacote como argumento. Entretanto, para ver o efeito de carregar o Tidyverse, vamos olhar na diferença entre o estado da memoria antes e depois do Tidyverse. Para isso, usamos a função `sessionInfo()` para mostra o que está carregado. Primeiro, aqui é como sua memoria quando você inicia R.
+
+```{r tidyv, echo = TRUE, eval = FALSE}
+sessionInfo() ## Comando para mostrar o estado do sistema R neste momento
+```
+
+```{r siantes, echo = FALSE, fig.align='center', fig.cap = "Pacotes Antes Tidyverse"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/session_bare.png")
+```
+
+Só têm os pacotes básicos que R carregar quando incia. Agora vamos carregar o Tidyverse.
+
+```{r tv2, eval = FALSE}
+library(tidyverse)
+```
+
+```{r tidyverse_load, echo = FALSE, fig.align='center', fig.cap = "Tidyverse Básico"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/tidyverse_load.png")
+```
+
+Agora, a memoria é bem diferente. Temos novos pacotes carregados diretamente e outros novos que estão carregados pela referência (*loaded via a namespace and not attached*).
+
+```{r tv3, echo = TRUE, eval = FALSE}
+sessionInfo()
+```
+
+```{r si_post, echo = FALSE, fig.align='center', fig.cap = "Pacotes com Tidyverse"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/session_tidyv.png")
+```
+
+### Passo 3 --- Download os Dados de GitHub
+
+Os dados atualmente existem no GitHub. No capitulo 1, aprendemos como fazer o download dos arquivos do GitHub. Siga o mesmo processo em seu sistema operacional e com seu browser para pôr `inflamacao.csv` na sua pasta ativa. 
+
+Para ajudar, aqui é um resumo dos passos:
+
+- aponte a browser para o repo do curso: https://github.com/jameshunterbr/Sustentare_ADcR
+- clique no nome do arquivo: `inflamacao.csv`
+- clique no botão "Raw"
+- salvar a página na sua pasta ativa. [^5]
+
+[^5]: Se o browser quer que você usa o sufixo "txt" para seu arquivo, precisa insistir no uso de "csv". Um arquivo "csv" é um tipo de arquivo de texto simples, mas outros programas como Excel só querem ver o sufixo "csv".
+
+### Passo 4 --- Carregar os Dados na Memoria de R
+
+R precisa ter todos os dados em que vai operar na memoria ativa do computador. Não vai para arquivos gravados para fazer operações. Outras linguagens como SQL e C podem operar em dados gravados, mas R não. Entretanto, este não e um limite em qualquer sentido prática. Nos laptops modernos, o espaço de memoria fica suficiente grande para suportar quase qualquer base de dados, mesmo se tivesse múltiplas gigabytes de dados.
+
+Para carregar, nós vamos usar a função `read_csv()` que vai pegar o arquivo e criar um objeto na memoria do R. 
+
+```{r load_dados, message = FALSE}
+dados <- read_csv(file = "inflamacao.csv", col_names = FALSE)
+```
+
+```{r env_dados, echo = FALSE, fig.align='center', fig.cap = "Environment com dados"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/environment_dados.png")
+```
+
+A função `read_csv()` vem do pacote `readr`. Ela tenta automatizar tanto quanto é possível a importação dos dados. Até, ela analisa os dados para decidir qual é o tipo de dados que o conjunto tem: cárater, número inteiro, número decimal, lógico, etc. Também usa a primeira linha como o nome das variáveis (colunas da planilha). Neste caso, as colunas só têm dados, não nomes na primeira linha. Então, temos que avisar `read_csv()` disso. Assim, usamos o argumento `colnames = FALSE` porque o padrão é `colnames = TRUE`, como a tela de *Help* para `read_csv` mostra.
  
+```{r help_read_csv, echo = FALSE, fig.align='center', fig.cap = "read_csv Help"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/read_csv_help.png")
+``` 
 
+### Passo 5 --- Qual É o Tipo do Conjunto dos Dados?
+
+Para saber os tipos de análises que podemos fazer no `dados`, precisamos determinar o que temos. Sabemos que temos 40 variáveis que são os dias em que a avaliação foi feita. Primeiro nível de informação é sobre o tipo de dados que temos. Para isso, usamos a função `class()`.
+
+```{r class_db}
+class(dados)
+```
+
+Este três descritores indicam que este é um *tibble*, um tipo avançado de `data.frame`, que é o tipo básico de um conjunto de dados quadrado, com variáveis nas colunas e observações na fileiras. As capacidades adicionais têm a maior significância para as operações internas do R e das funções do Tidyverse, mas pode ser muito mais rápido para conjuntos grandes de dados. 
+
+Existem duas outras funções que mostram mais detalhe sobre o conjunto. `str()` vai mostrar para todo o conjunto a classe (tipo) da variável os primeiros valores dela. `glimpse()` faz a mesma coisa mas com as linhas e colunas trocados. `glimpse()` oferece uma visão mais completa que `str()`. Por causa do tamanho do output in nosso caso com 40 variáveis, vou limitar ela para cinco variáveis usando uma técnica que aprenderemos abaixo.
+
+```{r}
+str(dados[, 1:5])
+glimpse(dados[, 1:5])
+```
+
+
+Também, podemos examinar o tamanho do conjunto usando a função `dim()` (dimensões). Esta retorna para você o número e linhas e colunas nos dados. 
+
+```{r dim_dados}
+dim(dados)
+```
+
+As variáveis são do mesmo tipo. Por isso, podemos olhar no primeiro cinco para ver suficiente detalhe sobre os dados. 
+
+### Passo 6 --- Subconjuntos (*Subsets*) de `dados`
+
+Nós queremos focar nas primeiras cinco variáveis porque mais que isso é simplesmente repetitivo e desnecessária por enquanto. Têm duas maneiras que podemos fazer este foco, um que vem de R básico e o outro que intoduza a gente para `dplyr` e a manipulação dos dados no Tidyverse.
+
+*Subconjuntos em R Básico* -- Índices
+
+Podemos referir a um dado individual colocando um índice dentro de colchetes (`[]`), com a fileira primeiro e a coluna depois. Por exemplo, para o primeiro dado em `dados`, podemos dizer `dados[1,1]`. Se nós queremos as avaliações para os primeiros cinco dias (colunas) para paciente 1, podemos dizer `dados[1, 1:5]`. Os dois-pontos diz "todos os valores entre valor 1 e valor 5". Se nós queremos as avaliações dos cinco primeiro pacientes (fileiras) no primeiro dia (coluna), podemos dizer `dados[1:5, 1]`. Se nós queremos ver todos as colunas ou todas as fileiras, simplesmente precisa deixar essa parte do índice em branco. Mas precisa incluir sempre a virgula ou R não vai saber em qual dimensão você refere. Por exemplo, se queremos ver o valor para todos os dias de paciente 50, podemos dizer `dados[50, ]`.  O próximo bloco de código mostra todas esses opções.
+
+```{r subset1}
+dados[1,1]
+dados[1, 1:5] # 1º paciente, 1º cinco dias
+dados[1:5, 1] # 1º 5 pacientes, 1º dia
+dados[50, ] # paciente 50, todos os dias
+```
+
+*Subconjuntos no Tidyverse* -- `dplyr`
+
+Este código parece razoável, mas não muito claro. Não segue as recommendações sobre nomes de variáveis por exemplo. É típico das linguagens de computação. Com o Tidyverse, podemos fazer este aparecer mais como um idioma normal. Nós vamos usar umas novas funções para fazer os subconjuntos que queremos. 
+
+Primeiro desses funções permite que combinamos operações das funções diferentes na mesma expressão. Este símbolo está chamada o "pipe" [^6] e está escrito assim: `%>%`. Este conceito é muito comum em linguagens de computação, apesar que está expressa por vários símbolos. Em R, o pipe quer dizer "aceite o resultado da operação no lado esquerdo e aplique a função no lado direto ao este resultado". Com o uso do pipe, nós não precisamos repetir o nome do objeto do lado esquerdo da operação quando você especifica a função no lado direto. 
+
+[^6]: Nenhum das palavras que traduz a palavra "*pipe*" realmente capta o sentido correto. Então, eu vou ficar com o inglês original.
+
+Para nosso exemplo, o código vai parecer complicado em comparação ao código acima, mas ele ilustra funções importantes que ajudaria você em projetos mais complicados. As funções que vamos usar são os seguintes:
+
+- `slice()` -- seleciona as linhas segundo a posição delas
+
+- `select()` -- seleciona as colunas por nome
+
+```{r tidy_ex}
+# equivalente a dados[1,1]
+
+dados %>% 
+  slice(1) %>% 
+  select(X1)
+
+# equivalente a dados[1, 1:5]
+
+dados %>% 
+  slice(1) %>% 
+  select(X1:X5)
+
+# equivalente a dados[1:5, 1]
+
+dados %>% 
+  slice(1:5) %>% 
+  select(X1)
+
+# equivalente a dados[50, ]
+dados %>% 
+  slice(50)
+```
+
+Uma vantagem da gramatica do Tidyverse com o pipe é que facilita a explicação da operação do comando. Por exemplo, a última expressão pode ser lido como: "começa com o conjunto `dados`; depois utiliza as primeiras 5 fileiras e depois seleciona a primeira variável". Quando você tem expressões complicadas, que usam muitos verbos (palavra que o Tidyverse usa para refere às ações como `slice` ou `select`), este habilidade de ler a expressão em quase-português faz a programação mais compreensível.
+
+Você pode ver que as variáveis têm nomes estranhas, `X1`, etc. Para nossos fins, este não é horrível porque refere corretamente ao número de dia, 1 até 40. Entretanto, podemos fazer melhor. No próximo bloco, nós vamos fazer isso introduzindo o conceito de um "*loop*" ou uma série das ações que podemos executar repetivamente.
+
+### Novo Nomes para as Variáveis --- Loops
+
+Nomes mais claros para as variáveis ajudaria nosso entendimento do conjunto `dados` e faria a apresentação dos dados mais profissional. Têm várias técnicas que podemos usar para fazer, mas é um bom momento para ver um loop, um dos conceitos mais básicos da programação. Nós vamos criar um loop de tipo "*for*", que vai repetir comandos um certo número de vezes. O loop tem o formato: 
+
+`for`(<expressão que define o número de repetições>) {
+  <código para executar dentro do loop>
+} 
+
+Queremos o loop considerar todas as variáveis, o número de que podemos determinar automaticamente com a função `seq_along()`. Esta função começa com 1 e continua até o número das variáveis. Dentro do loop nós vamos criar um vetor com 40 cadeias de cárateres composto da palavra "dia" mais um número para o dia. Para fazer isso, usamos a função `paste0()` que concatena os argumentos da função e produz uma cadeia de cárateres. O número resultará do contador das iterações do loop, `i`. `paste0` difere da função `paste()` só pelo fato que `paste()` insere um espaço entre os elementos da função mas `paste0()` não, como implica o nome da função. Quando o loop completa as 40 iterações, ele para e passa controle para a próxima expressão no programa. Nesta linha, a função `col_names()` vai transferir o vetor dos nomes para `dados` como novos nomes das variáveis.
+
+Antes de começar a operação do loop, devemos instruir R onde colocar os nomes que o loop está compondo. Vou criar uma variável `nome` que seria um vetor vazio e durante a operação do loop, ele vai aumentar os novos valores usando a função `c()`. 
+
+```{r loop_nomes}
+nome <- vector(mode = "character") 
+for (i in seq_along(dados)) {
+  nome <- c(nome, paste0("dia", i))
+}
+colnames(dados) <- nome
+str(dados[, 1:5])
+```
+
+## Análise de Dados de Inflamação
+
+Vamos fazer um resumo dos dados e olhar em alguns gráficos para poder entender os dados melhor e ver se podemos tirar conclusões sobre o novo tratamento. 
