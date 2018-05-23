@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 # Primeiros Exercícios
 
 Finalmente, estamos prontos para pôr R em operação. Vamos iniciar com alguns exercícios e terminar esta capitulo com a manipulação e análise exploratório de um dataset interessante. Seria um boa prática para você replicar estes exemplos no seu R.
@@ -129,7 +134,7 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/getwd
 
 Se a pasta ativa não é a pasta do curso, temos que mudar para a pasta correta. Para fazer a mudança, usamos a função `setwd()`, com a indicação da pasta que queremos dentro dos parênteses. Se você segue minha sugestão do nome da pasta, vai ser assim.
 
-```{r setwd}
+```{r setwd, eval = FALSE}
 setwd("~/ADcR")
 ```
 
@@ -151,7 +156,7 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/sessi
 
 Só têm os pacotes básicos que R carregar quando incia. Agora vamos carregar o Tidyverse.
 
-```{r tv2, eval = FALSE}
+```{r tv2}
 library(tidyverse)
 ```
 
@@ -289,11 +294,11 @@ Você pode ver que as variáveis têm nomes estranhas, `X1`, etc. Para nossos fi
 
 Nomes mais claros para as variáveis ajudaria nosso entendimento do conjunto `dados` e faria a apresentação dos dados mais profissional. Têm várias técnicas que podemos usar para fazer, mas é um bom momento para ver um loop, um dos conceitos mais básicos da programação. Nós vamos criar um loop de tipo "*for*", que vai repetir comandos um certo número de vezes. O loop tem o formato: 
 
-`for`(<expressão que define o número de repetições>) {
-  <código para executar dentro do loop>
+`for`(expressão que define o número de repetições) {
+  código para executar dentro do loop
 } 
 
-Queremos o loop considerar todas as variáveis, o número de que podemos determinar automaticamente com a função `seq_along()`. Esta função começa com 1 e continua até o número das variáveis. Dentro do loop nós vamos criar um vetor com 40 cadeias de cárateres composto da palavra "dia" mais um número para o dia. Para fazer isso, usamos a função `paste0()` que concatena os argumentos da função e produz uma cadeia de cárateres. O número resultará do contador das iterações do loop, `i`. `paste0` difere da função `paste()` só pelo fato que `paste()` insere um espaço entre os elementos da função mas `paste0()` não, como implica o nome da função. Quando o loop completa as 40 iterações, ele para e passa controle para a próxima expressão no programa. Nesta linha, a função `col_names()` vai transferir o vetor dos nomes para `dados` como novos nomes das variáveis.
+Queremos que o loop considerar todas as variáveis, o número de que podemos determinar automaticamente com a função `seq_along()`. Esta função começa com 1 e continua até o número das variáveis. Dentro do loop nós vamos criar um vetor com 40 cadeias de cárateres composto da palavra "dia" mais um número para o dia. Para fazer isso, usamos a função `paste0()` que concatena os argumentos da função e produz uma cadeia de cárateres. O número resultará do contador das iterações do loop, `i`. `paste0` difere da função `paste()` só pelo fato que `paste()` insere um espaço entre os elementos da função mas `paste0()` não, como implica o nome da função. Quando o loop completa as 40 iterações, ele para e passa controle para a próxima expressão no programa. Nesta linha, a função `col_names()` vai transferir o vetor dos nomes para `dados` como novos nomes das variáveis.
 
 Antes de começar a operação do loop, devemos instruir R onde colocar os nomes que o loop está compondo. Vou criar uma variável `nome` que seria um vetor vazio e durante a operação do loop, ele vai aumentar os novos valores usando a função `c()`. 
 

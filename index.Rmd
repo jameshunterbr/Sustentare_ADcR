@@ -1,13 +1,14 @@
 --- 
 title: "MAD -- Análise de Dados em R"
 author: "James R. Hunter"
-date: ""
-site: bookdown::bookdown_site
+date: '6 de julho de 2018'
 output: bookdown::gitbook
-documentclass: book
-link-citations: yes
 github-repo: rstudio/bookdown-demo
-description: "Matéria de Análise de Dados (MAD): Curso para Disciplina de IOT na Escola Sustentare"
+link-citations: yes
+documentclass: book
+site: bookdown::bookdown_site
+description: 'Matéria de Análise de Dados (MAD): Curso para Disciplina de IOT na Escola
+  Sustentare'
 ---
 # Prefácio
 
