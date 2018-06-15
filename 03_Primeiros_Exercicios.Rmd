@@ -290,7 +290,7 @@ Uma vantagem da gramatica do Tidyverse com o pipe é que facilita a explicação
 
 Você pode ver que as variáveis têm nomes estranhas, `X1`, etc. Para nossos fins, este não é horrível porque refere corretamente ao número de dia, 1 até 40. Entretanto, podemos fazer melhor. No próximo bloco, nós vamos fazer isso introduzindo o conceito de um "*loop*" ou uma série das ações que podemos executar repetivamente.
 
-### Novo Nomes para as Variáveis --- Loops
+### Novos Nomes para as Variáveis --- Loops
 
 Nomes mais claros para as variáveis ajudaria nosso entendimento do conjunto `dados` e faria a apresentação dos dados mais profissional. Têm várias técnicas que podemos usar para fazer, mas é um bom momento para ver um loop, um dos conceitos mais básicos da programação. Nós vamos criar um loop de tipo "*for*", que vai repetir comandos um certo número de vezes. O loop tem o formato: 
 
