@@ -4,7 +4,42 @@ output:
   html_document: default
 ---
 
-# Conceitos da Ciência de Dados
+# Conceitos da Ciência de Dados e R
 
-Os conceitos que se desenvolverem aqui são os que são necessários para entendimento do uso das ferramentas de programação como R para resolver problemas práticas da ciência ou dos negócios. Já vimos uma introdução aos alguns desses conceitos no Cápitulo *Primeiros Exercícios*. Aqui vamos tratar eles com um pouco mais rigor.
+Os conceitos que se desenvolverem aqui são os que são necessários para entendimento do uso das ferramentas de programação como R para resolver problemas práticas da ciência ou dos negócios. Já vimos uma introdução aos alguns desses conceitos no Capitulo *Primeiros Exercícios*. Algumas coisas vão repetir o que você já viu nos capítulos anteriores, mas numa forma mais organizada.
 
+## Processo e Fluxo de Trabalho de Análises em R
+
+Qualquer projeto que precisa as ferramentas da ciência de dados tem uma forma e fluxo de trabalho parecida. O diagrama seguinte mostra este processo: [^7]
+
+```{r process_w, echo = FALSE, fig.align='center', fig.cap = "Processo de Programação com R"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/wickham_process.png")
+```
+
+[^7]: Wickham, Hadley & Grolemund, Garrett, **R for Data Science** (O'Reilly, Sebastopol, CA, January 2017).
+
+O primeiro passo em qualquer análise em R é para **importar** os dados que vai analisar. O fonte mais popular nestes dias atuais é Microsoft Excel. Aqui nós vamos aprender como importar arquivos nos formatos `.csv` ou `xlsx` (ou seu primo mais antigo `.xls`) usando funções do Tidyverse.
+
+Com os dados na memória de R como objeto, o próximo passo é para **arrumar** eles. Esta fase do trabalho inclui a descoberta dos erros de recordação, decidir o que fazer com variáveis que têm dados faltando (dados `NA`). Você precisa também ver se as variáveis têm valores bem fora dos valores esperados (*outliers*) e também decidir como tratar eles. Finalmente, aqui você pode acertar que os dados ficam *tidy*, ou seja, num formato consistente em que toda coluna é uma variável, toda linha uma observação e que cada conjunto de dados (`data.frame` ou `tibble`) só contem um tipo de dados. Essa consistência deixa você focar na análise e as questões que você quer responder sem precisar fazer uma nova limpeza ou arrumação. Surpreendentemente, esta fase de arrumar dados ocupa mais tempo que o tempo necessário para fazer as análises; leva até 70% do tempo inteiro que vai investir no projeto.
+
+Uma vez que esses primeiros passos são completos, pode estudar as questões que motivaram o projeto no primeiro lugar. Nesta fase, o seu trabalho é cíclico. Você vai preparar um conjunto de dados menor que põe o foco nas observações que ajudam você responder à questão de interesse. As vezes, vai precisar transformar a escala ou unidade dos dados para facilitar a análise. Todo este processo de fazer um subconjunto do dados está chamada da fase de **transformação**. 
+
+Com os dados transformados, você pode explorar eles para entender a distribuição dos valores e a relação entre as variáveis. Nesta fase de **visualização**, você usa gráficos e tabelas para ver as possíveis abordagens dos modelos. Quando tem uma boa idéia da estrutura dos dados, pode experimentar um **modelo**. Quando você examina o resultados dos modelos, pode perceber que existem métodos de análise que produzirem respostas mais exatas às suas perguntas. Também pode ver se os resultados cumprem as premissas do modelo usado. Todos os modelos têm presmissas que os dados devem seguir. Senão, precisa usar um outro tipo de modelo que permite o uso do conjunto dos dados que você está empregando.
+
+É assim que essas fases de *transformação-visualização-modelagem* formam um ciclo. Você explora os dados e conduza as análises repetitivamente até que você consegue responder para sua pergunta. 
+
+Ao final, você deve fazer uma **reportagem** das análises. Uma análise sem um relatório é como o Koan zen que pergunta qual é o som de uma mão batendo palmas. Talvez produz grande iluminação pessoal mas não para os outros.
+
+## Programação como Princípio Organizacional
+
+Você vai combinar todos esses passos em 1 ou mais programas ou scripts. Como descrevi antes, o poder de um programa para executar suas análises de dados é que você e outros podem entender o que você fez para organizar os dados e analisar eles. 
+
+## Importar Dados para R
+
+Já apresentei o uso de `readr::read_csv()` (o nome de um pacote seguido por 2 dois pontos e o nome de uma função é usado em R para especificar qual versão desse nome você quer usar ou, como neste caso, para enfatizar de qual pacote a função vem) em relação dos dados de inflamação. Vamos aplicar esta função para o caso de preços de 2 ações em 2013, Starbucks (SBUX) e Apple (AAPL).
+
+A tela de `Help` para `readr::read_csv()` mostra os seguintes argumentos. Você pode ler a página para entender como usar todos deles. Aqui é as primeiras linhas do arquivo `.csv` em Excel. 
+
+```{r stockprice_excel, echo = FALSE, fig.align='center', fig.cap = "Excel - stockprice.csv"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/stockprice_Excel.png")
+```
