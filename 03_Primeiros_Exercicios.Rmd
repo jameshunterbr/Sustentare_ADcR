@@ -56,7 +56,7 @@ m
 
 Aqui, temos três linhas que fazem operações e a quarta que relata o resultado. Vamos olhar em cada uma e ver o que faz.
 
-`set.seed(1)`: set.seed() é um comando que fornece às funções que calculam valores aleatóricos a instrução de sempre iniciar o cálculo no mesmo posição. Pode aceitar qualquer número inteiro como argumento. Aqui usei `1`. Mas, podia ter usado `43` ou `2018`. Qualquer número que está usado vai produzir uma série de números aleatórios diferentes.
+`set.seed(1)`: `set.seed()` é um comando que fornece às funções que calculam valores aleatóricos a instrução de sempre iniciar o cálculo no mesmo posição. Pode aceitar qualquer número inteiro como argumento. Aqui usei `1`. Mas, podia ter usado `43` ou `2018`. Qualquer número que está usado vai produzir uma série de números aleatórios diferentes.
 
 `dados <- runif(100, min = 0, max = 1000)`: dados é uma variável que vai receber 100 valores aleatórios entre 0 e 1000 (`min` e `max`). Estes valores são baseados na distribuição de números "uniforme", que quer dizer que todos os números entre os 2 limites têm uma chance igual de ser selecionados. O resultado `dados` vai ser um vetor com os 100 números.
 
@@ -91,7 +91,7 @@ A primeira versão do assignment não é muito claro. Se não tivesse o comentá
 
 Frequentemente, pessoas gostam de usar nomes muito breves, mas não muito claros com `x`, `i` ou `n24`. É muito melhor usar nomes que explicam o que contem a variável que de enfatizar brevidade.
 
-Tem muitos outros aspetos de estilo que está sendo padronizado no mundo de programação de R. Uma guia para um estilo claro de programação foi desenvolvido pelo Hadley Wickham de RStudio e pode ser achado aqui: http://style.tidyverse.org/. O pacote `styler` que você carregou na instalação criou "Addins" no RStudio que pode acessar do itém na barra para cima. Esses opções permite que R em si coloca seu código no estilo correto seguindo as normas da guia de Wickham.
+Tem muitos outros aspetos de estilo que está sendo padronizado no mundo de programação de R. Uma guia para um estilo claro de programação foi desenvolvido pelo Hadley Wickham de RStudio e pode ser achado aqui: http://style.tidyverse.org/. O pacote `styler` que você carregou na instalação criou "Addins" no RStudio que pode acessar do itém na barra superior. Esses opções permite que R em si coloca seu código no estilo correto seguindo as normas da guia de Wickham.
 
 ```{r styler, echo = FALSE, fig.align='center', fig.cap = "Styler Addins"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/style_addin.png")

@@ -1,0 +1,10 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Conceitos da Ciência de Dados
+
+Os conceitos que se desenvolverem aqui são os que são necessários para entendimento do uso das ferramentas de programação como R para resolver problemas práticas da ciência ou dos negócios. Já vimos uma introdução aos alguns desses conceitos no Cápitulo *Primeiros Exercícios*. Aqui vamos tratar eles com um pouco mais rigor.
+
