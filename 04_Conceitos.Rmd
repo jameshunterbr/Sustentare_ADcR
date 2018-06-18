@@ -29,7 +29,7 @@ Com os dados na memória de R como objeto, o próximo passo é para **arrumar** 
 
 Uma vez que esses primeiros passos são completos, pode estudar as questões que motivaram o projeto no primeiro lugar. Nesta fase, o seu trabalho é cíclico. Você vai preparar um conjunto de dados menor que põe o foco nas observações que ajudam você responder à questão de interesse. As vezes, vai precisar transformar a escala ou unidade dos dados para facilitar a análise. Todo este processo de fazer um subconjunto do dados está chamada da fase de **transformação**. 
 
-Com os dados transformados, você pode explorar eles para entender a distribuição dos valores e a relação entre as variáveis. Nesta fase de **visualização**, você usa gráficos e tabelas para ver as possíveis abordagens dos modelos. Quando tem uma boa idéia da estrutura dos dados, pode experimentar um **modelo**. Quando você examina o resultados dos modelos, pode perceber que existem métodos de análise que produzirem respostas mais exatas às suas perguntas. Também pode ver se os resultados cumprem as premissas do modelo usado. Todos os modelos têm presmissas que os dados devem seguir. Senão, precisa usar um outro tipo de modelo que permite o uso do conjunto dos dados que você está empregando.
+Com os dados transformados, você pode explorar eles para entender a distribuição dos valores e a relação entre as variáveis. Nesta fase de **visualização**, você usa gráficos e tabelas para ver as possíveis abordagens dos modelos. Quando tem uma boa ideia da estrutura dos dados, pode experimentar um **modelo**. Quando você examina o resultados dos modelos, pode perceber que existem métodos de análise que produzirem respostas mais exatas às suas perguntas. Também pode ver se os resultados cumprem as premissas do modelo usado. Todos os modelos têm premissas que os dados devem seguir. Senão, precisa usar um outro tipo de modelo que permite o uso do conjunto dos dados que você está empregando.
 
 É assim que essas fases de *transformação-visualização-modelagem* formam um ciclo. Você explora os dados e conduza as análises repetitivamente até que você consegue responder para sua pergunta. 
 
@@ -58,7 +58,7 @@ Você pode ler a página para entender como usar todos os argumentos. Aqui são 
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/stockprice_Excel.png")
 ```
 
-Porque o padrão para o argumento `col_names` é `TRUE`, neste caso, podemos deixar a função importar as palavras na primeira linha como os nomes de variáveis. Se você não quer usar os nomes do Excel, pode mudar o argumento para `FALSE`, como fizemos no último capitulo. Também, `readr` tentará interpretar quais são as classes dos valores nas colunas, utilizando os primeiras 100 linhas para determinar se são carateres, números, datas, ou valores lógicos. Você pode controlar os tipos de colunas com o argumento `col_types`. Neste caso, se quisemos, podemos especificar as colunas como `col_types = c(D,n,n)` (data, número, número) como esta figura mostra.
+Porque o padrão para o argumento `col_names` é `TRUE`, neste caso, podemos deixar a função importar as palavras na primeira linha como os nomes de variáveis. Se você não quer usar os nomes do Excel, pode mudar o argumento para `FALSE`, como fizemos no último capitulo. Também, `readr` tentará interpretar quais são as classes dos valores nas colunas, utilizando os primeiras 100 linhas para determinar se são caráteres, números, datas, ou valores lógicos. Você pode controlar os tipos de colunas com o argumento `col_types`. Neste caso, se quisemos, podemos especificar as colunas como `col_types = c(D,n,n)` (data, número, número) como esta figura mostra.
 
 ```{r col_types_help, echo = FALSE, fig.align='center', fig.cap = "Tipos de Coluna"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/col_types_help.png")
@@ -79,12 +79,59 @@ Quando discutimos a limpeza dos dados, nós vamos transformar a variável `Date`
 
 O sistema `tidyverse` inclui um pacote que facilita importar os dados diretamente de uma planilha do Excel. Pode importar ou uma do tipo moderno de `.xlsx` ou do tipo antigo `.xls`. O comando `read_excel()` fica no pacote `readxl`. `read_excel()` tenta adivinhar qual é o tipo de arquivo que você abre. Se tiver problemas com o arquivo, você pode usar ou `read_xlsx` ou `read_xls` diretamente para abrir aquele tipo de arquivo. 
 
-Para demonstrar esta função, eu vou usar um arquivo derivado de um projeto verdadeiro de pesquisa em que estou envolvido sobre a doença HIV. A planilha mostra alguns dados sobre os pacientes e sobre os resultados dos exames que eles fizeram ao início do estudo. Esta planilha, `pac_demo.xlsx` tem duas folhas. A primeira, `pac_demo`, contem os dados. A segunda folha, `data_dic` tem a diccionário dos dados, ou seja, uma lista dos nomes das variáveis, os seus tipos, e uma explicação textural do contéudo. 
+Para demonstrar esta função, eu vou usar um arquivo derivado de um projeto verdadeiro de pesquisa em que estou envolvido sobre a doença HIV. A planilha mostra alguns dados sobre os pacientes e sobre os resultados dos exames que eles fizeram ao início do estudo. Esta planilha, `pac_demo.xlsx` tem duas folhas. A primeira, `pac_demo`, contem os dados. A segunda folha, `data_dic` tem a dicionário dos dados, ou seja, uma lista dos nomes das variáveis, os seus tipos, e uma explicação textural do conteúdo. 
 
 ```{r data_dic, echo = FALSE, fig.align='center', fig.cap = "Diccionário dos Dados"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/data_dic.png")
 ```
 
+**VSS** É sempre uma boa praxe criar uma dicionário dos dados para seu trabalho. Pode ser no formato em que você grava os dados inicialmente (e.g., Excel), em R ou até num caderno. Vale muito a pena para ajudar você e outros entender e reproduzir os seus resultados.
 
+A função `read_excel()` funciona muito semelhante a função `read_csv`. Você especifica o arquivo para ser importado, o nome da folha (diferentemente de uma arquivo `.csv`, que não tem folhas), uma cadeia de caracteres para os tipos das colunas, além das outras opções que pode consultar na tela de `Help`.
+
+```{r read_excel_file, echo = TRUE}
+pac_data <- readxl::read_excel("pac_demo.xlsx", sheet = "pac_demo")
+tibble::glimpse(pac_data)
+```
+
+No passado com R e até hoje com outras linguagens, foi considerado necessário salvar uma planilha em `.csv` antes de importar. Com o pacote `readxl`, este passo não é mais necessário. Pode importar diretamente da planilha original.
+
+## *Tidy Data* -- Arrumar os Dados
+
+Agora que temos dois objetos na memoria, `acoes` e `pac_data`, podemos proceder para limpar eles e prepará-los para as análises. Nesta fase do seu projeto, você vai começar de programar seriamente. Você vai combinar um número de funções em um script para preparar os dados para análise e modelagem. 
+
+Primeiro, tem de entender algumas regras de sintaxe de R e algumas praxes para dar seu código uma aparência que é fácil de seguir e entender. 
+
+### Nomes dos Objetos em R
+
+Nomes dos objetos (variáveis, funções, etc.) em R devem começar com uma letra e contem só letras, números, `_` (caractere de sublinhado), e `.` (ponto final). 
+
+Além disso, nomes devem ser descritivos para que você lembra o que você está fazendo e para outros o conhecem facilmente. Assim, você provavelmente vai querer combinar mais que uma palavra. Para fazer isso, existem alternativas que vários programadores usam:
+
+1. combine_palavras_assim (*snake case*)
+2. useMaiusculosMinusculos (*camel case*)
+3. usar.pontos.entre.palavras
+
+Minha preferência é para #1, *snake case* porque não precisa mexer com as letras maiúsculos e inclui um pouco de espaço entre as palavras. Experiência mostra que qualquer opção você escolhe, seja consistente no uso dele.
+
+Também, R e todas as outras linguagens de programação são muitos bravas sobre a ortografia das palavras. Se você não escreve o nome de um objeto exatamente na forma que você o designou originalmente, R não vai o reconhecer e vai retornar um erro.  
+
+```{r nomes_erros, echo = TRUE}
+r_designacao <- 26 * 37
+# agora quero ver o valor
+```
+
+```{r spell, echo = FALSE, fig.align='center', fig.cap = "Erros de r_designacao"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/spelling_erro.png")
+```
+
+Essas duas tentativas não deram certas. A primeira substituiu um ponto para o sublinhado e o segundo corrigiu este erro mas usou um "D" maiúsculo. Entretanto, se teclamos o nome certo ...
+
+```{r no_erro}
+r_designacao
+# Finalmente, o valor
+```
+
+A diferença em só 1 caractere é suficiente para confundir R e produz o erro. Também, R distingue entre letras minusculas e letras maiúsculas. **VSS** Prestem atenção nos detalhes dos nomes dos objetos.
 
 
