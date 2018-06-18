@@ -156,7 +156,7 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/sessi
 
 Só têm os pacotes básicos que R carregar quando incia. Agora vamos carregar o Tidyverse.
 
-```{r tv2}
+```{r tv2, echo = TRUE}
 library(tidyverse)
 ```
 

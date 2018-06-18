@@ -20,3 +20,15 @@ knitr::include_graphics("~/Documents/MAD/course_logo_3_small.png")
 Nos capítulos seguintes, nós vamos aprender a linguagem de estatística e programação R e sua utilização na análise de dados. O "approach" seria bem prática. Vamos começar com a instalação do software necessário, continuar com operações básicas em R, e seguir todos os passos de um projeto de análise de dados até um relatório final. No longo do caminho à conclusão da matéria, você terá muitas oportunidades para praticar suas habilidades.
 
 Deixe-me ressaltar aqui que estou escrevendo e desenvolvendo todos os materiais da matéria em R, no formato *R Markdown*: apostila, slides, etc. R com RStudio tem uma gama de recursos super abrangente. Nós vamos ver neste curso rápido só uma pequena porção deles.
+
+Quando inclui programação em R, vou usar o seguinte fonte:
+
+```{r comptext, echo = TRUE, eval = FALSE}
+sub_dados <- dados %>% 
+  select(dia20:dia25)
+glimpse(sub_dados)
+summary(sub_dados)
+sub_dados %>% map_dbl(sd)
+```
+
+As vezes, vai ter um ponto importante que não cabe linearmente no texto. Este tipo de ponto eu chamo um **VSS**, um *verbum sapientibus satis* que é Latím para "um palavra é suficiente para os sábios", em honra da minha professora de Latím de ensino médio, Profa. Walden.  
