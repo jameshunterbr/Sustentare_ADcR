@@ -130,8 +130,27 @@ Essas duas tentativas não deram certas. A primeira substituiu um ponto para o s
 ```{r no_erro}
 r_designacao
 # Finalmente, o valor
+
 ```
 
-A diferença em só 1 caractere é suficiente para confundir R e produz o erro. Também, R distingue entre letras minusculas e letras maiúsculas. **VSS** Prestem atenção nos detalhes dos nomes dos objetos.
+A diferença em só 1 caractere é suficiente para confundir R e produz o erro. Também, R distingue entre letras minusculas e letras maiúsculas. **VSS** Prestem atenção nos detalhes dos nomes dos objetos. 
+
+Na luta para lembrar e grafar os nomes dos objetos corretamente, RStudio pode ajudar você com 2 atalhos. Primeiro, se você escreve os primeiros caráteres de um nome e toca na tecla <TAB>, RStudio vai dar uma lista dos objetos (variáveis, data frames, tibbles e funções) que começam com este sequência dos caráteres. A figura seguinte mostra esta ajuda. Selecione o nome que você quer e toca no <TAB> de novo. RStudio vai completar o nome.
+
+```{r name_help, echo = FALSE, fig.align='center', fig.cap = "<TAB> Ajuda com Nomes"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/name_choice.png")
+```
+
+Segundo, se você tecla uma linha de código complicado e fazer um erro, mas não quer teclar toda a linha de novo, RStudio pode ajudar você. O software lembra todas as linhas de código que você já escreveu. Se você escreve só os primeiros caráteres da linha e toca nas teclas <CMD/CTRL> + <SETA-PARA-CIMA> e RStudio mostrará as últimas linhas de código que usam estes caráteres ao início. No exemplo seguinte, uma linha de código de um projeto de pesquisa meu, teclei o nome de um objeto como `trpl_new` e R retornou um erro. Eu quis `prpl_new`. Invés de escrever toda a linha de novo, posso tocar a combinação de <CMD/CTRL> + <SETA-PARA-CIMA> no Console (não na janela de programação), e a historia dos comandos aparecerá. Selecione a linha que você quer inserir, faça sua correção e executar. Se a linha de código que você quer repetir (para corrigir) é a última, existe uma versão simplificada deste truque: só toque na tecla de <SETA-PARA-CIMA> e a última linha vai aparacer no Console. Finalmente, você pode ver todas as linhas que você já executou, mesmo se eles vieram das sessões de trabalho anteriores na aba `History` da janela a cima para direta como a figura seguinte mostra.
+
+```{r history, echo = FALSE, fig.align='center', fig.cap = "<TAB> Janela de History"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/history.png")
+```
+
+
+
+
+
+
 
 
