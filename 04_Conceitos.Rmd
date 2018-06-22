@@ -141,11 +141,15 @@ Na luta para lembrar e grafar os nomes dos objetos corretamente, RStudio pode aj
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/name_choice.png")
 ```
 
-Segundo, se você tecla uma linha de código complicado e fazer um erro, mas não quer teclar toda a linha de novo, RStudio pode ajudar você. O software lembra todas as linhas de código que você já escreveu. Se você escreve só os primeiros caráteres da linha e toca nas teclas <CMD/CTRL> + <SETA-PARA-CIMA> e RStudio mostrará as últimas linhas de código que usam estes caráteres ao início. No exemplo seguinte, uma linha de código de um projeto de pesquisa meu, teclei o nome de um objeto como `trpl_new` e R retornou um erro. Eu quis `prpl_new`. Invés de escrever toda a linha de novo, posso tocar a combinação de <CMD/CTRL> + <SETA-PARA-CIMA> no Console (não na janela de programação), e a historia dos comandos aparecerá. Selecione a linha que você quer inserir, faça sua correção e executar. Se a linha de código que você quer repetir (para corrigir) é a última, existe uma versão simplificada deste truque: só toque na tecla de <SETA-PARA-CIMA> e a última linha vai aparacer no Console. Finalmente, você pode ver todas as linhas que você já executou, mesmo se eles vieram das sessões de trabalho anteriores na aba `History` da janela a cima para direta como a figura seguinte mostra.
+Segundo, se você tecla uma linha de código complicado e fazer um erro, mas não quer teclar toda a linha de novo, RStudio pode ajudar você. O software lembra todas as linhas de código que você já escreveu. Se você escreve só os primeiros caráteres da linha e toca nas teclas <CMD/CTRL> + <SETA-PARA-CIMA> e RStudio mostrará as últimas linhas de código que usam estes caráteres ao início. No exemplo seguinte, uma linha de código de um projeto de pesquisa meu, teclei o nome de um objeto como `trpl_new` e R retornou um erro. Eu quis `prpl_new`. Invés de escrever toda a linha de novo, posso tocar a combinação de <CMD/CTRL> + <SETA-PARA-CIMA> no Console (não na janela de programação), e a historia dos comandos aparecerá. Selecione a linha que você quer inserir, faça sua correção e executar. Se a linha de código que você quer repetir (para corrigir) é a última, existe uma versão simplificada deste truque: só toque na tecla de <SETA-PARA-CIMA> e a última linha vai aparacer no Console. Finalmente, você pode ver todas as linhas que você já executou, mesmo se eles vieram das sessões de trabalho anteriores na aba `History` da janela a cima para direta como a figura seguinte mostra. [^8] 
+
+[^8]: É difícil de mostrar isso num documento. Criarei um vidéo no canal de YouTube para demonstrar como funciona este ajuda historica.
 
 ```{r history, echo = FALSE, fig.align='center', fig.cap = "<TAB> Janela de History"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/history.png")
 ```
+
+### Limpando um Conjunto dos Dados 
 
 
 
