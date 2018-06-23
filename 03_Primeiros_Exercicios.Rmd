@@ -252,9 +252,13 @@ dados[50, ] # paciente 50, todos os dias
 
 Este código parece razoável, mas não muito claro. Não segue as recommendações sobre nomes de variáveis por exemplo. É típico das linguagens de computação. Com o Tidyverse, podemos fazer este aparecer mais como um idioma normal. Nós vamos usar umas novas funções para fazer os subconjuntos que queremos. 
 
-Primeiro desses funções permite que combinamos operações das funções diferentes na mesma expressão. Este símbolo está chamada o "pipe" [^6] e está escrito assim: `%>%`. Este conceito é muito comum em linguagens de computação, apesar que está expressa por vários símbolos. Em R, o pipe quer dizer "aceite o resultado da operação no lado esquerdo e aplique a função no lado direto ao este resultado". Com o uso do pipe, nós não precisamos repetir o nome do objeto do lado esquerdo da operação quando você especifica a função no lado direto. 
+Primeiro desses funções permite que combinamos operações das funções diferentes na mesma expressão. Este símbolo está chamada o "pipe" e está escrito assim: `%>%`. Este conceito é muito comum em linguagens de computação,  especialmente do sistema UNIX, apesar que está expressa por vários símbolos. Em R, o pipe quer dizer "aceite o resultado da operação no lado esquerdo e aplique a função no lado direto ao este resultado". Com o uso do pipe, nós não precisamos repetir o nome do objeto do lado esquerdo da operação quando você especifica a função no lado direto. 
 
-[^6]: Nenhum das palavras que traduz a palavra "*pipe*" realmente capta o sentido correto. Então, eu vou ficar com o inglês original.
+O termo *pipe* não vem do sentido de tubo, mas da palavra "cachimbo" através de arte surrealista, especificamente do quadro do pintor belga René Magritte, "Ceci n'est pas une pipe". Por quê? Porque veio originalmente do pacote `magritte`, mas agora está incorporado no `dplyr`, o pacote principal do `tidyverse` para a manipulação dos dados.
+
+```{r pipe, echo = FALSE, fig.align='center', fig.cap = ""}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/ceci_nest_pas_pipe.jpg")
+```
 
 Para nosso exemplo, o código vai parecer complicado em comparação ao código acima, mas ele ilustra funções importantes que ajudaria você em projetos mais complicados. As funções que vamos usar são os seguintes:
 

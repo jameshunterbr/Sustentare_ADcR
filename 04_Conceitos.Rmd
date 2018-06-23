@@ -143,7 +143,7 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/name_
 
 Segundo, se você tecla uma linha de código complicado e fazer um erro, mas não quer teclar toda a linha de novo, RStudio pode ajudar você. O software lembra todas as linhas de código que você já escreveu. Se você escreve só os primeiros caráteres da linha e toca nas teclas <CMD/CTRL> + <SETA-PARA-CIMA> e RStudio mostrará as últimas linhas de código que usam estes caráteres ao início. No exemplo seguinte, uma linha de código de um projeto de pesquisa meu, teclei o nome de um objeto como `trpl_new` e R retornou um erro. Eu quis `prpl_new`. Invés de escrever toda a linha de novo, posso tocar a combinação de <CMD/CTRL> + <SETA-PARA-CIMA> no Console (não na janela de programação), e a historia dos comandos aparecerá. Selecione a linha que você quer inserir, faça sua correção e executar. Se a linha de código que você quer repetir (para corrigir) é a última, existe uma versão simplificada deste truque: só toque na tecla de <SETA-PARA-CIMA> e a última linha vai aparacer no Console. Finalmente, você pode ver todas as linhas que você já executou, mesmo se eles vieram das sessões de trabalho anteriores na aba `History` da janela a cima para direta como a figura seguinte mostra. [^8] 
 
-[^8]: É difícil de mostrar isso num documento. Criarei um vidéo no canal de YouTube para demonstrar como funciona este ajuda historica.
+[^8]: É difícil de mostrar isso num documento. Criarei um vídeo no canal de YouTube para demonstrar como funciona este ajuda histórica.
 
 ```{r history, echo = FALSE, fig.align='center', fig.cap = "<TAB> Janela de History"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/history.png")
@@ -151,10 +151,58 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/histo
 
 ### Limpando um Conjunto dos Dados 
 
+Vamos primeiro carregar um conjunto dos dados e limpar ele para preparar uma análise. Nós vamos usar o `dataframe/tibble` `flights` do pacote `nycflights13`. `flights` inclui todos os 336.766 vôos que saíram dos 3 aeroportos nova iorquinos (JFK/Kennedy, LGA/Laguardia e EWR/Newark) em 2013. A questão que nós vamos querer estudar é a eficiência relativa dos 3 aeroportos em termos de demora na chegada dos vôos indo da Nova Iorque para O'Hare/Chicago, uma das rotas mais importantes dos EUA. Nós vamos também carregar o tibble `airlines`, que contem os nomes completos das linhas aéreas. Esse segue a estratégia `tidy` em que cada tibble fala de um aspeto distinto do assunto sob estudo.  `flights` tem os dados sobre origem-destinação, datas, e demoras. Só identifica os vôos pelo campo `carrier` que usa o código da IATA. Para ver o nome, precisa consulta esta outra tabela `airlines`.
 
+*Carregar `flights`*
 
+Para carregar um conjunto dos dados já colocado num pacote de R, você usa a função `data()`. Daí em frente, os dados daquele tibble seriam disponíveis para análise. Vamos aqui carregar `flights` e `airlines` e ver a estrutura básica deles.
 
+```{r load_flight_data, echo = TRUE}
+library(nycflights13)
+data(flights)
+data(airlines)
+tibble::glimpse(flights)
+tibble::glimpse(airlines)
+```
 
+#### Tipos de Variáveis em `flights`
 
+Na segunda coluna do `glimpse()`, você vê abreviações de 3 ou 4 letras que indicam o tipo da variável. A lista seguinte indica os tipos mais importantes:
 
+* `<int>` *integer* (número inteiro)
+* `<dbl>` *double*  (número de duplo tamanho, ou seja, um número real)
+* `<chr>` *character* (caráter)
+* `<dttm>`  *date/time* (data com tempo)
+* `<date>`  *date* (data)
+* `<fctr>`  *factor*  (fator)
+* `<lgl>` *logical* (lógico -- TRUE/FALSE)
+
+Existem também outros tipos mas esses são os tipos mais comuns. Uma variável do tipo fator é muito útil e é o tipo mais comum a ser usado quando quer criar variáveis categóricas. 
+
+*Somente Dados sobre Partidas? -- `table()`*
+
+Vamos próximo confirmar que `flights` realmente tem dados só de partidas de Nova Iorque. Senão, temos que limitar com essa restrição. Tem duas maneiras de responder a essa pergunta (Quais são os aeroportos de partida `origin`?). Uma usa a função `table()` e a outra usa funções do pacote `dplyr`. Vamos ver primeiro e depois, explico.
+
+```{r origin, echo = TRUE}
+library(dplyr)
+table(flights$origin)
+flights %>% 
+  group_by(origin) %>% 
+  summarize(n = n())
+```
+
+Facilmente, confirmamos que o conjunto trata mesmo das partidas de Nova Iorque e não outras cidades. Porque fiz isso quando começamos por dizer que o assunto do `flights` era partidas de Nova Iorque? **VSS** Nunca confie em nada que você não observou diretamente num conjunto dos dados. 
+
+O método de `table()` é antigo; ele vem da base R. O proposito da função é a construção de tables de uma ou duas dimensões. O argumento principal que `table()` precisa ver é o objeto que você quer contar. `table()` deve trabalhar com variáveis que podem ser contado. Aqui, `origin` é um vetor de classe`character`. Também, `table()` pode ser usado com variáveis de classe `factor`. Com variáveis numéricos, a situação fica mais problemática. `table()` vai tratar cada valor distinto no vetor como uma categoria em si. 
+Por exemplo, se fizéssemos uma tabela da variável numérica `arr_delay` (demora na chegada), teria 577 valores distintos, que não seria útil para examinar. Quando temos este problema podemos criar uma nova variável categórica para pôr a original em classes como "muito_cedo", "cedo", "pontual", "atrasado", "muito_atrasado". Precisamos decidir quais seriam os limites numéricos de cada categoria. 
+
+*O Pipe -- Uma Superferramenta*
+
+O método de `dplyr` neste caso não é o mais eficiente (precisa 3 linhas de código), mas mostra dois pontos fortes do sistema de `tidyverse`. Primeiro, é um exemplo do uso do *pipe*, a ferramenta que vimos no último capitulo. Alguns programadores gostam de escrever a função `group_by()` no caso deste tibble assim:
+ 
+ >  `flights %>% 
+  group_by(., origin)`
+  
+com o ponto agindo para segurar o lugar do `flights` na função. Quando tiver 
+comandos com vários pipes, talvez esse ajudará para entender melhor o fonte dos dados que está sendo usado na função. Mas, não é obrigatório.
 
