@@ -96,7 +96,7 @@ tibble::glimpse(pac_data)
 
 No passado com R e até hoje com outras linguagens, foi considerado necessário salvar uma planilha em `.csv` antes de importar. Com o pacote `readxl`, este passo não é mais necessário. Pode importar diretamente da planilha original.
 
-### Nomes dos Objetos em R
+## Nomes dos Objetos em R
 
 Nomes dos objetos (variáveis, funções, etc.) em R devem começar com uma letra e contem só letras, números, `_` (caractere de sublinhado), e `.` (ponto final). 
 
@@ -128,6 +128,8 @@ r_designacao
 ```
 
 A diferença em só 1 caractere é suficiente para confundir R e produz o erro. Também, R distingue entre letras minusculas e letras maiúsculas. **VSS** *Prestem atenção nos detalhes dos nomes dos objetos.* 
+
+### Assistência -- RStudio
 
 Na luta para lembrar e grafar os nomes dos objetos corretamente, RStudio pode ajudar você com 2 atalhos. Primeiro, se você escreve os primeiros caráteres de um nome e toca na tecla <TAB>, RStudio vai dar uma lista dos objetos (variáveis, data frames, tibbles e funções) que começam com este sequência dos caráteres. A figura seguinte mostra esta ajuda. Selecione o nome que você quer e toca no <TAB> de novo. RStudio vai completar o nome.
 
