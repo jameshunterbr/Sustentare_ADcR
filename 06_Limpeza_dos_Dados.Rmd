@@ -1,0 +1,94 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(printr)
+```
+
+# Arrumando o Conjunto dos Dados
+
+Nosso objetivo nesta fase do trabalho com os dados é organizar os dados para as funções de análise e visualização dos dados estão esperando. Este formato de dados é frequentemente bastante diferente do formato em que uma planilha apresenta dados. O formato que queremos é o formato "*tidy*", que apresentei inicialmente nos capitulos anteriores. 
+
+O formato *tidy* oferece uma consistência que outros formatos não oferecem. Uma vez que temos os dados organizados, vai precisar mudar o formato muito pouco durante a fase de análise. Mas, se mantemos os dados num outro formato, é muito provável que precisaremos reorganizar eles para cada análise. Como disse Hadley Wickham, autor dos pacotes principais do Tidyverse (parafraseando Liev Tolstoy): [^9]
+
+> *Tidy datasets are all alike, but every messy dataset is messy in its own way.* Conjuntos de dados *tidy* parecem iguais, mas todo conjunto de dados confuso é confuso na sua maneira.
+
+[^9]: Wickham e Grolemund, **R for Data Science**.
+
+Existe uma segunda vantagem na organização *tidy*. Colocar variáveis em colunas permite que a vetorização innata de R seja utilizada ao máximo. Vetorização é uma característica das linguagens que fazem os cálculos não só em um valor por vez, mas em todo um vetor, que faz os cálculos muito mais rápidos. As funções do Tidyverse maximizam o uso de vetorização assim como a maioria das ferramentas de análise.
+
+Têm três regras que definam se um conjunto de dados é tidy ou não:
+
+1.  Cada variável deve ter sua própria coluna
+2.  Cada observação deve ter sua própria linha
+3.  Cada valor deve ter sua própria celula
+
+A figura mostra esses regras visualmente.
+
+```{r regras, echo = FALSE, fig.align='center', fig.cap = "<TAB> Regras de Dados Tidy"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/regras_tidy.png")
+```
+
+Se trabalhamos com tibbles e se colocamos as varíaveis em colunas, já vencemos a maioria da batalha para criar um conjunto *tidy*. Nós vamos ver em baixo exemplos com uma grande conjunto (`who_tb`) onde a organização *tidy* assista na preparação e limpeza do conjunto para análise.
+
+## Limpando o Conjunto dos Dados
+
+Vamos primeiro carregar um conjunto dos dados e limpar ele para preparar uma análise. Nós vamos usar o `dataframe/tibble` `flights` do pacote `nycflights13`. `flights` inclui todos os 336.766 vôos que saíram dos 3 aeroportos nova iorquinos (JFK/Kennedy, LGA/Laguardia e EWR/Newark) em 2013. A questão que nós vamos querer estudar é a eficiência relativa dos 3 aeroportos em termos de demora na chegada dos vôos indo da Nova Iorque para O'Hare/Chicago, uma das rotas mais importantes dos EUA. Nós vamos também carregar o tibble `airlines`, que contem os nomes completos das linhas aéreas. Esse segue a estratégia `tidy` em que cada tibble fala de um aspeto distinto do assunto sob estudo.  `flights` tem os dados sobre origem-destinação, datas, e demoras. Só identifica os vôos pelo campo `carrier` que usa o código da IATA. Para ver o nome, precisa consulta esta outra tabela `airlines`.
+
+### Carregar `flights`
+
+Para carregar um conjunto dos dados já colocado num pacote de R, você usa a função `data()`. Daí em frente, os dados daquele tibble seriam disponíveis para análise. Vamos aqui carregar `flights` e `airlines` e ver a estrutura básica deles.
+
+```{r load_flight_data, echo = TRUE}
+library(nycflights13)
+data(flights)
+data(airlines)
+tibble::glimpse(flights)
+tibble::glimpse(airlines)
+```
+
+### Tipos de Variáveis em `flights`
+
+Na segunda coluna do `glimpse()`, você vê abreviações de 3 ou 4 letras que indicam o tipo da variável. A lista seguinte indica os tipos mais importantes:
+
+* `<int>` *integer* (número inteiro)
+* `<dbl>` *double*  (número de duplo tamanho, ou seja, um número real)
+* `<chr>` *character* (caráter)
+* `<dttm>`  *date/time* (data com tempo)
+* `<date>`  *date* (data)
+* `<fctr>`  *factor*  (fator)
+* `<lgl>` *logical* (lógico -- TRUE/FALSE)
+
+Existem também outros tipos mas esses são os tipos mais comuns. Uma variável do tipo fator é muito útil e é o tipo mais comum a ser usado quando quer criar variáveis categóricas. 
+
+### Somente Dados sobre Partidas? -- `table()`
+
+Vamos próximo confirmar que `flights` realmente tem dados só de partidas de Nova Iorque. Senão, temos que limitar com essa restrição. Tem duas maneiras de responder a essa pergunta (Quais são os aeroportos de partida `origin`?). Uma usa a função `table()` e a outra usa funções do pacote `dplyr`. Vamos ver primeiro e depois, explico.
+
+```{r origin, echo = TRUE}
+library(dplyr)
+table(flights$origin)
+flights %>% 
+  group_by(origin) %>% 
+  summarize(n = n())
+```
+
+Facilmente, confirmamos que o conjunto trata mesmo das partidas de Nova Iorque e não outras cidades. Porque fiz isso quando começamos por dizer que o assunto do `flights` era partidas de Nova Iorque? **VSS** *Nunca confie em nada que você não observou diretamente num conjunto dos dados.* 
+
+O método de `table()` é antigo; ele vem da base R. O proposito da função é a construção de tables de uma ou duas dimensões. O argumento principal que `table()` precisa ver é o objeto que você quer contar. `table()` deve trabalhar com variáveis que podem ser contado. Aqui, `origin` é um vetor de classe`character`. Também, `table()` pode ser usado com variáveis de classe `factor`. Com variáveis numéricos, a situação fica mais problemática. `table()` vai tratar cada valor distinto no vetor como uma categoria em si. 
+Por exemplo, se fizéssemos uma tabela da variável numérica `arr_delay` (demora na chegada), teria 577 valores distintos, que não seria útil para examinar. Quando temos este problema podemos criar uma nova variável categórica para pôr a original em classes como "muito_cedo", "cedo", "pontual", "atrasado", "muito_atrasado". Precisamos decidir quais seriam os limites numéricos de cada categoria. 
+
+### O Pipe -- Uma Superferramenta
+
+O método de `dplyr` neste caso não é o mais eficiente (precisa 3 linhas de código), mas mostra dois pontos fortes do sistema de `tidyverse`. Primeiro, é um exemplo do uso do *pipe*, a ferramenta que vimos no último capitulo. Alguns programadores gostam de escrever a função que segue o pipe assim:
+ 
+ >  `flights %>% 
+  group_by(., origin)`
+  
+com o ponto segurando o lugar do `flights` na função. Quando tiver 
+comandos com vários pipes, talvez esse ajudará para entender melhor o fonte dos dados que está sendo usado na função. Mas, não é obrigatório.
+

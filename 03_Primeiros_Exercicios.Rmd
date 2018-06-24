@@ -254,7 +254,7 @@ Este código parece razoável, mas não muito claro. Não segue as recommendaç�
 
 Primeiro desses funções permite que combinamos operações das funções diferentes na mesma expressão. Este símbolo está chamada o "pipe" e está escrito assim: `%>%`. Este conceito é muito comum em linguagens de computação,  especialmente do sistema UNIX, apesar que está expressa por vários símbolos. Em R, o pipe quer dizer "aceite o resultado da operação no lado esquerdo e aplique a função no lado direto ao este resultado". Com o uso do pipe, nós não precisamos repetir o nome do objeto do lado esquerdo da operação quando você especifica a função no lado direto. 
 
-O termo *pipe* não vem do sentido de tubo, mas da palavra "cachimbo" através de arte surrealista, especificamente do quadro do pintor belga René Magritte, "Ceci n'est pas une pipe". Por quê? Porque veio originalmente do pacote `magritte`, mas agora está incorporado no `dplyr`, o pacote principal do `tidyverse` para a manipulação dos dados.
+O termo *pipe* não vem do sentido de tubo, mas da palavra "cachimbo" vindo de arte surrealista, especificamente do quadro do pintor belga René Magritte, "Ceci n'est pas une pipe". Por quê? Porque veio originalmente do pacote `magritte`, mas agora está incorporado no `dplyr`, o pacote principal do `tidyverse` para a manipulação dos dados.
 
 ```{r pipe, echo = FALSE, fig.align='center', fig.cap = ""}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/ceci_nest_pas_pipe.jpg")

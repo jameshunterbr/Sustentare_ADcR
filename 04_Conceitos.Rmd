@@ -66,7 +66,7 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/col_t
 
 Para importar o arquivo dos preços de ações, podemos confiar que `read_csv()` vai reconhecer corretamente os tipos das colunas e que queremos os nomes na primeira linha como nomes das variáveis na base de dados. Podemos então usar uma forma simples do comando. Você pode ver que o tibble que resulta tem as classes (tipos) de variáveis corretos.
 
-**VSS** Se você tem o seu arquivo `.csv` com números do estilo brasileiro (com uma vírgula como o separador entre a mantissa e as casas decimais), você precisa usar a versão da função `read_csv2()`. Esta versão da função separa os valores com um ponto e vírgula e reserva a vírgula usado sozinho para separador decimal.
+**VSS** *Se você tem o seu arquivo `.csv` com números do estilo brasileiro (com uma vírgula como o separador entre a mantissa e as casas decimais), você precisa usar a versão da função `read_csv2()`*. Esta versão da função separa os valores com um ponto e vírgula e reserva a vírgula usado sozinho para separador decimal.
 
 ```{r imp_stocks, echo = TRUE}
 acoes <- readr::read_csv("stockprice.csv")
@@ -85,7 +85,7 @@ Para demonstrar esta função, eu vou usar um arquivo derivado de um projeto ver
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/data_dic.png")
 ```
 
-**VSS** É sempre uma boa praxe criar uma dicionário dos dados para seu trabalho. Pode ser no formato em que você grava os dados inicialmente (e.g., Excel), em R ou até num caderno. Vale muito a pena para ajudar você e outros entender e reproduzir os seus resultados.
+**VSS** *É sempre uma boa praxe criar uma dicionário dos dados para seu trabalho.* Pode ser no formato em que você grava os dados inicialmente (e.g., Excel), em R ou até num caderno. Vale muito a pena para ajudar você e outros entender e reproduzir os seus resultados.
 
 A função `read_excel()` funciona muito semelhante a função `read_csv`. Você especifica o arquivo para ser importado, o nome da folha (diferentemente de uma arquivo `.csv`, que não tem folhas), uma cadeia de caracteres para os tipos das colunas, além das outras opções que pode consultar na tela de `Help`.
 
@@ -95,12 +95,6 @@ tibble::glimpse(pac_data)
 ```
 
 No passado com R e até hoje com outras linguagens, foi considerado necessário salvar uma planilha em `.csv` antes de importar. Com o pacote `readxl`, este passo não é mais necessário. Pode importar diretamente da planilha original.
-
-## *Tidy Data* -- Arrumar os Dados
-
-Agora que temos dois objetos na memoria, `acoes` e `pac_data`, podemos proceder para limpar eles e prepará-los para as análises. Nesta fase do seu projeto, você vai começar de programar seriamente. Você vai combinar um número de funções em um script para preparar os dados para análise e modelagem. 
-
-Primeiro, tem de entender algumas regras de sintaxe de R e algumas praxes para dar seu código uma aparência que é fácil de seguir e entender. 
 
 ### Nomes dos Objetos em R
 
@@ -133,7 +127,7 @@ r_designacao
 
 ```
 
-A diferença em só 1 caractere é suficiente para confundir R e produz o erro. Também, R distingue entre letras minusculas e letras maiúsculas. **VSS** Prestem atenção nos detalhes dos nomes dos objetos. 
+A diferença em só 1 caractere é suficiente para confundir R e produz o erro. Também, R distingue entre letras minusculas e letras maiúsculas. **VSS** *Prestem atenção nos detalhes dos nomes dos objetos.* 
 
 Na luta para lembrar e grafar os nomes dos objetos corretamente, RStudio pode ajudar você com 2 atalhos. Primeiro, se você escreve os primeiros caráteres de um nome e toca na tecla <TAB>, RStudio vai dar uma lista dos objetos (variáveis, data frames, tibbles e funções) que começam com este sequência dos caráteres. A figura seguinte mostra esta ajuda. Selecione o nome que você quer e toca no <TAB> de novo. RStudio vai completar o nome.
 
@@ -148,61 +142,4 @@ Segundo, se você tecla uma linha de código complicado e fazer um erro, mas nã
 ```{r history, echo = FALSE, fig.align='center', fig.cap = "<TAB> Janela de History"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/history.png")
 ```
-
-### Limpando um Conjunto dos Dados 
-
-Vamos primeiro carregar um conjunto dos dados e limpar ele para preparar uma análise. Nós vamos usar o `dataframe/tibble` `flights` do pacote `nycflights13`. `flights` inclui todos os 336.766 vôos que saíram dos 3 aeroportos nova iorquinos (JFK/Kennedy, LGA/Laguardia e EWR/Newark) em 2013. A questão que nós vamos querer estudar é a eficiência relativa dos 3 aeroportos em termos de demora na chegada dos vôos indo da Nova Iorque para O'Hare/Chicago, uma das rotas mais importantes dos EUA. Nós vamos também carregar o tibble `airlines`, que contem os nomes completos das linhas aéreas. Esse segue a estratégia `tidy` em que cada tibble fala de um aspeto distinto do assunto sob estudo.  `flights` tem os dados sobre origem-destinação, datas, e demoras. Só identifica os vôos pelo campo `carrier` que usa o código da IATA. Para ver o nome, precisa consulta esta outra tabela `airlines`.
-
-*Carregar `flights`*
-
-Para carregar um conjunto dos dados já colocado num pacote de R, você usa a função `data()`. Daí em frente, os dados daquele tibble seriam disponíveis para análise. Vamos aqui carregar `flights` e `airlines` e ver a estrutura básica deles.
-
-```{r load_flight_data, echo = TRUE}
-library(nycflights13)
-data(flights)
-data(airlines)
-tibble::glimpse(flights)
-tibble::glimpse(airlines)
-```
-
-#### Tipos de Variáveis em `flights`
-
-Na segunda coluna do `glimpse()`, você vê abreviações de 3 ou 4 letras que indicam o tipo da variável. A lista seguinte indica os tipos mais importantes:
-
-* `<int>` *integer* (número inteiro)
-* `<dbl>` *double*  (número de duplo tamanho, ou seja, um número real)
-* `<chr>` *character* (caráter)
-* `<dttm>`  *date/time* (data com tempo)
-* `<date>`  *date* (data)
-* `<fctr>`  *factor*  (fator)
-* `<lgl>` *logical* (lógico -- TRUE/FALSE)
-
-Existem também outros tipos mas esses são os tipos mais comuns. Uma variável do tipo fator é muito útil e é o tipo mais comum a ser usado quando quer criar variáveis categóricas. 
-
-*Somente Dados sobre Partidas? -- `table()`*
-
-Vamos próximo confirmar que `flights` realmente tem dados só de partidas de Nova Iorque. Senão, temos que limitar com essa restrição. Tem duas maneiras de responder a essa pergunta (Quais são os aeroportos de partida `origin`?). Uma usa a função `table()` e a outra usa funções do pacote `dplyr`. Vamos ver primeiro e depois, explico.
-
-```{r origin, echo = TRUE}
-library(dplyr)
-table(flights$origin)
-flights %>% 
-  group_by(origin) %>% 
-  summarize(n = n())
-```
-
-Facilmente, confirmamos que o conjunto trata mesmo das partidas de Nova Iorque e não outras cidades. Porque fiz isso quando começamos por dizer que o assunto do `flights` era partidas de Nova Iorque? **VSS** Nunca confie em nada que você não observou diretamente num conjunto dos dados. 
-
-O método de `table()` é antigo; ele vem da base R. O proposito da função é a construção de tables de uma ou duas dimensões. O argumento principal que `table()` precisa ver é o objeto que você quer contar. `table()` deve trabalhar com variáveis que podem ser contado. Aqui, `origin` é um vetor de classe`character`. Também, `table()` pode ser usado com variáveis de classe `factor`. Com variáveis numéricos, a situação fica mais problemática. `table()` vai tratar cada valor distinto no vetor como uma categoria em si. 
-Por exemplo, se fizéssemos uma tabela da variável numérica `arr_delay` (demora na chegada), teria 577 valores distintos, que não seria útil para examinar. Quando temos este problema podemos criar uma nova variável categórica para pôr a original em classes como "muito_cedo", "cedo", "pontual", "atrasado", "muito_atrasado". Precisamos decidir quais seriam os limites numéricos de cada categoria. 
-
-*O Pipe -- Uma Superferramenta*
-
-O método de `dplyr` neste caso não é o mais eficiente (precisa 3 linhas de código), mas mostra dois pontos fortes do sistema de `tidyverse`. Primeiro, é um exemplo do uso do *pipe*, a ferramenta que vimos no último capitulo. Alguns programadores gostam de escrever a função `group_by()` no caso deste tibble assim:
- 
- >  `flights %>% 
-  group_by(., origin)`
-  
-com o ponto agindo para segurar o lugar do `flights` na função. Quando tiver 
-comandos com vários pipes, talvez esse ajudará para entender melhor o fonte dos dados que está sendo usado na função. Mas, não é obrigatório.
 

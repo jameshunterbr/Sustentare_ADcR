@@ -1,0 +1,67 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(printr)
+```
+
+# Importar Dados para R
+
+## `read_csv()` --- Arquivos .csv 
+
+Já apresentei o uso de `readr::read_csv()` (o nome de um pacote seguido por 2 dois pontos e o nome de uma função é usado em R para especificar qual versão desse nome você quer usar ou, como neste caso, para enfatizar de qual pacote a função vem) em relação dos dados de inflamação. Vamos aplicar esta função para o caso de preços de 2 ações em 2013, Starbucks (SBUX) e Apple (AAPL).
+
+
+A tela de `Help` para `readr::read_csv()` mostra os seguintes argumentos. `read_csv` faz parte de um grupo de funções que traduzem arquivos externos em *tibbles* (data frames com habilidades adicionais) de R. 
+
+```{r read_csv, echo = FALSE, fig.align='center', fig.cap = "Help - read_csv"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/read_csv_help.png")
+```
+
+Você pode ler a página para entender como usar todos os argumentos. Aqui são as primeiras linhas do arquivo `.csv` em Excel. 
+
+```{r stockprice_excel, echo = FALSE, fig.align='center', fig.cap = "Excel - stockprice.csv"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/stockprice_Excel.png")
+```
+
+Porque o padrão para o argumento `col_names` é `TRUE`, neste caso, podemos deixar a função importar as palavras na primeira linha como os nomes de variáveis. Se você não quer usar os nomes do Excel, pode mudar o argumento para `FALSE`, como fizemos no último capitulo. Também, `readr` tentará interpretar quais são as classes dos valores nas colunas, utilizando os primeiras 100 linhas para determinar se são caráteres, números, datas, ou valores lógicos. Você pode controlar os tipos de colunas com o argumento `col_types`. Neste caso, se quisemos, podemos especificar as colunas como `col_types = c(D,n,n)` (data, número, número) como esta figura mostra.
+
+```{r col_types_help, echo = FALSE, fig.align='center', fig.cap = "Tipos de Coluna"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/col_types_help.png")
+```
+
+Para importar o arquivo dos preços de ações, podemos confiar que `read_csv()` vai reconhecer corretamente os tipos das colunas e que queremos os nomes na primeira linha como nomes das variáveis na base de dados. Podemos então usar uma forma simples do comando. Você pode ver que o tibble que resulta tem as classes (tipos) de variáveis corretos.
+
+**VSS** *Se você tem o seu arquivo `.csv` com números do estilo brasileiro (com uma vírgula como o separador entre a mantissa e as casas decimais), você precisa usar a versão da função `read_csv2()`*. Esta versão da função separa os valores com um ponto e vírgula e reserva a vírgula usado sozinho para separador decimal.
+
+```{r imp_stocks, echo = TRUE}
+acoes <- readr::read_csv("stockprice.csv")
+str(acoes)
+```
+
+Quando discutimos a limpeza dos dados, nós vamos transformar a variável `Date` para uma variável do tipo `Date` para que possamos utilizar em cálculos das datas. `read_csv()` somente importa como uma cadeia de caracteres se você não especifica uma sequência dos tipos de coluna porque existem tantos maneiras para retratar datas no mundo inteiro que R não tenta de adivinhar qual é o formato usado.
+
+## Planilhas de Excel
+
+O sistema `tidyverse` inclui um pacote que facilita importar os dados diretamente de uma planilha do Excel. Pode importar ou uma do tipo moderno de `.xlsx` ou do tipo antigo `.xls`. O comando `read_excel()` fica no pacote `readxl`. `read_excel()` tenta adivinhar qual é o tipo de arquivo que você abre. Se tiver problemas com o arquivo, você pode usar ou `read_xlsx` ou `read_xls` diretamente para abrir aquele tipo de arquivo. 
+
+Para demonstrar esta função, eu vou usar um arquivo derivado de um projeto verdadeiro de pesquisa em que estou envolvido sobre a doença HIV. A planilha mostra alguns dados sobre os pacientes e sobre os resultados dos exames que eles fizeram ao início do estudo. Esta planilha, `pac_demo.xlsx` tem duas folhas. A primeira, `pac_demo`, contem os dados. A segunda folha, `data_dic` tem a dicionário dos dados, ou seja, uma lista dos nomes das variáveis, os seus tipos, e uma explicação textural do conteúdo. 
+
+```{r data_dic, echo = FALSE, fig.align='center', fig.cap = "Diccionário dos Dados"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/data_dic.png")
+```
+
+**VSS** *É sempre uma boa praxe criar uma dicionário dos dados para seu trabalho.* Pode ser no formato em que você grava os dados inicialmente (e.g., Excel), em R ou até num caderno. Vale muito a pena para ajudar você e outros entender e reproduzir os seus resultados.
+
+A função `read_excel()` funciona muito semelhante a função `read_csv`. Você especifica o arquivo para ser importado, o nome da folha (diferentemente de uma arquivo `.csv`, que não tem folhas), uma cadeia de caracteres para os tipos das colunas, além das outras opções que pode consultar na tela de `Help`.
+
+```{r read_excel_file, echo = TRUE}
+pac_data <- readxl::read_excel("pac_demo.xlsx", sheet = "pac_demo")
+tibble::glimpse(pac_data)
+```
+
+No passado com R e até hoje com outras linguagens, foi considerado necessário salvar uma planilha em `.csv` antes de importar. Com o pacote `readxl`, este passo não é mais necessário. Pode importar diretamente da planilha original.
