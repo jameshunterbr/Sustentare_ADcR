@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(printr)
 ```
 
-# Conceitos da Ciência de Dados e R
+# Conceitos da Ciência de Dados e R e Importação dos Dados
 
 Os conceitos que se desenvolverem aqui são os que são necessários para entendimento do uso das ferramentas de programação como R para resolver problemas práticas da ciência ou dos negócios. Já vimos uma introdução aos alguns desses conceitos no Capitulo *Primeiros Exercícios*. Algumas coisas vão repetir o que você já viu nos capítulos anteriores, mas numa forma mais organizada.
 
