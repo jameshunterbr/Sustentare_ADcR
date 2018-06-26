@@ -6,26 +6,26 @@ output:
 
 ```{r global_options, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-library(printr)
+
 ```
 
-# Arrumando o Conjunto dos Dados
+# Arrumar e Limpar o Conjunto dos Dados
 
-Nosso objetivo nesta fase do trabalho com os dados é organizar os dados para as funções de análise e visualização dos dados estão esperando. Este formato de dados é frequentemente bastante diferente do formato em que uma planilha apresenta dados. O formato que queremos é o formato "*tidy*", que apresentei inicialmente nos capitulos anteriores. 
+Nosso objetivo nesta fase do trabalho com os dados é organizar os dados para as funções de análise e visualização dos dados estão esperando. Este formato de dados é frequentemente bastante diferente do formato em que uma planilha apresenta dados. O formato que queremos é o formato "*tidy*", que apresentei inicialmente nos capítulos anteriores. 
 
-O formato *tidy* oferece uma consistência que outros formatos não oferecem. Uma vez que temos os dados organizados, vai precisar mudar o formato muito pouco durante a fase de análise. Mas, se mantemos os dados num outro formato, é muito provável que precisaremos reorganizar eles para cada análise. Como disse Hadley Wickham, autor dos pacotes principais do Tidyverse (parafraseando Liev Tolstoy): [^9]
+O formato *tidy* oferece uma consistência que outros formatos não oferecem. Uma vez que temos os dados organizados, vai precisar mudar o formato muito pouco durante a fase de análise. Mas, se mantemos os dados num outro formato, é muito provável que precisaremos reorganizar eles para cada análise. Como disse Hadley Wickham, autor dos pacotes principais do Tidyverse (parafraseando Liev Tolstoy): [^1]
 
 > *Tidy datasets are all alike, but every messy dataset is messy in its own way.* Conjuntos de dados *tidy* parecem iguais, mas todo conjunto de dados confuso é confuso na sua maneira.
 
-[^9]: Wickham e Grolemund, **R for Data Science**.
+[^1]: Wickham e Grolemund, **R for Data Science**.
 
-Existe uma segunda vantagem na organização *tidy*. Colocar variáveis em colunas permite que a vetorização innata de R seja utilizada ao máximo. Vetorização é uma característica das linguagens que fazem os cálculos não só em um valor por vez, mas em todo um vetor, que faz os cálculos muito mais rápidos. As funções do Tidyverse maximizam o uso de vetorização assim como a maioria das ferramentas de análise.
+Existe uma segunda vantagem na organização *tidy*. Colocar variáveis em colunas permite que a vetorização inata de R seja utilizada ao máximo. Vetorização é uma característica das linguagens que fazem os cálculos não só em um valor por vez, mas em todo um vetor, que faz os cálculos muito mais rápidos. As funções do Tidyverse maximizam o uso de vetorização assim como a maioria das ferramentas de análise.
 
 Têm três regras que definam se um conjunto de dados é tidy ou não:
 
 1.  Cada variável deve ter sua própria coluna
 2.  Cada observação deve ter sua própria linha
-3.  Cada valor deve ter sua própria celula
+3.  Cada valor deve ter sua própria célula
 
 A figura mostra esses regras visualmente.
 
@@ -33,27 +33,35 @@ A figura mostra esses regras visualmente.
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/regras_tidy.png")
 ```
 
-Se trabalhamos com tibbles e se colocamos as varíaveis em colunas, já vencemos a maioria da batalha para criar um conjunto *tidy*. Nós vamos ver em baixo exemplos com uma grande conjunto (`who_tb`) onde a organização *tidy* assista na preparação e limpeza do conjunto para análise.
+Se trabalhamos com tibbles e se colocamos as variáveis em colunas, já vencemos a maioria da batalha para criar um conjunto *tidy*. Nós vamos ver em baixo exemplos com uma grande conjunto (`who`) onde a organização *tidy* assista na preparação e limpeza do conjunto para análise.
 
 ## Limpando o Conjunto dos Dados
 
-Vamos primeiro carregar um conjunto dos dados e limpar ele para preparar uma análise. Nós vamos usar o `dataframe/tibble` `flights` do pacote `nycflights13`. `flights` inclui todos os 336.766 vôos que saíram dos 3 aeroportos nova iorquinos (JFK/Kennedy, LGA/Laguardia e EWR/Newark) em 2013. A questão que nós vamos querer estudar é a eficiência relativa dos 3 aeroportos em termos de demora na chegada dos vôos indo da Nova Iorque para O'Hare/Chicago, uma das rotas mais importantes dos EUA. Nós vamos também carregar o tibble `airlines`, que contem os nomes completos das linhas aéreas. Esse segue a estratégia `tidy` em que cada tibble fala de um aspeto distinto do assunto sob estudo.  `flights` tem os dados sobre origem-destinação, datas, e demoras. Só identifica os vôos pelo campo `carrier` que usa o código da IATA. Para ver o nome, precisa consulta esta outra tabela `airlines`.
+Vamos primeiro carregar um conjunto dos dados verdadeiro [^2] e limpar ele para preparar uma análise. Nós vamos usar o `dataframe/tibble` `who` do pacote `tidyr`. `who` vem da Organização Mundial de Saúde ("WHO" em inglês) e inclui dados epidemiológicos sobre a incidência [^3] da tuberculose no mundo. Sendo uma base de dados real, ela é nada tidy. Para questionar aspetos deste conjunto e desenvolver modelos sobre tuberculose, temos que reorganizar os dados na forma *tidy*. 
 
-### Carregar `flights`
+A questão que nós vamos querer estudar é a incidência relativa de tuberculose entre os países BRICS (Brasil, Russia, Índia, China, África de Sul) entre 2002 e 2011. Na distribuição original dos arquivos da OMS, eles fornecem um dicionário de dados como foi recomendado no último capitulo. A figura seguinte mostra uma pequena porção do dicionário. Se você quer ver os dados atualizados, pode ir para o site seguinte: <http://www.who.int/tb/country/data/download/en/> 
 
-Para carregar um conjunto dos dados já colocado num pacote de R, você usa a função `data()`. Daí em frente, os dados daquele tibble seriam disponíveis para análise. Vamos aqui carregar `flights` e `airlines` e ver a estrutura básica deles.
+[^2]: Mas, um pouco pré-digerido pelo Wickham et. al. para fins de ensinamento.
 
-```{r load_flight_data, echo = TRUE}
-library(nycflights13)
-data(flights)
-data(airlines)
-tibble::glimpse(flights)
-tibble::glimpse(airlines)
+[^3]: Incidência é o número de novos casos num periodo de tempo e prevalência é a presença de uma doença numa população.
+
+```{r data_dic2, echo = FALSE, fig.align='center', fig.cap = "Dicionário dos Dados - TB"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/tb_dict.png")
 ```
 
-### Tipos de Variáveis em `flights`
+### Carregar `who`
 
-Na segunda coluna do `glimpse()`, você vê abreviações de 3 ou 4 letras que indicam o tipo da variável. A lista seguinte indica os tipos mais importantes:
+Para carregar um conjunto dos dados já colocado num pacote de R, você usa a função `data()`. Daí em frente, os dados daquele tibble ou data frame seriam disponíveis para análise. Vamos aqui carregar `who`. Porque nós vamos usar funções de `tidyr`, mais `dplyr` e outros pacotes do tidyverse, nós vamos carregar o pacote `tidyverse` invés de só `tidyr` que é a fonte dos dados.
+
+```{r load_who_data, echo = TRUE, message = FALSE}
+library(tidyverse)
+data(who)
+who
+```
+
+## Tipos de Variáveis em `who`
+
+Você vê na segunda linha do relatório e na lista das variáveis abreviações de 3 letras que indicam o tipo da variável. A lista seguinte indica os tipos mais importantes:
 
 * `<int>` *integer* (número inteiro)
 * `<dbl>` *double*  (número de duplo tamanho, ou seja, um número real)
@@ -63,32 +71,102 @@ Na segunda coluna do `glimpse()`, você vê abreviações de 3 ou 4 letras que i
 * `<fctr>`  *factor*  (fator)
 * `<lgl>` *logical* (lógico -- TRUE/FALSE)
 
+`who` só contem `<int>` e `<chr>`. Podemos assumir que variáveis do tipo caráter descrevem coisas e as com números inteiros contam um número dos casos. 
+
 Existem também outros tipos mas esses são os tipos mais comuns. Uma variável do tipo fator é muito útil e é o tipo mais comum a ser usado quando quer criar variáveis categóricas. 
 
-### Somente Dados sobre Partidas? -- `table()`
+## Examinar as Colunas e Variáveis 
 
-Vamos próximo confirmar que `flights` realmente tem dados só de partidas de Nova Iorque. Senão, temos que limitar com essa restrição. Tem duas maneiras de responder a essa pergunta (Quais são os aeroportos de partida `origin`?). Uma usa a função `table()` e a outra usa funções do pacote `dplyr`. Vamos ver primeiro e depois, explico.
+Mas, o que são todas as variáveis e como você vai usar elas? Vamos começar ao início e der uma olhada em todos. Primeiro, podemos ver que `country`, `iso2` e `iso3` todos referem ao nome do país: `Afghanistan`, `AF` e `AFG`. Só precisamos um desses nomes. Assim podemos tirar `iso2` e `iso3` do conjunto. Próximo é a variável `year`. Aqui, só queremos os 10 anos entre 2002 e 2011. Essas quatro colunas são variáveis. Então satisfazem as regras de dados *tidy*. 
 
-```{r origin, echo = TRUE}
-library(dplyr)
-table(flights$origin)
-flights %>% 
-  group_by(origin) %>% 
-  summarize(n = n())
+As outras variáveis têm uma estrutura parecida. Todas começam com a palavra "new", que indica que eles são categorias de casos novos da doença. E, com uma consulta no dicionário de dados, podemos confirmar que este é correto. São todos categorias de tipos de determinação da presença da doença em faixas etárias e gêneros. Essas colunas representam valores invés das variáveis. Sim, pode pensar nelas como variáveis, mas para nosso propósito, são somente elementos de uma contagem de novos casos. 
+
+As variáveis que são importantes para nos são `country`, `year` e uma variável que representa a contagem, que vamos chamar `cases` quando criamos ela. Este vai limitar bastante o tamanho do conjunto final que vamos analisar. Ao invés de `r length(unique(who$country))` paises, queremos estudar só 4. E ao invés de `r length(unique(who$year))` anos na base original, nós vamos focar em 10. E todas essas `r length(str_sub(colnames(who[5:60]), 1, 3) == "new")` categórias de novos casos, queremos só o total de novos casos.  
+
+## Dados Faltando
+
+Uma parte importante de qualquer análise de dados é entender como tratar dados que não são presentes no conjuntos, demarcados em R com as letras `NA`. Precisa decidir se `NA` quer dizer que um dado realmente *missing* ou é uma outra maneira de marcar 0. Numa fase desta limpeza mais para frente, nós vamos examinar esses dados `NA` para determinar como tratá-los. 
+
+## Reunir (`gather`) as Colunas de Incidência
+
+Quando temos muitas colunas e precisamos combinar elas para criar uma variável, usamos a função `gather` do pacote `tidyr`. `gather` combinam colunas em pares de **chaves** e **valores** (*key-value pairs* em inglês). Juntaremos as colunas que tratam de novos casos para ver as contagens dos casos. Nós podemos deixar fora todos as linhas com `NA`, que fazemos com o argumento `na.rm = TRUE`. A função `gather` precisa ao mínimo três argumentos: 
+
+1.  Quais são as colunas que a função vai juntar?
+2.  Qual é o nome da chave que esta combinação vai criar?
+3.  Qual é o nome da variável que vai ter os valores?
+
+Se `gather` faz parte de um cadeia das funções ligadas pelo *pipe*, não precisa incluir uma referência ao tibble. Mas senão, precisa especificar o tibble como o primeiro argumento.
+
+Para evitar que precisamos começar de novo e recarregar o conjunto dos dados, nós vamos salvar o resultado de `gather` num novo tibble `who_mod1`.
+
+```{r mod1, echo = TRUE}
+who_mod1 <- who %>% gather(new_sp_m014:newrel_f65, 
+                           key = "chave", value = "casos", 
+                           na.rm = TRUE)
+who_mod1
+who_mod1 %>% 
+  distinct(chave) %>% 
+  slice(1:20)
 ```
 
-Facilmente, confirmamos que o conjunto trata mesmo das partidas de Nova Iorque e não outras cidades. Porque fiz isso quando começamos por dizer que o assunto do `flights` era partidas de Nova Iorque? **VSS** *Nunca confie em nada que você não observou diretamente num conjunto dos dados.* 
+A última linha neste *chunk* de código mostra os primeiros 20 valores entre todos os tipos de novos casos. A função `distinct` identifica os valores distintos. Invés de receber um vetor de `r nrow(who_mod1)`, a função retorna só os valores diferentes. 
 
-O método de `table()` é antigo; ele vem da base R. O proposito da função é a construção de tables de uma ou duas dimensões. O argumento principal que `table()` precisa ver é o objeto que você quer contar. `table()` deve trabalhar com variáveis que podem ser contado. Aqui, `origin` é um vetor de classe`character`. Também, `table()` pode ser usado com variáveis de classe `factor`. Com variáveis numéricos, a situação fica mais problemática. `table()` vai tratar cada valor distinto no vetor como uma categoria em si. 
-Por exemplo, se fizéssemos uma tabela da variável numérica `arr_delay` (demora na chegada), teria 577 valores distintos, que não seria útil para examinar. Quando temos este problema podemos criar uma nova variável categórica para pôr a original em classes como "muito_cedo", "cedo", "pontual", "atrasado", "muito_atrasado". Precisamos decidir quais seriam os limites numéricos de cada categoria. 
+Usando este resultado, você pode adivinhar qual é a estrutura desses valores, mas o dicionário dos dados fornece a informação que precisamos para entender. Os tipos não são importantes para a nossa pesquisa. Estudando os códigos mostra que queremos somar todos eles, que foi feito pela `gather` na coluna `casos`. Também, se comparamos `who_mod1` com uma versão do mesmo com os `NA` incluídos, verá que esses valores não vão contribuir para a contagem de casos. Ainda existe a possibilidade que eles representam um valor não-zero, mas não sabemos com a informação que temos como a OMS quis usar `NA`. Por isso, podemos continuar de deixar os valores `NA` fora do tibble.
+
+### Construir o Tibble Final para o Estudo
+
+Temos uma sequência das tarefas de fazer para pôr o tibble na forma *tidy* e limpar ele para o que queremos fazer com os dados. Esses passos são
+
+1.  Começar com o tibble `who_mod1` (já tem os `NA`s eliminados)
+2.  Agrupar os dados pelas variáveis `country` e `year`
+3.  Criar um novo tibble `who_mod2` que uma soma os valores dos casos utilizando `summarize` do pacote `dplyr`
+4.  Limitar a variável `country` para os paises do BRICS
+5.  Limitar a variável `year` para periodo que nos interesse
+
+Podemos combinar todos esses passos em uma cadeia de funções usando o *pipe* como fizemos em comandos anteriores. 
+
+```{r mod2, echo = TRUE}
+brics <- c("Brazil", "Russian Federation", "India", "China", "South Africa")
+who_mod2 <- who_mod1 %>% 
+  group_by(country, year) %>% 
+  summarize(casos = sum(casos)) %>% 
+  filter(country %in% brics) %>% 
+  filter(year %in% 2002:2011)
+who_mod2
+```
+
+**Operador `%in%`** Os filtros que aplicamos para focar os casos nos paises BRICS e nos anos de interesse usam o operador `%in%`. Este operador é um equivalente eficiente para um série de operações lógicas. Ele funciona para testar se o valor no lado esquerdo fica dentro da objeto no lado direta. Por exemplo, aplicado ao primeiro país no `who_mod1`, o `country` ("Afghanistan") não fica dentro do vetor dos BRICS (`brics`). Então, o operador retornará o resultado `FALSE` e seguir para próxima linha. Só vai deixar entrar no resultado aquelas linhas que têm como valor para o `country` um dos cinco valores válidos para `brics`.
+
+Esta estratégia também tem o benefício que não precisamos mais tirar as colunas desnecessárias. A função `summarize` define um novo tibble que faz o resumo somando os casos através de todos as categórias de causa da doença. Porque só agrupamos os dados pelas variáveis `country` e `year`, a `summarize` só vai guardar essas variáveis e não as outras (como `iso2` e `iso3`).
+
+
+### `who_mod2` é *Tidy*?
+
+Agora, sim. Cada linha defina uma observação, que é o número de novos casos em um país e um ano. Cada coluna define uma variável distinta.  
+
+Um comentário sobre dados não-*tidy*. Para algumas razões práticas, não precisa chegar a um tibble puramente *tidy*. Nós vamos ver que a maneira melhor para incorporar uma outra variável no tibble seria de quebrar a regra sobre consistência dos unidades de medida. Mas, *tidy* é um bom objetivo para evitar confusões enquanto você está tentando de organizar e executar uma análise.
 
 ### O Pipe -- Uma Superferramenta
 
-O método de `dplyr` neste caso não é o mais eficiente (precisa 3 linhas de código), mas mostra dois pontos fortes do sistema de `tidyverse`. Primeiro, é um exemplo do uso do *pipe*, a ferramenta que vimos no último capitulo. Alguns programadores gostam de escrever a função que segue o pipe assim:
+O uso de *pipe* mostra um ponto forte do sistema de `tidyverse`. Conseguimos escrever em um comando só varías ações que precisamos para limpar os dados de tuberculose. Também esta sequência está compreensível em linguagem comum. 
+
+> Começar com `who_mod1`, agrupar os casos por país e ano, calcular a soma dos casos para cada grupo (de país e ano), limitar os casos para aqueles dos paises BRICS e limitar os casos para os anos 2002 até 2011.
+
+Sem este tipo de gramática, não seria possível para traduzir esses comandos para a idioma que falamos no dia-á-dia.
+
+Uma observação sobre o *pipe*: Alguns programadores gostam de escrever a função que segue o pipe assim:
  
- >  `flights %>% 
-  group_by(., origin)`
+ >  `who_mod1 %>% 
+  group_by(., country, year)`
   
-com o ponto segurando o lugar do `flights` na função. Quando tiver 
-comandos com vários pipes, talvez esse ajudará para entender melhor o fonte dos dados que está sendo usado na função. Mas, não é obrigatório.
+com o ponto segurando o lugar do `who_mod1` na função. Quando tiver comandos com vários pipes, talvez esse ajudará para entender melhor o fonte dos dados que está sendo usado na função. Mas, não é obrigatório.
+
+## Examinar Os Dados
+
+Antes de declarar que você tinha limpado os dados com êxito, é importante de olhar neles; fazer uma exploração dos valores. Para fazer isso, olhamos nas estatísticas que resumam a forma das distribuições das variáveis e gráficos que dão uma imagem visual das distribuições. Frequentemente assim, achamos vários tipos de vícios que podem distorcer os resultados analiticos. 
+
+ **VSS** *Nunca confie em nada que você não observou diretamente num conjunto dos dados.* 
+
+
+
 
