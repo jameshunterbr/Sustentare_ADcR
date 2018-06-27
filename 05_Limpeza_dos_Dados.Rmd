@@ -43,7 +43,7 @@ A questão que nós vamos querer estudar é a incidência relativa de tuberculos
 
 [^2]: Mas, um pouco pré-digerido pelo Wickham et. al. para fins de ensinamento.
 
-[^3]: Incidência é o número de novos casos num periodo de tempo e prevalência é a presença de uma doença numa população.
+[^3]: Incidência é o número de novos casos num período de tempo e prevalência é a presença de uma doença numa população.
 
 ```{r data_dic2, echo = FALSE, fig.align='center', fig.cap = "Dicionário dos Dados - TB"}
 knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/tb_dict.png")
@@ -81,7 +81,7 @@ Mas, o que são todas as variáveis e como você vai usar elas? Vamos começar a
 
 As outras variáveis têm uma estrutura parecida. Todas começam com a palavra "new", que indica que eles são categorias de casos novos da doença. E, com uma consulta no dicionário de dados, podemos confirmar que este é correto. São todos categorias de tipos de determinação da presença da doença em faixas etárias e gêneros. Essas colunas representam valores invés das variáveis. Sim, pode pensar nelas como variáveis, mas para nosso propósito, são somente elementos de uma contagem de novos casos. 
 
-As variáveis que são importantes para nos são `country`, `year` e uma variável que representa a contagem, que vamos chamar `cases` quando criamos ela. Este vai limitar bastante o tamanho do conjunto final que vamos analisar. Ao invés de `r length(unique(who$country))` paises, queremos estudar só 4. E ao invés de `r length(unique(who$year))` anos na base original, nós vamos focar em 10. E todas essas `r length(str_sub(colnames(who[5:60]), 1, 3) == "new")` categórias de novos casos, queremos só o total de novos casos.  
+As variáveis que são importantes para nos são `country`, `year` e uma variável que representa a contagem, que vamos chamar `cases` quando criamos ela. Este vai limitar bastante o tamanho do conjunto final que vamos analisar. Ao invés de `r length(unique(who$country))` países, queremos estudar só 4. E ao invés de `r length(unique(who$year))` anos na base original, nós vamos focar em 10. E todas essas `r length(str_sub(colnames(who[5:60]), 1, 3) == "new")` categorias de novos casos, queremos só o total de novos casos.  
 
 ## Dados Faltando
 
@@ -120,8 +120,8 @@ Temos uma sequência das tarefas de fazer para pôr o tibble na forma *tidy* e l
 1.  Começar com o tibble `who_mod1` (já tem os `NA`s eliminados)
 2.  Agrupar os dados pelas variáveis `country` e `year`
 3.  Criar um novo tibble `who_mod2` que uma soma os valores dos casos utilizando `summarize` do pacote `dplyr`
-4.  Limitar a variável `country` para os paises do BRICS
-5.  Limitar a variável `year` para periodo que nos interesse
+4.  Limitar a variável `country` para os países do BRICS
+5.  Limitar a variável `year` para período que nos interesse
 
 Podemos combinar todos esses passos em uma cadeia de funções usando o *pipe* como fizemos em comandos anteriores. 
 
@@ -135,20 +135,20 @@ who_mod2 <- who_mod1 %>%
 who_mod2
 ```
 
-**Operador `%in%`** Os filtros que aplicamos para focar os casos nos paises BRICS e nos anos de interesse usam o operador `%in%`. Este operador é um equivalente eficiente para um série de operações lógicas. Ele funciona para testar se o valor no lado esquerdo fica dentro da objeto no lado direta. Por exemplo, aplicado ao primeiro país no `who_mod1`, o `country` ("Afghanistan") não fica dentro do vetor dos BRICS (`brics`). Então, o operador retornará o resultado `FALSE` e seguir para próxima linha. Só vai deixar entrar no resultado aquelas linhas que têm como valor para o `country` um dos cinco valores válidos para `brics`.
+**Operador `%in%`** Os filtros que aplicamos para focar os casos nos países BRICS e nos anos de interesse usam o operador `%in%`. Este operador é um equivalente eficiente para um série de operações lógicas. Ele funciona para testar se o valor no lado esquerdo fica dentro da objeto no lado direta. Por exemplo, aplicado ao primeiro país no `who_mod1`, o `country` ("Afghanistan") não fica dentro do vetor dos BRICS (`brics`). Então, o operador retornará o resultado `FALSE` e seguir para próxima linha. Só vai deixar entrar no resultado aquelas linhas que têm como valor para o `country` um dos cinco valores válidos para `brics`.
 
-Esta estratégia também tem o benefício que não precisamos mais tirar as colunas desnecessárias. A função `summarize` define um novo tibble que faz o resumo somando os casos através de todos as categórias de causa da doença. Porque só agrupamos os dados pelas variáveis `country` e `year`, a `summarize` só vai guardar essas variáveis e não as outras (como `iso2` e `iso3`).
+Esta estratégia também tem o benefício que não precisamos mais tirar as colunas desnecessárias. A função `summarize` define um novo tibble que faz o resumo somando os casos através de todos as categorias de causa da doença. Porque só agrupamos os dados pelas variáveis `country` e `year`, a `summarize` só vai guardar essas variáveis e não as outras (como `iso2` e `iso3`).
 
 
 ### `who_mod2` é *Tidy*?
 
-Agora, sim. Cada linha defina uma observação, que é o número de novos casos em um país e um ano. Cada coluna define uma variável distinta.  
+Agora, sim, chegamos em *tidyville*. Cada linha defina uma observação, que é o número de novos casos em um país e um ano. Cada coluna define uma variável distinta.  
 
 Um comentário sobre dados não-*tidy*. Para algumas razões práticas, não precisa chegar a um tibble puramente *tidy*. Nós vamos ver que a maneira melhor para incorporar uma outra variável no tibble seria de quebrar a regra sobre consistência dos unidades de medida. Mas, *tidy* é um bom objetivo para evitar confusões enquanto você está tentando de organizar e executar uma análise.
 
 ### O Pipe -- Uma Superferramenta
 
-O uso de *pipe* mostra um ponto forte do sistema de `tidyverse`. Conseguimos escrever em um comando só varías ações que precisamos para limpar os dados de tuberculose. Também esta sequência está compreensível em linguagem comum. 
+O uso de *pipe* mostra um ponto forte do sistema de `tidyverse`. Conseguimos escrever em um comando só várias ações que precisamos para limpar os dados de tuberculose. Também esta sequência está compreensível em linguagem comum. 
 
 > Começar com `who_mod1`, agrupar os casos por país e ano, calcular a soma dos casos para cada grupo (de país e ano), limitar os casos para aqueles dos paises BRICS e limitar os casos para os anos 2002 até 2011.
 
@@ -163,10 +163,81 @@ com o ponto segurando o lugar do `who_mod1` na função. Quando tiver comandos c
 
 ## Examinar Os Dados
 
-Antes de declarar que você tinha limpado os dados com êxito, é importante de olhar neles; fazer uma exploração dos valores. Para fazer isso, olhamos nas estatísticas que resumam a forma das distribuições das variáveis e gráficos que dão uma imagem visual das distribuições. Frequentemente assim, achamos vários tipos de vícios que podem distorcer os resultados analiticos. 
+Antes de declarar que você tinha limpado os dados com êxito, é importante de olhar neles; fazer uma exploração dos valores. Para fazer isso, olhamos nas estatísticas que resumam a forma das distribuições das variáveis e gráficos que dão uma imagem visual das distribuições. Frequentemente assim, achamos vários tipos de vícios que podem distorcer os resultados analíticos. 
 
- **VSS** *Nunca confie em nada que você não observou diretamente num conjunto dos dados.* 
+**VSS** *Nunca confie em nada que você não observou diretamente num conjunto dos dados.* 
 
+### Pacotes para Descrever Dados
 
+R contem vários pacotes que têm funções para examinar. Entretanto, eu tenho uma preferência forte para um deles: `DescTools` e `Hmisc` -- e algumas funções simples que você pode escrever mesmo utilizando `dplyr`. Para gráficos, usaremos o pacote `ggpubr`. Este pacote simplifica as funções de um dos pacotes centrais do tidyverse, `ggplot`, e faz elas mais accessíveis. `ggplot` implementa a arquitetura de gráficos chamada *Grammar of Graphics* que fornece um consistente maneira para especificar paramêtros de gráficos de todos os tipos. Mas, a especificação de um gráfico de `ggplot` pode ser um pouco complicado. `ggpubr` facilita o processo.
 
+### Resumo dos Dados
+
+O primeiro teste de dados é examinar um resumo de quantos dados ficam em nosso conjunto, quantos têm valores `NA`, quantos são númericos, quantos categoricas e outras caracteristicas chaves. Para um conjunto de dados com um número relativamente pequeno de variáveis, você pode simplesmente ligar a função para o conjunto inteiro. A função em si vai separar as variáveis e mostrar um resumo baseado no tipo de cada variável.
+
+```{r desc1, echo = TRUE, message = FALSE}
+library(DescTools)
+library(Hmisc)
+DescTools::Desc(who_mod2, plotit = TRUE)
+Hmisc::describe(who_mod2)
+```
+
+### Comando para Ver Elementos Básicos das Variáveis
+
+Como um exercício, vamos construir um comando que dá a informação importante sobre as três variáveis em `who_mod2`. A função `dplyr::summarize()` tem uma variedade dos valores que podem ser calculados que fornecem informações valiosas para você. Normalmente, você vai querer agrupar os dados segundo variáveis que classificam os dados (i.e., `country`, `year`). Vamos primeiro contar o número de casos em cada um de nossos países e depois nos anos.
+
+```{r func1, echo = TRUE}
+who_mod2 %>% 
+  group_by(country) %>% 
+  summarise(número = n(), faltando = sum(is.na(casos)))
+who_mod2 %>% 
+  group_by(year) %>% 
+  summarise(número = n())
+```
+
+### Gráfico dos Casos
+
+Você vai anotar que a função `DescTools::Desc` pode produzir gráficos para todas as variáveis. Você pode supprimir esses gráficos, dando o valor `FALSE` para o parâmetro `plotit`. Neste caso também, criaremos um gráfico mostrando a evolução dos casos de TB em todos os 5 países. Nós começamos a construção do gráfico com o conjunto dos dados `who_mod2`. Queremos um plotagem de linha, que conseguimos com a função `ggline`. Neste caso, vamos plotar ambos as linhas e os pontos dos dados, que fazemos com o parâmetro `plot_type = "b"`. `plot_type` pode aceitar `"l"` (linha), `"p"` (ponto) ou `"b"` (*both*/ambos). Os outros parâmetros neste caso são todos títulos ou rótulos para fazer claro o que estamos colocando no gráfico. Este é uma especificação muito básica de um gráfico. Existe muito mais opções gráficas que pode incorporar para preparar o gráfico para uma apresentação. Mas, aqui, nosso interesse é o entendimento dos dados e nosso público é nos mesmo. Então todos os *bells and whistles* não são necessários.
+
+A gramática de um comando das funções do `ggpubr` é simples. Você pode pensar nele como você está acrescentando camadas a uma estrutura de variáveis (marcado por `x`, `y` e `color` aqui). Algumas dessas camadas seriam gráficas e outras estatísticas, mas todas funcionam do mesmo jeito. 
+
+**VSS** Um truque para facilitar a construção dos gráficos é de guardar a tela de *help* para o tipo do gráfico aberta enquanto você está escrevendo o código e seguir a sequência dos parâmetros. Quando você encontra um parâmetro onde não vai usar o valor padronizado, coloque isso no comando. Assim, não precisa lembrar a significância dos parâmetros todos. Esta é a tela de *help* de `ggline`. Se precisa mais informação, todos os parâmetros tem uma explicação abaixo da seção de *Usage*.
+
+```{r help_ggline, echo = FALSE, fig.align='center', fig.cap = "ggline Help"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/ggline_help.png")
+```
+
+```{r explor_gr, echo = TRUE, message = FALSE}
+library(ggpubr)
+who_mod2 %>% 
+  ggline(x = "year", y = "casos", color = "country", # Variáveis
+            plot_type = "b",                         # "both" linhas e pontos
+            title = "Novos Casos de TB por País BRICS",
+            subtitle = "2002 - 2011",
+            xlab = "Ano",                            # Rótulo do eixo x
+            ylab = "Novos Casos")                    # Rótulo de eixo y
+
+```
+
+## Problemas nos Dados
+
+### Rússia 2005
+
+Existem pelo menos três problemas com os dados que são típicos das pesquisas com dados nacionais. Vamos identificar esses problemas e achar uma maneira de concertar eles. Primeiro, você pode ver que a Rússia não informou OMS sobre os dados para um dos anos. Todos os outros países tem 10 pontos de dados, mas Rússia só 9. Olhando no tibble dos anos, podemos ver que foi em 2005 que este brecho ocorreu. Todos os outros anos têm 5 países, mas 2005 só 4. O gráfico de linha que construimos também indica este problema. A linha da Rússia não tem um ponto para 2005. Podemos confirmar este problema facilmente:
+
+```{r russ05, echo = TRUE}
+who_mod2 %>% filter(country == "Russian Federation")
+```
+
+Realmente, o ano 2005 está faltando para a Rússia.
+
+### Índia 2007
+
+O gráfico mostra que o valor da Índia para 2007 é muito alto, quase 1.2 milhões de novos casos, dobro de ou 2006 ou 2008. Este sugere que este valor não está certo. É muito improvável que um aumento pontual aconteceu de verdade.
+
+### Tamanho Relativo da China e Índia em Incidência
+
+O gráfico mostra que o número de novos casos foi maior em Índia que em China até 2009. China tem uma população levemente mais alta que a população da Índia através do período estudado. Por quê? Ele só superou a Índia perto do final do período em incidência. Talvez podemos descobrir mais se tratamos de casos per 100.000 pessoas, uma taxa de incidência invés do número bruto. Para comparar China e Índia com Brasil, Rússia e África de Sul, uma taxa vai representar a situação no países mais claramente, especialmente se formos interessados em políticas de saúde de cada país.
+
+## O Que Fazer para Controlar Esses Problemas
 
