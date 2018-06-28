@@ -143,10 +143,11 @@ O seguinte é o texto do arquivo. É muito simples. Só 2 comandos. Um que espec
 ```{r inst_packs, eval = FALSE, echo = TRUE}
 pacotes <- c("tidyverse", "car", "caret", "caTools", "data.table", 
              "DescTools", "devtools", "gapminder", "ggpubr", "ggvis", 
-             "gmodels", "kableExtra", "knitr", "lattice", "lpSolve", 
-             "lubridate", "magrittr", "nortest", "nycflights13", "outliers", 
-             "pROC", "psych", "RColorBrewer", "Rcpp", "readxl", "ROCR",   
-             "shiny", "titanic", "yarrr")
+             "gmodels", "Hmisc", "kableExtra", "knitr", "lattice", 
+             "lpSolve", "lubridate", "magrittr", "mice", "nortest", 
+             "nycflights13", "outliers", "pROC", "psych", 
+             "RColorBrewer", "Rcpp", "readxl", "ROCR", "shiny", "styler", 
+             "titanic", "yarrr")
 
 install.packages(pacotes)
 ```

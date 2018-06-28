@@ -169,11 +169,11 @@ Antes de declarar que você tinha limpado os dados com êxito, é importante de 
 
 ### Pacotes para Descrever Dados
 
-R contem vários pacotes que têm funções para examinar. Entretanto, eu tenho uma preferência forte para um deles: `DescTools` e `Hmisc` -- e algumas funções simples que você pode escrever mesmo utilizando `dplyr`. Para gráficos, usaremos o pacote `ggpubr`. Este pacote simplifica as funções de um dos pacotes centrais do tidyverse, `ggplot`, e faz elas mais accessíveis. `ggplot` implementa a arquitetura de gráficos chamada *Grammar of Graphics* que fornece um consistente maneira para especificar paramêtros de gráficos de todos os tipos. Mas, a especificação de um gráfico de `ggplot` pode ser um pouco complicado. `ggpubr` facilita o processo.
+R contem vários pacotes que têm funções para examinar. Entretanto, eu tenho uma preferência forte para um deles: `DescTools` e `Hmisc` -- e algumas funções simples que você pode escrever mesmo utilizando `dplyr`. Para gráficos, usaremos o pacote `ggpubr`. Este pacote simplifica as funções de um dos pacotes centrais do tidyverse, `ggplot`, e faz elas mais accessíveis. `ggplot` implementa a arquitetura de gráficos chamada *Grammar of Graphics* que fornece um consistente maneira para especificar parâmetros de gráficos de todos os tipos. Mas, a especificação de um gráfico de `ggplot` pode ser um pouco complicado. `ggpubr` facilita o processo.
 
 ### Resumo dos Dados
 
-O primeiro teste de dados é examinar um resumo de quantos dados ficam em nosso conjunto, quantos têm valores `NA`, quantos são númericos, quantos categoricas e outras caracteristicas chaves. Para um conjunto de dados com um número relativamente pequeno de variáveis, você pode simplesmente ligar a função para o conjunto inteiro. A função em si vai separar as variáveis e mostrar um resumo baseado no tipo de cada variável.
+O primeiro teste de dados é examinar um resumo de quantos dados ficam em nosso conjunto, quantos têm valores `NA`, quantos são numéricos, quantos categóricas e outras características chaves. Para um conjunto de dados com um número relativamente pequeno de variáveis, você pode simplesmente ligar a função para o conjunto inteiro. A função em si vai separar as variáveis e mostrar um resumo baseado no tipo de cada variável.
 
 ```{r desc1, echo = TRUE, message = FALSE}
 library(DescTools)
@@ -197,7 +197,7 @@ who_mod2 %>%
 
 ### Gráfico dos Casos
 
-Você vai anotar que a função `DescTools::Desc` pode produzir gráficos para todas as variáveis. Você pode supprimir esses gráficos, dando o valor `FALSE` para o parâmetro `plotit`. Neste caso também, criaremos um gráfico mostrando a evolução dos casos de TB em todos os 5 países. Nós começamos a construção do gráfico com o conjunto dos dados `who_mod2`. Queremos um plotagem de linha, que conseguimos com a função `ggline`. Neste caso, vamos plotar ambos as linhas e os pontos dos dados, que fazemos com o parâmetro `plot_type = "b"`. `plot_type` pode aceitar `"l"` (linha), `"p"` (ponto) ou `"b"` (*both*/ambos). Os outros parâmetros neste caso são todos títulos ou rótulos para fazer claro o que estamos colocando no gráfico. Este é uma especificação muito básica de um gráfico. Existe muito mais opções gráficas que pode incorporar para preparar o gráfico para uma apresentação. Mas, aqui, nosso interesse é o entendimento dos dados e nosso público é nos mesmo. Então todos os *bells and whistles* não são necessários.
+Você vai anotar que a função `DescTools::Desc` pode produzir gráficos para todas as variáveis. Você pode suprimir esses gráficos, dando o valor `FALSE` para o parâmetro `plotit`. Neste caso também, criaremos um gráfico mostrando a evolução dos casos de TB em todos os 5 países. Nós começamos a construção do gráfico com o conjunto dos dados `who_mod2`. Queremos um plotagem de linha, que conseguimos com a função `ggline`. Neste caso, vamos plotar ambos as linhas e os pontos dos dados, que fazemos com o parâmetro `plot_type = "b"`. `plot_type` pode aceitar `"l"` (linha), `"p"` (ponto) ou `"b"` (*both*/ambos). Os outros parâmetros neste caso são todos títulos ou rótulos para fazer claro o que estamos colocando no gráfico. Este é uma especificação muito básica de um gráfico. Existe muito mais opções gráficas que pode incorporar para preparar o gráfico para uma apresentação. Mas, aqui, nosso interesse é o entendimento dos dados e nosso público é nos mesmo. Então todos os *bells and whistles* não são necessários.
 
 A gramática de um comando das funções do `ggpubr` é simples. Você pode pensar nele como você está acrescentando camadas a uma estrutura de variáveis (marcado por `x`, `y` e `color` aqui). Algumas dessas camadas seriam gráficas e outras estatísticas, mas todas funcionam do mesmo jeito. 
 
@@ -219,11 +219,65 @@ who_mod2 %>%
 
 ```
 
+### A Lei de Benford
+
+Um outro teste que value muito a fazer no início de uma exploração é para ver se o conjunto obedece a *Lei de Benford* [^4] ou a *Lei de Primeiro Dígito*. Em 1937, o físico Frank Benford redescobriu uma relação matemática inicialmente encontrado por um outro físico, Simon Newcomb, em 1881. Esta relação diz que os primeiros dígitos de qualquer grupo dos números vai ter uma probabilidade fixa de ocorrer. Essa relação ocorre através de uma gama abrangente das disciplinas estendendo de física para biologia para dados econômicos e mais. A Lei de Benford está usado frequentemente nas investigações de fraudes comerciais e até nas investigações de fraudes acadêmicos.
+
+A lei diz que uma distribuição segue a Lei de Benford se ele segue o primeiro dígito ocorre com a seguinte probabilidade onde `d` é um dígito entre 1 e 9:
+
+$$ P(d)=log_{10}(d+1)-log_{10}(d)=log_{10}(1+\frac{1}{d})$$
+
+Aliás, a probabilidade da ocorrência de um dígito seria o logaritmo (base 10) do dígito maior menos o logaritmo (base 10) do dígito em si.
+
+Se você quer ver se suas variáveis são realmente aleatórios ou não (ou foram entradas no conjunto que você está estudando incorretamente ou fraudulentamente), só precisa fazer uma tabela dos primeiros dígitos dos números nas variáveis e compara para as probabilidades na figura seguinte. Vou mostrar dois programas breves em R que a) cria a tabela das probabilidades (`p`) e que testa nosso a variável `casos` em nosso conjunto de dados. 
+
+A Lei de Benford parece um pouco trivial para citar num curso sobre R e a Ciência dos Dados, mas ela provou sua utilidade e valor em muitos contextos, e o uso dela é recommendado.
+
+[^4]: LEI DE BENFORD. In: WIKIPÉDIA, a enciclopédia livre. Flórida: Wikimedia Foundation, 2018. Disponível em: <https://pt.wikipedia.org/w/index.php?title=Lei_de_Benford&oldid=52461574>. Acesso em: 26 jun. 2018. 
+
+```{r benford_prog, echo = TRUE}
+library(tibble)
+library(dplyr)
+library(ggpubr)
+p <- tibble(digit = 1:9, prob = 0)
+for (i in 1:9)   p$prob[i] <-  log10((i + 1)/i)
+problabel <- round(p$prob, 3)
+library(ggpubr)
+p %>% mutate(digit = as.character(digit)) %>% 
+  ggbarplot(x = "digit", y = "prob",
+                palette = "aaas",
+                fill = "dark blue",
+                color = "dark blue",
+                label = problabel,
+                lab.pos = "out",
+                title = "A Lei de Benford -- Primeiro Dígito",
+                subtitle = "Tamanho Relativo da Probabilidade do Digito",
+                xlab = "Digito",
+                ylab = "Probabilidade",
+                ggtheme = theme_gray())
+```
+
+```{r benford_func, echo = TRUE}
+benford_law <- function(variavel) {
+  casos_ch <- as.character(variavel)
+  dig1 <- as.integer(str_sub(casos_ch, 1, 1))
+  dist_dig1 <- as.data.frame(table(dig1))
+  dist_dig1 <- dist_dig1 %>% 
+    mutate(prob = Freq/length(casos_ch)) 
+  return(dist_dig1)
+}
+benford_law(who_mod2$casos)  
+```
+
+#### Exercício
+
+Escreva em português o que faz todas as linhas do programa para determinar as probabilidades padronizadas. Se você não entenda uma linha, procura ajuda dentro do sistema de RStudio.
+
 ## Problemas nos Dados
 
 ### Rússia 2005
 
-Existem pelo menos três problemas com os dados que são típicos das pesquisas com dados nacionais. Vamos identificar esses problemas e achar uma maneira de concertar eles. Primeiro, você pode ver que a Rússia não informou OMS sobre os dados para um dos anos. Todos os outros países tem 10 pontos de dados, mas Rússia só 9. Olhando no tibble dos anos, podemos ver que foi em 2005 que este brecho ocorreu. Todos os outros anos têm 5 países, mas 2005 só 4. O gráfico de linha que construimos também indica este problema. A linha da Rússia não tem um ponto para 2005. Podemos confirmar este problema facilmente:
+Existem pelo menos três problemas com os dados que são típicos das pesquisas com dados nacionais. Vamos identificar esses problemas e achar uma maneira de concertar eles. Primeiro, você pode ver que a Rússia não informou OMS sobre os dados para um dos anos. Todos os outros países tem 10 pontos de dados, mas Rússia só 9. Olhando no tibble dos anos, podemos ver que foi em 2005 que este brecho ocorreu. Todos os outros anos têm 5 países, mas 2005 só 4. O gráfico de linha que construímos também indica este problema. A linha da Rússia não tem um ponto para 2005. Podemos confirmar este problema facilmente:
 
 ```{r russ05, echo = TRUE}
 who_mod2 %>% filter(country == "Russian Federation")
@@ -239,5 +293,17 @@ O gráfico mostra que o valor da Índia para 2007 é muito alto, quase 1.2 milh�
 
 O gráfico mostra que o número de novos casos foi maior em Índia que em China até 2009. China tem uma população levemente mais alta que a população da Índia através do período estudado. Por quê? Ele só superou a Índia perto do final do período em incidência. Talvez podemos descobrir mais se tratamos de casos per 100.000 pessoas, uma taxa de incidência invés do número bruto. Para comparar China e Índia com Brasil, Rússia e África de Sul, uma taxa vai representar a situação no países mais claramente, especialmente se formos interessados em políticas de saúde de cada país.
 
+### Resultados da Lei de Benford
+
+Com só 49 casos é difícil replicar completamente a distribuição das probabilidades padronizadas da Lei. Entretanto, podemos ver que "1" é o dígito mais frequente. Com uma distribuição deste tamanho e com 1 como o dígito mais frequente, aceitaria o resultado como realmente aleatório. Se tivessímos resultados semelhantes com uma distribuição com um "n" maior que 100, eu teria suspeito da distribuição. É sempre bom sujeitar as suas variáveis numéricas ao teste de Benford.
+
 ## O Que Fazer para Controlar Esses Problemas
+
+### Dados Faltando/*Missing Data*
+
+Seria bom ter um valor para Rússia para 2005 para completar o conjunto e ficar com 10 observações por país. Para isso, devemos criar um valor. Existem várias técnicas que podemos usar para imputar o valor que está faltando. Primeiro, sempre existe a opção de não preencher o valor. Frequentemente, fazendo nada é uma opção superior à alternativa de distorcer a distribuição dos valores observados. Se nós precisamos trocar o valor `NA` para um outro, nosso objetivo deve ser de minimizar a distorção da distribuição dos dados. Têm dois tipos de substituição que são típicos:
+
+1. Para uma distribuição univariada, ou seja, onde só tem uma varíavel numérica com valores faltando, a média dos outros valores frequentemente representa bem o dado que falta.
+
+2. Para um conjunto de dados mais complexo, que tem várias variáveis numéricas, 
 
