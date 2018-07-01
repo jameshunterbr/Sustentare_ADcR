@@ -21,7 +21,7 @@ O formato *tidy* oferece uma consistência que outros formatos não oferecem. Um
 
 Existe uma segunda vantagem na organização *tidy*. Colocar variáveis em colunas permite que a vetorização inata de R seja utilizada ao máximo. Vetorização é uma característica das linguagens que fazem os cálculos não só em um valor por vez, mas em todo um vetor, que faz os cálculos muito mais rápidos. As funções do Tidyverse maximizam o uso de vetorização assim como a maioria das ferramentas de análise.
 
-Têm três regras que definam se um conjunto de dados é tidy ou não:
+Três regras definem se um conjunto de dados é tidy ou não:
 
 1.  Cada variável deve ter sua própria coluna
 2.  Cada observação deve ter sua própria linha
@@ -189,7 +189,7 @@ Como um exercício, vamos construir um comando que dá a informação importante
 ```{r func1, echo = TRUE}
 who_mod2 %>% 
   group_by(country) %>% 
-  summarise(número = n(), faltando = sum(is.na(casos)))
+  summarise(número = n())
 who_mod2 %>% 
   group_by(year) %>% 
   summarise(número = n())
@@ -227,7 +227,7 @@ A lei diz que uma distribuição segue a Lei de Benford se ele segue o primeiro 
 
 $$ P(d)=log_{10}(d+1)-log_{10}(d)=log_{10}(1+\frac{1}{d})$$
 
-Aliás, a probabilidade da ocorrência de um dígito seria o logaritmo (base 10) do dígito maior menos o logaritmo (base 10) do dígito em si.
+Aliás, a probabilidade da ocorrência de um dígito seria o logaritmo (base 10) do dígito maior menos o logaritmo (base 10) do dígito em si. A primeira versão na equação acima é a definição e a segunda, uma tranformação algébrica que facilita o cálculo.
 
 Se você quer ver se suas variáveis são realmente aleatórios ou não (ou foram entradas no conjunto que você está estudando incorretamente ou fraudulentamente), só precisa fazer uma tabela dos primeiros dígitos dos números nas variáveis e compara para as probabilidades na figura seguinte. Vou mostrar dois programas breves em R que a) cria a tabela das probabilidades (`p`) e que testa nosso a variável `casos` em nosso conjunto de dados. 
 
@@ -242,7 +242,6 @@ library(ggpubr)
 p <- tibble(digit = 1:9, prob = 0)
 for (i in 1:9)   p$prob[i] <-  log10((i + 1)/i)
 problabel <- round(p$prob, 3)
-library(ggpubr)
 p %>% mutate(digit = as.character(digit)) %>% 
   ggbarplot(x = "digit", y = "prob",
                 palette = "aaas",
@@ -285,6 +284,10 @@ who_mod2 %>% filter(country == "Russian Federation")
 
 Realmente, o ano 2005 está faltando para a Rússia.
 
+### Mudança na Escala dos Casos na Rússia depois de 2006
+
+Não é muito visível no gráfico, mas o numéro dos casos aumenta de casa de 30.000 até 120.000 entre 2006 e 2007. Depois disso, o numéro de casos sempre fica acima de 100.000. A tabela que usei abaixo para explorar o dado faltando no caso da Rússia mostra esta tendência claramente. É muito improvável que a Rússia teve um surto da TB que causou um aumento de 270% na incidência da doença. Talvez, as autoridades sanitárias do país mudaram o sistema de reportagem que reconheceu mais casos novos que antes. Mas, sem mais informação, não temos como saber o que exatamente aconteceu. Assim, precisamos aceitar essa mudança na escala e relatar para nosso público que aconteceu e precisa mais pesquisa para determinar a causa.
+
 ### Índia 2007
 
 O gráfico mostra que o valor da Índia para 2007 é muito alto, quase 1.2 milhões de novos casos, dobro de ou 2006 ou 2008. Este sugere que este valor não está certo. É muito improvável que um aumento pontual aconteceu de verdade.
@@ -303,7 +306,174 @@ Com só 49 casos é difícil replicar completamente a distribuição das probabi
 
 Seria bom ter um valor para Rússia para 2005 para completar o conjunto e ficar com 10 observações por país. Para isso, devemos criar um valor. Existem várias técnicas que podemos usar para imputar o valor que está faltando. Primeiro, sempre existe a opção de não preencher o valor. Frequentemente, fazendo nada é uma opção superior à alternativa de distorcer a distribuição dos valores observados. Se nós precisamos trocar o valor `NA` para um outro, nosso objetivo deve ser de minimizar a distorção da distribuição dos dados. Têm dois tipos de substituição que são típicos:
 
-1. Para uma distribuição univariada, ou seja, onde só tem uma varíavel numérica com valores faltando, a média dos outros valores frequentemente representa bem o dado que falta.
+1. Para uma distribuição univariada, ou seja, onde só tem uma varíavel numérica com valores faltando, a média dos dois valores em volta daquele que está faltando é uma boa escolha. Por exemplo, aqui se fazemos a média entre os casos da Rússia em 2004 e 2006, este resultado seria uma boa aproximação do valor que está faltando.
 
-2. Para um conjunto de dados mais complexo, que tem várias variáveis numéricas, 
+2. Para um conjunto de dados mais complexo, que tem várias variáveis numéricas, você quer empregar um algoritmo mais complexo que vai deixar a distribuição multi-dimensional sem alterações. Minha preferência entre os pacotes e approaches é `mice`: *Multivariate Imputation by Chained Equations* [^5]. Nós veremos isso em ação mais para frente.
 
+[^5]: Buuren, S. van, and K. Groothuis-Oudshoorn. 2011. “MICE: Multivariate Imputation by Chained Equations in R.” *Journal of Statistical Software* 45 (3): 1–67.
+
+Para este caso, com só uma variável numérica, podemos usar o primeiro método: a média dos dois valores em volta do dado faltando. Criaremos uma nova versão do conjunto com um valor imputado para este caso.
+
+```{r mod3, echo = TRUE}
+# calcular o valor de 2005 para a Rússia
+r2005 <- mean(who_mod2$casos[who_mod2$country == "Russian Federation" &
+                               who_mod2$year %in% 2004:2006])
+# criar novo linha no who_mod3 para este valor
+who_mod3 <- who_mod2 %>% 
+  ungroup() %>% 
+  add_row(country = "Russian Federation", year = 2005, casos = r2005) %>% 
+  arrange(country, year)
+knitr::kable(who_mod3[who_mod3$country == "Russian Federation",])
+```
+
+```{r russ_med, echo = FALSE}
+print(paste("Sem dado de 2005: média =", 
+    round(mean(who_mod2$casos[who_mod3$country == "Russian Federation"]), 1)))
+print(paste("Com dado de 2005: média =", 
+    round(mean(who_mod3$casos[who_mod3$country == "Russian Federation"]), 1)))
+```
+
+Agora, temos 10 valores para Rússia e o valor para 2005 cai diretamente dentro da sequência dos números. Porque Rússia teve um aumento brusco entre 2006 e 2007, a média para Rússia vai mudar, mas não por causa do novo valor que acrescentamos. 
+
+### Índia 2007 - *Outlier*?
+
+Destaquei este valor alto para a Índia em 2007. Uma tabela dos valores com a mudança porcentual de ano em ano para a Índia mostra o problema:
+
+```{r india_tabela, echo = TRUE}
+who_mod3 %>% 
+  filter(country == "India") %>% 
+  mutate(deltapct = 100 * (lead(casos) - casos)/casos) %>% 
+  knitr::kable()
+
+```
+
+Os 1.2 milhões dos casos relatados em 2007 é mais do que o dobro dos casos do ano anterior. E para 2008, a incidência cai quase 50%. Este padrão sugere que o valor de `r who_mod3$casos[who_mod3$country == "India" & who_mod3$year == 2007]` está errado. Também, podemos medir onde os valores individuais cai numa distribuição dos valores. 
+
+### Outliers e Boxplots
+
+A melhora maneira de fazer isso é com o gráfico de boxplot. Um boxplot mostra onde os valores de uma distribuição cai em relação à mediana e o IQR (*interquartile range*) da distribuição. Um boxplot tem a forma seguinte.
+
+```{r bplot, echo = FALSE, fig.align='center', fig.cap = "Boxplot"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/r4ds_boxplot.png")
+```
+
+Além da caixa (box), o gráfico mostra *whiskers* que estendem até 1.5 vezes o IQR acima e abaixo dos quartis. Todos os valores que caem fora desses limites são considerados *outliers*. [^6] *Outliers* podem distorcer perigosamente os dados e criar uma impressão muito errada do que está acontecendo com o que você quer explicar ou estudar. 
+
+O valor dos casos para Índia em 2007 é um outlier. Um boxplot vai mostrar. Primeiro, vamos focar nos dados da Índia e depois criar o gráfico.
+
+```{r ind_box, echo = TRUE}
+who_mod3 %>% 
+  filter(country == "India") %>% 
+  ggboxplot(x = "country", y = "casos",
+            palette = "aaas",
+            add = "point",
+            title = "Casos de TB em Índia 2002 - 2011",
+            xlab = "",
+            ylab = "Casos")
+```
+
+Com certeza, esse valor acima de 1 milhão é um outlier bem longe da maioria dos valores. Se existe uma razão baseada nos fatos e as circunstâncias dos dados que suportam o valor outlier, então precisa ficar com ele. 
+
+Mas, senão, existem três maneiras que podemos ajustar o valor.
+
+1. Tirar o caso 
+2. Reduzir o valor para a média dos outros valores 
+3. Reduzir o valor para o valor mais próximo 
+
+[^6]: Wickham e Grolemund, **R for Data Science**.  
+
+Entre essas soluções, não seria apropriado de tirar o caso porque queremos 10 casos por cada país. Reduzir o valor para a média dos outros valores tem uma história. Mas, eu acho que este distorce ainda mais a distribuição. A terceira solução -- usar o valor do itém mais próximo ao outlier introduz menos distorção na distribuição dos valores e o que adotaria neste caso. Vamos ver como as soluções de mudar o valor funcionam.
+
+```{r outlier_India, echo = TRUE}
+
+# Média dos Outros Valores
+
+india <- (who_mod3 %>% 
+  filter(country == "India"))
+india <- india$casos
+
+## Média de todos os casos
+
+mean(india)
+
+## Tirar o caso outlier
+india_noout <- india[-6] # tirar o sexto caso (2007)
+mean(india_noout)
+
+## Mudar o 6o caso para o valor mais próximo
+
+india_sort <- sort(india, decreasing = TRUE) # arrumar valores em ordem
+novo_valor <- india_sort[2] # próximo valor
+who_mod4 <- who_mod3 # criar novo tibble para a modificação
+who_mod4$casos[who_mod3$country == "India" & 
+                 who_mod3$year == 2007] <- novo_valor
+who_mod4 %>% 
+  filter(country == "India") %>%
+  knitr::kable()
+who_mod4 %>% 
+  filter(country == "India") %>% 
+  ggboxplot(x = "country", y = "casos",
+            palette = "aaas",
+            add = "point",
+            title = "Casos de TB em Índia 2002 - 2011",
+            subtitle = "Novo Valor para 2007",
+            xlab = "",
+            ylab = "Casos")
+  
+```
+
+Agora, não tem mais outlier para a Índia. Todos os valores ficam dentro de 1,5 vezes o IQR dos primeiro e terceiro quartis. 
+
+### Escala da China e Índia
+
+China e Índia são os dois países maiores da planeta com pelo menos 1,25 bilhões de pessoas cada um em 2011. África de Sul tem uma população que é só 4% da população da China. Mesmo o Brasil tem 15% do numéro das pessoas China. Mas, estamos contando casos. O fato de simplesmente contar sugere que as populações são iguais. Não seria melhor medir a incidência dos casos de tuberculose em termos de casos per capita, ou é mais comum, casos per 100.000 pessoas. Talvez este daria um retrato da epidemiologia da tuberculose mais preciso. 
+
+A planilha da OMS que é a fonte deste tibble também tem a população para todos os anos de interesse para nosso estudo. Já coloquei esses dados em R no arquivo `popTB.rds`.  [^7] O formato `rds` é um formato compacto de R para gravação de um objeto em R. Quando lemos um arquivo deste tipo, precisamos designar um nome do objeto que vai receber os dados. O que vamos fazer é primeiro olhar nos dados e segundo usar as funções `join` para integrar esses dados no tibble de incidência (que agora carregará o nome `who_mod5`).
+
+[^7]: Depositei o programa que usei para criar `popTB.rds` no SER e no repositório de GitHub para o curso.
+
+```{r add_pop, echo = TRUE}
+
+popTB <- readRDS("popTB.rds")
+knitr::kable(popTB)
+who_mod5 <- who_mod4 %>% 
+  left_join(., popTB, by = c("country", "year")) %>% 
+  mutate(taxa = 100000 * casos/pop)
+knitr::kable(who_mod5, caption = "who_mod5 com População")
+```
+
+Agora que ajustamos os dados para a escala de população dos países, a incidência mostra um outro padrão. Aqui o mesmo gráfico que fizemos acima para comparar os países, mas agora em termos de taxa de incidência.
+
+```{r rev_scat, echo = TRUE}
+
+who_mod5 %>% 
+  ggline(x = "year", y = "taxa", color = "country", # Variáveis
+            plot_type = "b",                         # "both" linhas e pontos
+            title = "Taxa de Incidência de TB por País BRICS",
+            subtitle = "2002 - 2011",
+            xlab = "Ano",                            # Rótulo do eixo x
+            ylab = "Casos por 100.000 população")    # Rótulo de eixo y
+```
+
+A realidade não é que China e Índia têm tantos mais casos que os outros três países, mas que África de Sul tem uma incidência que quase não pode controlar (paralelo com problemas com outras doenças infecciosas naquele país) e os outros quatro países tem taxas relativamente baixos e que não crescem rapidamente. Também ajudaria de só olhar nos outros quatro países para ver se existem diferenças entre eles que não aparecem no gráfico com África de Sul. A taxa na África de Sul fica mais de dez vezes maior que a taxa no Brasil ou no Índia. Quando pensamos no estado lastimável de nossa qualidade de serviços de saúde em Brasil, é bom de lembrar que um de nossos parceiros BRICS sofre muito mais que a gente.
+
+```{r }
+who_mod5 %>% 
+  filter(country != "South Africa") %>% 
+  ggline(x = "year", y = "taxa", color = "country", # Variáveis
+            plot_type = "b",                         # "both" linhas e pontos
+            title = "Taxa de Incidência de TB por País BRICS",
+            subtitle = "2002 - 2011",
+            xlab = "Ano",                            # Rótulo do eixo x
+            ylab = "Casos por 100.000 população")    # Rótulo de eixo y
+```
+
+Este gráfico oferece outras novas informações: 
+
+1.  A Rússia ou estava não relatando todos os casos antes de 2007 ou mudou o sistema de reportagem neste ano. Vale a pena pesquisar qual é a verdade. 
+
+2.  A China teve um aumento brusco na taxa de incidência em 2009 e depois. De novo, uma mudança no sistema de reportagem ou teve uma subpopulação anteriormente não medida cuja padrão de saúde foi capto neste ano e incorporado nos dados nacionais? 
+
+## Conclusão -- Dados Limpos
+
+Precisou cinco modificações, mas chegamos de ter um conjunto de dados limpo e *tidy* e pronto a ser analisado. Os testes de outliers, Benford's Law, dados faltando, etc. são importante para processo de fazer modelos e análises que refletam corretamente as fenomena que você quer medir.
