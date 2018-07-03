@@ -227,11 +227,11 @@ A lei diz que uma distribuição segue a Lei de Benford se ele segue o primeiro 
 
 $$ P(d)=log_{10}(d+1)-log_{10}(d)=log_{10}(1+\frac{1}{d})$$
 
-Aliás, a probabilidade da ocorrência de um dígito seria o logaritmo (base 10) do dígito maior menos o logaritmo (base 10) do dígito em si. A primeira versão na equação acima é a definição e a segunda, uma tranformação algébrica que facilita o cálculo.
+Aliás, a probabilidade da ocorrência de um dígito seria o logaritmo (base 10) do dígito maior menos o logaritmo (base 10) do dígito em si. A primeira versão na equação acima é a definição e a segunda, uma transformação algébrica que facilita o cálculo.
 
 Se você quer ver se suas variáveis são realmente aleatórios ou não (ou foram entradas no conjunto que você está estudando incorretamente ou fraudulentamente), só precisa fazer uma tabela dos primeiros dígitos dos números nas variáveis e compara para as probabilidades na figura seguinte. Vou mostrar dois programas breves em R que a) cria a tabela das probabilidades (`p`) e que testa nosso a variável `casos` em nosso conjunto de dados. 
 
-A Lei de Benford parece um pouco trivial para citar num curso sobre R e a Ciência dos Dados, mas ela provou sua utilidade e valor em muitos contextos, e o uso dela é recommendado.
+A Lei de Benford parece um pouco trivial para citar num curso sobre R e a Ciência dos Dados, mas ela provou sua utilidade e valor em muitos contextos, e o uso dela é recomendado.
 
 [^4]: LEI DE BENFORD. In: WIKIPÉDIA, a enciclopédia livre. Flórida: Wikimedia Foundation, 2018. Disponível em: <https://pt.wikipedia.org/w/index.php?title=Lei_de_Benford&oldid=52461574>. Acesso em: 26 jun. 2018. 
 
@@ -286,7 +286,7 @@ Realmente, o ano 2005 está faltando para a Rússia.
 
 ### Mudança na Escala dos Casos na Rússia depois de 2006
 
-Não é muito visível no gráfico, mas o numéro dos casos aumenta de casa de 30.000 até 120.000 entre 2006 e 2007. Depois disso, o numéro de casos sempre fica acima de 100.000. A tabela que usei abaixo para explorar o dado faltando no caso da Rússia mostra esta tendência claramente. É muito improvável que a Rússia teve um surto da TB que causou um aumento de 270% na incidência da doença. Talvez, as autoridades sanitárias do país mudaram o sistema de reportagem que reconheceu mais casos novos que antes. Mas, sem mais informação, não temos como saber o que exatamente aconteceu. Assim, precisamos aceitar essa mudança na escala e relatar para nosso público que aconteceu e precisa mais pesquisa para determinar a causa.
+Não é muito visível no gráfico, mas o número dos casos aumenta de casa de 30.000 até 120.000 entre 2006 e 2007. Depois disso, o número de casos sempre fica acima de 100.000. A tabela que usei abaixo para explorar o dado faltando no caso da Rússia mostra esta tendência claramente. É muito improvável que a Rússia teve um surto da TB que causou um aumento de 270% na incidência da doença. Talvez, as autoridades sanitárias do país mudaram o sistema de reportagem que reconheceu mais casos novos que antes. Mas, sem mais informação, não temos como saber o que exatamente aconteceu. Assim, precisamos aceitar essa mudança na escala e relatar para nosso público que aconteceu e precisa mais pesquisa para determinar a causa.
 
 ### Índia 2007
 
@@ -298,7 +298,7 @@ O gráfico mostra que o número de novos casos foi maior em Índia que em China 
 
 ### Resultados da Lei de Benford
 
-Com só 49 casos é difícil replicar completamente a distribuição das probabilidades padronizadas da Lei. Entretanto, podemos ver que "1" é o dígito mais frequente. Com uma distribuição deste tamanho e com 1 como o dígito mais frequente, aceitaria o resultado como realmente aleatório. Se tivessímos resultados semelhantes com uma distribuição com um "n" maior que 100, eu teria suspeito da distribuição. É sempre bom sujeitar as suas variáveis numéricas ao teste de Benford.
+Com só 49 casos é difícil replicar completamente a distribuição das probabilidades padronizadas da Lei. Entretanto, podemos ver que "1" é o dígito mais frequente. Com uma distribuição deste tamanho e com 1 como o dígito mais frequente, aceitaria o resultado como realmente aleatório. Se tivéssemos resultados semelhantes com uma distribuição com um "n" maior que 100, eu teria suspeito da distribuição. É sempre bom sujeitar as suas variáveis numéricas ao teste de Benford.
 
 ## O Que Fazer para Controlar Esses Problemas
 
@@ -306,7 +306,7 @@ Com só 49 casos é difícil replicar completamente a distribuição das probabi
 
 Seria bom ter um valor para Rússia para 2005 para completar o conjunto e ficar com 10 observações por país. Para isso, devemos criar um valor. Existem várias técnicas que podemos usar para imputar o valor que está faltando. Primeiro, sempre existe a opção de não preencher o valor. Frequentemente, fazendo nada é uma opção superior à alternativa de distorcer a distribuição dos valores observados. Se nós precisamos trocar o valor `NA` para um outro, nosso objetivo deve ser de minimizar a distorção da distribuição dos dados. Têm dois tipos de substituição que são típicos:
 
-1. Para uma distribuição univariada, ou seja, onde só tem uma varíavel numérica com valores faltando, a média dos dois valores em volta daquele que está faltando é uma boa escolha. Por exemplo, aqui se fazemos a média entre os casos da Rússia em 2004 e 2006, este resultado seria uma boa aproximação do valor que está faltando.
+1. Para uma distribuição univariada, ou seja, onde só tem uma variável numérica com valores faltando, a média dos dois valores em volta daquele que está faltando é uma boa escolha. Por exemplo, aqui se fazemos a média entre os casos da Rússia em 2004 e 2006, este resultado seria uma boa aproximação do valor que está faltando.
 
 2. Para um conjunto de dados mais complexo, que tem várias variáveis numéricas, você quer empregar um algoritmo mais complexo que vai deixar a distribuição multi-dimensional sem alterações. Minha preferência entre os pacotes e approaches é `mice`: *Multivariate Imputation by Chained Equations* [^5]. Nós veremos isso em ação mais para frente.
 
@@ -382,7 +382,7 @@ Mas, senão, existem três maneiras que podemos ajustar o valor.
 
 [^6]: Wickham e Grolemund, **R for Data Science**.  
 
-Entre essas soluções, não seria apropriado de tirar o caso porque queremos 10 casos por cada país. Reduzir o valor para a média dos outros valores tem uma história. Mas, eu acho que este distorce ainda mais a distribuição. A terceira solução -- usar o valor do itém mais próximo ao outlier introduz menos distorção na distribuição dos valores e o que adotaria neste caso. Vamos ver como as soluções de mudar o valor funcionam.
+Entre essas soluções, não seria apropriado de tirar o caso porque queremos 10 casos por cada país. Reduzir o valor para a média dos outros valores tem uma história. Mas, eu acho que este distorce ainda mais a distribuição. A terceira solução -- usar o valor do item mais próximo ao outlier introduz menos distorção na distribuição dos valores e o que adotaria neste caso. Vamos ver como as soluções de mudar o valor funcionam.
 
 ```{r outlier_India, echo = TRUE}
 
@@ -426,7 +426,7 @@ Agora, não tem mais outlier para a Índia. Todos os valores ficam dentro de 1,5
 
 ### Escala da China e Índia
 
-China e Índia são os dois países maiores da planeta com pelo menos 1,25 bilhões de pessoas cada um em 2011. África de Sul tem uma população que é só 4% da população da China. Mesmo o Brasil tem 15% do numéro das pessoas China. Mas, estamos contando casos. O fato de simplesmente contar sugere que as populações são iguais. Não seria melhor medir a incidência dos casos de tuberculose em termos de casos per capita, ou é mais comum, casos per 100.000 pessoas. Talvez este daria um retrato da epidemiologia da tuberculose mais preciso. 
+China e Índia são os dois países maiores da planeta com pelo menos 1,25 bilhões de pessoas cada um em 2011. África de Sul tem uma população que é só 4% da população da China. Mesmo o Brasil tem 15% do número das pessoas China. Mas, estamos contando casos. O fato de simplesmente contar sugere que as populações são iguais. Não seria melhor medir a incidência dos casos de tuberculose em termos de casos per capita, ou é mais comum, casos per 100.000 pessoas. Talvez este daria um retrato da epidemiologia da tuberculose mais preciso. 
 
 A planilha da OMS que é a fonte deste tibble também tem a população para todos os anos de interesse para nosso estudo. Já coloquei esses dados em R no arquivo `popTB.rds`.  [^7] O formato `rds` é um formato compacto de R para gravação de um objeto em R. Quando lemos um arquivo deste tipo, precisamos designar um nome do objeto que vai receber os dados. O que vamos fazer é primeiro olhar nos dados e segundo usar as funções `join` para integrar esses dados no tibble de incidência (que agora carregará o nome `who_mod5`).
 
@@ -476,4 +476,4 @@ Este gráfico oferece outras novas informações:
 
 ## Conclusão -- Dados Limpos
 
-Precisou cinco modificações, mas chegamos de ter um conjunto de dados limpo e *tidy* e pronto a ser analisado. Os testes de outliers, Benford's Law, dados faltando, etc. são importante para processo de fazer modelos e análises que refletam corretamente as fenomena que você quer medir.
+Precisou cinco modificações, mas chegamos de ter um conjunto de dados limpo e *tidy* e pronto a ser analisado. Os testes de outliers, Benford's Law, dados faltando, etc. são importante para processo de fazer modelos e análises que refletem corretamente as fenomena que você quer medir.

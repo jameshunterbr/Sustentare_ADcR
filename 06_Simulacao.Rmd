@@ -1,0 +1,96 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+```
+
+# Simulação -- Técnica Fundamental de Análise de Dados
+
+Agora que sabemos como manipular e limpar um conjunto de dados com R, vamos começar a experimentar com técnicas de análise. Aqui, nós vamos tratar um dos mais fundamentais, a **Simulação Monte Carlo**, [^1] uma técnica que foi desenvolvida durante a Segunda Guerra Mundial para ajudar os físicos e matemáticos americanos desenvolver a bomba atômica como parte do Manhattan Project. Desde então, tornou uma peça básica em qualquer caixa de ferramentas analíticas. 
+
+[^1]: MÉTODO DE MONTE CARLO. In: WIKIPÉDIA, a enciclopédia livre. Flórida: Wikimedia Foundation, 2018. Disponível em: <https://pt.wikipedia.org/w/index.php?title=M%C3%A9todo_de_Monte_Carlo&oldid=52382871>. Acesso em: 17 jun. 2018. 
+
+A simulação Monte Carlo se baseia em múltiplas amostragens aleatórias (frequentemente massivas) para obter resultados numéricos. Em prática, nós vamos especificar um sistema com variáveis aleatórias e repetir a simulação do sistema estocasticamente muitas vezes para calcular a probabilidade de um resultado ocorrer. Em prática, é mais fácil de entender que a explicação em linguagem formal.
+
+## Distribuições
+
+Para aprender esta técnica, nós precisamos fazer um pequeno desvio. Primeiro, nós vamos olhar em dados sob uma ótica diferente que no último capitulo. Aqui nós vamos olhar em distribuições dos dados e assumir que dados seguirem uma distribuição ou outra. Aqui, vamos tratar de três distribuições: uniforme, normal (gaussiana), ou triangular. Todas essas três relatam às variáveis numéricas. 
+
+No capitulo sobre limpeza dos dados, referi às distribuições de números. Mas, naquele caso, foi para uma distribuição empírica. Aqui a distribuição vai ser teórica. Sempre podemos testar se uma variável aleatória tem uma distribuição ou outra. Os testes de Qui-Quadrado ($\chi^2$) fazem este tipo de inferência. Também, temos vários testes estatísticos para testar se uma variável segue a distribuição normal. Este é importante por causa da teorema de limite central, que diz que como o numero de observações de uma variável aumenta, a distribuição das observações aproxima à distribuição normal.
+
+## Exemplo -- Investir ou Não num Novo Projeto Tecnológico
+
+Para motivar esta aprendizagem, vamos tratar de um problema típica das empresas. Neste caso, vai ser uma empresa, a corporação Novas Técnicas Medicas (NTM) que quer desenvolver um novo sequenciador de DNA de "próxima geração" que vai ser vendido aos hospitais e laboratórios para testes genômicas sobre câncer e várias doenças infecciosas (e.g., HIV-1) cujas sequências virais são sujeitas às mutações que bloquem a ação dos remédios. A empresa já conduziu vários estudos de marketing e têm uma estimativa que eles podem vender entre 8 e 12 unidades ao ano nos primeiros quatro anos depois do lançamento do produto. 
+
+Os dados conhecidos sobre o projeto são os seguintes:
+
+* Custos de desenvolvimento: $1.500.000
+* Preço de Venda: $350.000
+* Custos fixos associado com o projeto: $150.000
+* Depreciação por ano:  $100.000
+* Custos variáveis (produção e suporte): 75% da receita
+* Custo de capital: 8,25% ao ano
+* Alíquota de imposto:  34%
+* Anos de Estudo: 4
+* Vendas projetadas: 8 até 12 unidades
+
+A empresa tem o objetivo de ter um resultado de break-even dentro do quatro anos do plano baseado no valor presente líquido (VPL, *net present value* em inglês). Se o VPL seja positivo depois do quarto ano de vendas, a empresa seria satisfeita com o resultado e faria um compromisso para ir em frente com o projeto. 
+
+VPL pode ser expresso em R com uma função simples. Nós podemos especificar funções além das funções que R tem nos pacotes e na R base. **VSS** Se você vai usar as mesmas linhas de código mais de duas vezes, colocá-las numa função invés de copiar/colar as linhas. Vai produzir muito erros a menos!
+
+A função de VPL fica em uma linha só. É muito simples.
+
+```{r f_npv, echo = TRUE}
+vpl <- function(i, cf, t = seq(along = cf)) {
+   sum(cf/(1+i)^t) 
+}
+```
+
+Nesta função, os paramêtros representam as variáveis seguintes:
+
+* *i*:  taxa de juros/custo de capital (na forma decimal)
+* *cf*: vetor de fluxos de caixa líquidos ao final do ano
+* *t*:  número de períodos do projeto (calculado automaticamente)
+
+Primeiro, entraremos os dados que sabemos em R para preparar a simulação
+
+```{r, vars_entry, echo = TRUE}
+taxa_cap <- 0.0825 #também usada para calcular o desconto de VPL
+cust_init <- 1500000
+preco <- 350000
+deprec <- 100000
+cust_var <- 0.75 # porcentagem da receita bruta da venda
+t_imp <- 0.34
+anos <- 4
+```
+
+## Distribuição Uniforme
+
+Numa distribuição uniforme, uma variável pode ter qualquer valor com probabilidade igual entre um limite inferior e um limite superior. Não pode ter qualquer outro valor.
+
+Em matemática, expressamos isso assim:
+
+$$p(x)	=\begin{cases}
+\frac{1}{b-a} & para\:a\leq x\leq b\\
+0 & para\:qualquer\:outro\:valor
+\end{cases}$$
+
+## Distribuição Normal
+
+$$f(x)=\frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{(x-\mu)^{2}}{2\sigma^{2}}\right)$$
+
+
+
+## Distribuição Triangular
+
+$$f(x|a,b,c)=\begin{cases}
+0 & para\:x<a,\\
+\frac{2(x-a)}{(b-a)(c-a)} & para\:a\leq x\leq c,\\
+\frac{2(b-x)}{(b-a)(b-c)} & para\:c<x\leq b,\\
+0 & para\:b<x
+\end{cases}$$
