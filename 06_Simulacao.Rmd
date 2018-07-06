@@ -17,12 +17,6 @@ Agora que sabemos como manipular e limpar um conjunto de dados com R, vamos come
 
 A simulação Monte Carlo se baseia em múltiplas amostragens aleatórias (frequentemente massivas) para obter resultados numéricos. Em prática, nós vamos especificar um sistema com variáveis aleatórias e repetir a simulação do sistema estocasticamente muitas vezes para calcular a probabilidade de um resultado ocorrer. Em prática, é mais fácil de entender que a explicação em linguagem formal.
 
-## Distribuições
-
-Para aprender esta técnica, nós precisamos fazer um pequeno desvio. Primeiro, nós vamos olhar em dados sob uma ótica diferente que no último capitulo. Aqui nós vamos olhar em distribuições dos dados e assumir que dados seguirem uma distribuição ou outra. Aqui, vamos tratar de três distribuições: uniforme, normal (gaussiana), ou triangular. Todas essas três relatam às variáveis numéricas. 
-
-No capitulo sobre limpeza dos dados, referi às distribuições de números. Mas, naquele caso, foi para uma distribuição empírica. Aqui a distribuição vai ser teórica. Sempre podemos testar se uma variável aleatória tem uma distribuição ou outra. Os testes de Qui-Quadrado ($\chi^2$) fazem este tipo de inferência. Também, temos vários testes estatísticos para testar se uma variável segue a distribuição normal. Este é importante por causa da teorema de limite central, que diz que como o numero de observações de uma variável aumenta, a distribuição das observações aproxima à distribuição normal.
-
 ## Exemplo -- Investir ou Não num Novo Projeto Tecnológico
 
 Para motivar esta aprendizagem, vamos tratar de um problema típica das empresas. Neste caso, vai ser uma empresa, a corporação Novas Técnicas Medicas (NTM) que quer desenvolver um novo sequenciador de DNA de "próxima geração" que vai ser vendido aos hospitais e laboratórios para testes genômicas sobre câncer e várias doenças infecciosas (e.g., HIV-1) cujas sequências virais são sujeitas às mutações que bloquem a ação dos remédios. A empresa já conduziu vários estudos de marketing e têm uma estimativa que eles podem vender entre 8 e 12 unidades ao ano nos primeiros quatro anos depois do lançamento do produto. 
@@ -30,10 +24,10 @@ Para motivar esta aprendizagem, vamos tratar de um problema típica das empresas
 Os dados conhecidos sobre o projeto são os seguintes:
 
 * Custos de desenvolvimento: $1.500.000
-* Preço de Venda: $350.000
+* Preço de Venda: $310.000
 * Custos fixos associado com o projeto: $150.000
 * Depreciação por ano:  $100.000
-* Custos variáveis (produção e suporte): 75% da receita
+* Custos variáveis (produção e suporte): 78% da receita
 * Custo de capital: 8,25% ao ano
 * Alíquota de imposto:  34%
 * Anos de Estudo: 4
@@ -51,27 +45,71 @@ vpl <- function(i, cf, t = seq(along = cf)) {
 }
 ```
 
-Nesta função, os paramêtros representam as variáveis seguintes:
+Nesta função, os parâmetros representam as variáveis seguintes:
 
 * *i*:  taxa de juros/custo de capital (na forma decimal)
 * *cf*: vetor de fluxos de caixa líquidos ao final do ano
 * *t*:  número de períodos do projeto (calculado automaticamente)
 
-Primeiro, entraremos os dados que sabemos em R para preparar a simulação
+### Modelo do Sistema
+
+Primeiro, entraremos os dados que sabemos em R para preparar a simulação. Depois, criarei uma função que calcula os retornos do projeto.
 
 ```{r, vars_entry, echo = TRUE}
 taxa_cap <- 0.0825 #também usada para calcular o desconto de VPL
 cust_init <- 1500000
-preco <- 350000
+preco <- 310000
+cust_fixo <- 150000
 deprec <- 100000
-cust_var <- 0.75 # porcentagem da receita bruta da venda
+cust_var <- 0.78 # porcentagem da receita bruta da venda
 t_imp <- 0.34
 anos <- 4
+
+## Função para os retornos
+projeto <- function(cust_init, preco, cust_fixo, deprec,
+                    cust_var, t_imp, anos, demanda) {
+  proj_dados <- tibble::tibble(ano = 0:anos, demanda,
+                       renda = demanda * preco,
+                       custos = ifelse(ano == 0, -cust_init, 
+                                -(renda * cust_var + cust_fixo + deprec)),
+                       margem = renda + custos,
+                       lucro = margem * ifelse(margem > 0, (1 - t_imp), 1),
+                       ncf = lucro + ifelse(ano == 0, 0, deprec))
+  return(proj_dados)
+  }
+
 ```
+
+Nas formulas para `custos` e `lucro`, introduzi uma nova função importante em R, `base::ifelse()`. Esta função permite um teste lógico simples. Se o teste tem resultado lógico `TRUE`, executa a primeira opção, mas se for `FALSE`, executa a segunda opção. Geralmente, pode ser vista na forma seguinte: 
+
+* `ifelse(<teste lógico>, <resultado TRUE>, <resultado FALSE>)`
+
+Se seu teste tem mais que duas opções, você pode usar a função `dplyr::case_when()` que permite que você faz múltiplas testes de `if` e `else` numa forma vetorizada para facilitar o cálculo. Vou tratar deste função mais tarde.
+
+### Resultado de VPL para o Projeto
+
+A variável `demanda` é um vetor que vai ter valores por todos os anos do projeto começando com um 0 no ano 0 (porque os sequenciadores ainda não estão disponível para vender) e seguindo com uma estimativa de demanda nos outros anos de projeto. Depois de calcular os custos e retornos anuais do projeto, nós podemos calcular o VPL. O resultado da função seria um número em dinheiro.
+
+Até agora, não sabemos como tratar as vendas como uma variável aleatória, mas vamos ver o que aconteceria se as vendas ficaram constantes durante os quatro anos do projeto. Podemos fazer isso com um dos valores possíveis, 10 unidades.
+
+```{r static, echo = TRUE}
+stat <- projeto(cust_init, preco, cust_fixo, deprec, 
+                cust_var, t_imp, anos, c(0, rep(10, 4)))
+knitr::kable(stat)
+vpl(taxa_cap, stat$ncf)
+```
+
+O VPL no caso que vende 10 unidade por ano não seria suficiente para justificar o projeto. Mas, nós podemos testar as vendas utilizando uma das distribuições que explicarei próximo.
+
+## Distribuições
+
+Para aprender simulação Monte Carlo, nós precisamos fazer um pequeno desvio. Nós vimos no exemplo que as vendas podem variar entre 8 e 12 unidades por ano. Mas, qual valor vai ser? A variável é aleatória. Aqui só tem uma variável aleatório, mas no mundo verdadeiro, pode ter muito mais variáveis num sistema que são estocásticas. Se sabemos algo sobre como os valores das variáveis aleatórias são distribuídos em realidade, podemos definir uma distribuição para criar valores para essas variáveis. Aqui, vamos tratar de três distribuições usadas frequentemente em estudos de negócios: uniforme, normal (gaussiana), ou triangular. Todas essas três tem a ver com às variáveis numéricas. 
+
+No capitulo sobre limpeza dos dados, referi às distribuições de números. Mas, naquele caso, foi para a distribuição empírica. Aqui a distribuição vai ser teórica. Sempre podemos testar se uma variável aleatória reflete uma distribuição teórica ou outra. Os testes de Qui-Quadrado ($\chi^2$) fazem este tipo de inferência. Também, temos vários testes estatísticos para testar se uma variável segue a distribuição normal. Este é importante por causa da teorema de limite central, que diz que como o numero de observações de uma variável aumenta, a distribuição das observações aproxima à distribuição normal.
 
 ## Distribuição Uniforme
 
-Numa distribuição uniforme, uma variável pode ter qualquer valor com probabilidade igual entre um limite inferior e um limite superior. Não pode ter qualquer outro valor.
+Numa distribuição uniforme, uma variável pode aceitar qualquer valor com probabilidade igual se ela fica acima de um limite inferior e abaixo de um limite superior. Qualquer outro valor (i.e., fora dos limites), não tem chance nenhum de aceitar este valor.
 
 Em matemática, expressamos isso assim:
 
@@ -80,13 +118,67 @@ $$p(x)	=\begin{cases}
 0 & para\:qualquer\:outro\:valor
 \end{cases}$$
 
+A distribuição uniforme tem a forma de uma mesa ou planalto. 
+
+```{r gr_unif}
+x <- dunif(seq(from = -5, to = 5, by = 0.01), min = -2, max = 2)
+plot(x, type = "l", main = "Distribuição Uniforme")
+```
+
+A formula diz que existe duas possibilidades. Primeiro, se você tem limites de 0 e 10, qualquer número entre esses valores é igualmente provável. Pode ser 1, 8, 3 ou 5.5. Mas, 11 seria impossível como -3 porque são fora dos limites. Quando alguém pede que você pensa num número aleatório, a probabilidade uniforme é geralmente o que você está pensando. Pode escolher qualquer número; são todos igualmente possíveis. Em nosso caso, os limites são $a=8$ e $b=12$. 
+
+Em R, podemos definir números aleatórios com a função `stats::runif()`. O pacote `stats` faz parte do R base. Todas as funções dentro deste modulo estão automaticamente disponíveis. Não precisa carregar os pacotes de base especialmente. Estão carregados no startup de R. Para cada distribuição (R tem muitas), existem quatro funções diferentes que você chama com um prefixo de uma letra:
+
+* `d`: a função de densidade
+* `p`: a função da área sob a curva de densidade a menos que o valor indicado
+* `q`: a função do valor da curva de densidade a um quantil especifico
+* `r`: um número aleatório derivado da distribuição
+
+Neste curso, nós vamos nos envolver mais com o prefixo `r` que com os outros. Eles têm mais a ver com estatística. Em todos os exercícios aqui, nós vamos especificar um `seed` ou ponto de partida para o gerador de números aleatórios consistente, para você pode obter os mesmos resultados que eu mostro aqui.
+
+Primeiro, vamos listar 10 números aleatórios entre 0 e 10, baseados na distribuição uniforme.
+
+```{r rand_unif, echo = TRUE}
+set.seed(42)
+runif(10, min = 0, max = 10)
+```
+
+Anote que esses números não são números inteiros. São números reais. Nossas vendas precisam ser números inteiros. Não podemos vender uma fração de uma maquina. Para fazer isso, nós vamos usar a função `base::floor()` (piso), que preserva só a parte inteira do número. Assim, vamos escolher 10 números equivalentes a demanda para os sequenciadores, ou seja com um piso de 8 e um teto de 12. Precisei usar um valor `min` de 8 e um `max` de 12.999 para que a função pode incluir os valores extremos 8 e 12 enquanto usei a função `base::floor()`
+
+```{r rand_unif_vend, echo = TRUE}
+set.seed(42)
+floor(runif(10, min = 8, max = 12.999))
+```
+
 ## Distribuição Normal
+
+Alguns tipos de variáveis seguem a distribuição normal e como eu tinha dito antes, todos as distribuições com um número de observações grandes (> 35 mais ou menos) aproximam à distribuição normal. A distribuição normal tem a curva de densidade conhecida como a "curva de sino" e você especifica a distribuição não com os limites, como na distribuição uniforme, mas com os parâmetros a **média** ($\mu$) e o **desvio padrão** ($\sigma$) como na equação abaixo.
 
 $$f(x)=\frac{1}{\sqrt{2\pi}\sigma}exp\left(-\frac{(x-\mu)^{2}}{2\sigma^{2}}\right)$$
 
+```{r gr_norm}
+x <- dnorm(seq(from = -5, to = 5, by = 0.01), mean = 0, sd = 1)
+plot(x, type = "l", main = "Distribuição Normal")
+```
 
+O processo de especificar números aleatórios é o mesmo que foi para a distribuição uniforme. Mas, aqui, precisamos entrar a média (*mean*) e o desvio padrão (*sd*). Com a distribuição normal, sempre tem a chance que o valor cairia fora dos limites que estabelecemos (8 e 12). Se esses limites são rígidos, como aqui, a distribuição normal não é a melhor escolha e nós vamos deixar ela fora por isso. Mas é uma distribuição importante que vocês devem entender.
+
+```{r rand_norm_vend, echo = TRUE}
+set.seed(43)
+floor(rnorm(10, mean = mean(8:12), sd = sd(8:12)))
+```
 
 ## Distribuição Triangular
+
+A distribuição triangular é muito útil quando você sabe que a variável que você está modelando não é plano, como a uniforme, mas vai ter um modo, ou valor mais frequente.[^2] Apesar de ter uma aparência um pouco em comum com a curva normal, você não precisa saber a média e o desvio padrão. Os três parâmetros da distribuição triangular são 
+
+* `a`: limite inferior
+* `b`: limite superior
+* `c`: o modo (R calcula isso automaticamente)
+
+[^2]: Os sábios de R mudaram a distribuição triangular para um pacote externo `triangle`. Você deve fazer o download deste pacote porque eu não sabia desta mudança quando criei a lista dos pacotes para download. Sorry!
+
+A função da densidade tem a seguinte forma.
 
 $$f(x|a,b,c)=\begin{cases}
 0 & para\:x<a,\\
@@ -94,3 +186,78 @@ $$f(x|a,b,c)=\begin{cases}
 \frac{2(b-x)}{(b-a)(b-c)} & para\:c<x\leq b,\\
 0 & para\:b<x
 \end{cases}$$
+
+```{r gr_tri}
+x <- triangle::dtriangle(seq(from = -5, to = 5, by = 0.01), a = -2, b = 2)
+plot(x, type = "l", main = "Distribuição Triangular")
+```
+
+A distribuição triangular aplicada ao problema das vendas está especificada na mesma maneira que a distribuição uniforme, ou seja, com os limites inferiores e superiores. Aqui, precisamos estender a região válida para 12.999. Precisamos incluir quase todo o espaço entre 12 e 13 para criar cinco divisões iguais que a função `floor()` reduzir para um dos números inteiros 8, 9, 10, 11 ou 12, a sequência de números possíveis para a venda do sequênciador.
+
+```{r rtri_norm_vend, echo = TRUE}
+set.seed(42)
+floor(triangle::rtriangle(10, a = 8, b = 12.999))
+```
+
+## Construir a Simulação
+
+Depois de mais pesquisa e pensamento, a empresa NTM decide que a demanda seria triangular em forma e por isso vai usar essa distribuição para definir a variável `demanda`. 
+
+A chave de uma simulação Monte Carlo é de repetir o processo muitas vezes e analisar os resultados desta repetição. Dado o poder dos computadores atuais, muitas vezes pode significar 1.000 ou 10.000 ou até mais. Em nosso caso, nós vamos repetir a simulação 10.000 vezes, aliás conduzir 10.000 experimentos. O variável que vai ter este valor terá o nome `exper`. Você vai ver que este não usa muito tempo para processar. 
+
+Nós vamos usar um *loop* para executar a simulação. Ele é fácil de construir. Podemos testar quanto tempo esse método leva para completar a simulação.
+
+### Simulação com *Loop*
+
+Para fazer a simulação com um *loop*, precisamos primeiro definir um vetor que vai receber os VPLs. Para simplicidade, chamaremos isso `sim_resultado`. A função `projeto`, definida acima, vai processar os cálculos de cada simulação. Todas teriam uma sequência de vendas em cada ano aleatórias porque usaremos o gerador dos números aleatórios triangular `triangle::rtriangle()`. Vamos ver como o código para simulação vai funcionar.
+
+```{r sim_loop, echo = TRUE}
+exper <- 10000 # repetições da simulação
+sim_resultado <- vector(mode = "numeric", length = exper) # vetor para resultados
+
+# loop
+for (i in 1:exper) {
+  # definir demanda aleatória para cada simulação; 1o ano sempre 0
+  demanda_alea <- c(0, floor(triangle::rtriangle(anos, a = 8, b = 12.999)))
+  proj <- projeto(cust_init, preco, cust_fixo, deprec, cust_var, 
+                  t_imp, anos, demanda_alea)
+  # Colocar o VPL da simulação no vetor dos resultados
+  sim_resultado[i] <- vpl(taxa_cap, proj)
+}
+```
+
+A pergunta com que iniciamos este simulação foi se valeu a pena baseado no VPL de produzir e vender o sequênciador. Nós podemos julgar nossa decisão em duas maneiras. Primeiro, podemos ver se quantas vezes entre o número dos experimentos que tivemos um VPL positivo, ou seja, que a empresa lucrou com o investimento. A segunda maneira é para olhar nos parâmetros estatísticos para entender melhor qual foi a distribuição dos resultados. A segunda nós vamos fazer com o pacote `DescTools` e sua função principal `Desc()`, que oferece informação descritiva em forma da tabela e do gráfico e que vimos num capítulo anterior.
+
+```{r teste_resultados, echo = TRUE}
+
+# Teste simples: % dos experimentos que teve VPL positivo
+library(DescTools)
+pct_exito <- sum(sim_resultado > 0)/exper
+scales::percent(pct_exito)
+desc_res <- Desc(sim_resultado)
+desc_res
+```
+
+Os dois métodos de análise indicam que este seria um bom investimento. O primeiro mostra que `r scales::percent(pct_exito)` dos experimentos deu um resultado positivo. No segundo, você pode ver que a média dos resultados foi `r desc_res[[1]]$mean` e que o intervalo de confiança não incluiu 0, mostrando que o projeto provavelmente teria um resultado positivo.
+
+```{r timing, include = FALSE}
+start_time <- Sys.time()
+x <- vector(mode = "numeric", length = exper)
+for (i in 1:exper) {
+  # definir demanda aleatória para cada simulação; 1o ano sempre 0
+  demanda_alea <- c(0, floor(triangle::rtriangle(anos, a = 8, b = 12.999)))
+  proj <- projeto(cust_init, preco, cust_fixo, deprec, cust_var, 
+                  t_imp, anos, demanda_alea)
+  # Colocar o VPL da simulação no vetor dos resultados
+  x[i] <- vpl(taxa_cap, proj)
+}
+end_time <- Sys.time()
+
+```
+
+Esta simulação teve `r exper` iterações, cada um calculando valores para cinco anos ou um total de `r exper*5` operações, mais o cálculo dos valores de demanda. Mas, a simulação toda levou só 34 segundos no meu laptop de 2012 com vários outros programas rodando simultaneamente. Se suas simulações têm mais variáveis aleatórias, vai precisar muito mais tempo para rodar. Se este for o caso, seria bom de pensar no uso de um outro método para o cálculo da simulação.
+
+Agora que conquistamos uma maneira de usar R para apoiar suas decisões técnicas e para suas empresas, vamos olhar em outras técnicas de utilizar R na tomada de decisão, os métodos de *Machine Learning.*
+
+
+
