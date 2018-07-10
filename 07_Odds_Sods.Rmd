@@ -37,3 +37,42 @@ Este habilidade de organizar os dados para contar (neste caso) ou fazer outra op
 ## Gapminder
 
 Pensando dos dados no pacote de Gapminder, acho que seria melhor de ir diretamente ao site da Fundação Gapminder e download diretamente os dados que queremos usar nas aulas e nos projetos que vocês vão elaborar. Importante então é compartilhar onde pode achar os dados que eles têm disponíveis:  https://gapminder.org/data/. Existem lá muitas bases de dados, todas em Excel e todas bem curadas.
+
+## Os Dez Mandamentos para as Bases de Dados Bem Formatados
+
+Esta semana, li um blog post do site françês, *ThinkR*, na tradução inglês, com este título e achei ótimo. [^1] Então vou reproduzir aqui as idéias básicas dos 10 pontos. Todos esses pontos refletem a filosofia do *tidyverse*. Muitas dessas regras especialmente aplicam a fase de organizar dados nas planilhas antes de importação em R.
+
+[^1]: Colin Fay, Marion Louvoux (tr.), https://rtask.thinkr.fr/blog/the-ten-commandments-for-a-well-formatted-database/
+
+1.  Todos seus dados caberá em um dataframe/tibble **único**
+  * Não coloque os dados em dataframes múltiplos. Este é um habito que se associe com *relational database management* não R e não *tidyverse*.
+  
+2.  Você respeitará um estilo de formatação certo
+  * A tabela deve ser preenchido sem brechas começando na célula para cima a esquerda e descendo sem deixar linhas em branca.
+  
+3.  Uma linha $=$ uma observação
+
+4.  Uma coluna $=$ uma variável
+
+5. Você não codificará variáveis qualitativas
+  * Se você tem variáveis para gênero, use `homem/mulher`, não `1/2`. 
+  
+5a. Você não codificará variáveis com cores -- **JAMAIS**
+  * O R não pode entender cores mesmo que este é um artifício preferido dos Excelistas
+  
+6.  A base de dados deve conter somente dados
+  * Formatação artística cria dificuldades na importação dos dados de Excel para R. Siga o princípio KISS.[^2]
+  
+[^2]: KISS: Keep It Simple, Stupid!
+
+7.  Consistente, você sempre estará
+  * Não misture nomes diferentes para a mesma coisa: sempre `homem`, não uma vez `homem`, uma vez `rapaz` ou `masculino`.
+  
+8.  Você sempre respeitará a qualidade numérica das variáveis numéricas
+  * Exemplo: idade sempre estará um número ('25'), não texto e número ('25anos') e datas sempre na forma aceita internacionalmente YYYY-MM-DD.
+  
+9.  Guarde o anonimato de seus pacientes/respondentes/clientes
+  * Use números ou outros identificadores para as pessoas e guardar a correspondência num lugar seguro.
+  
+10. Use nomes de variáveis compreensíveis pelos seres humanos
+  * Algum dia no futuro, você ou um outro vai querer entender o que quer dizer o nome de variável `G6`, e você não vai lembrar que refere a "glicemia em mês 6".
