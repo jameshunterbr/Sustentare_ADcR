@@ -1,0 +1,39 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(scipen = 10)
+```
+
+# *Odds & Sods* 1
+
+> Esta expressão da Inglaterra quer dizer *miudezas* e seria útil em que estou tentando de entregar este material para vocês, mas sempre penso que existe mais uma coisa que quero comunicar. Nesta versão da material, vou escrever vários pequenos capítulos que contem idéias que não consegui colocar no texto principal quando estava escrevendo-lo. 
+
+## Resumo Rápido de `dplyr`
+
+Já falei várias vezes das funções do pacote `dpylr` e vou falar muito mais dele porque é um dos pacotes mais importantes do *tidyverse*. Têm alguns conceitos que ainda não tratei que acho importante.
+
+### Funções como Verbos
+
+Em `dplyr`, é sempre conveniente de pensar que as funções têm a mesma função que os verbos em frases em português. São palavras de ação. Eles contam para você o que o programa vai fazer. Já vimos `filter()`, `select()`. Eles fazem exatamente o que a palavra diz: filtrar linhas e selecionar colunas para inclusão ou exclusão num dataframe ou tibble. Todos as funções em `dplyr` têm esta caraterística: elas escrevem ações. Esse foi intencional na parte de Hadley Wickham e sua equipe. Eles estão tentando estabelecer uma **gramática** de manipulação dos dados, ou seja, uma maneira ou estrutura formal para preparar dados para análise. Ele tinha usado este conceito no primeiro grande pacote do *tidyverse* `ggplot`, que cujas letras iniciais querem dizer *a grammar of graphics*.
+
+### Agrupamento dos Dataframes/Tibbles
+
+Uma outra capacidade super importante do `dplyr` é a habilidade de agrupar bases de dados em subgrupos utilizando a função (verbo) `group_by()`. Na secção 6.5.1, usei `group_by()` para organizar os dados por país e ano antes de calcular a soma de casos. O código usei lá foi o seguinte:
+
+```{r bric_cod, eval = FALSE, echo = TRUE}
+brics <- c("Brazil", "Russian Federation", "India", "China", "South Africa")
+who_mod2 <- who_mod1 %>%
+  group_by(country, year) %>% 
+  summarize(casos = sum(casos))
+```
+
+Este habilidade de organizar os dados para contar (neste caso) ou fazer outra operação nos dados agrupados em subgrupos é altamente poderoso e uma que você vai usar frequentemente.
+
+## Gapminder
+
+Pensando dos dados no pacote de Gapminder, acho que seria melhor de ir diretamente ao site da Fundação Gapminder e download diretamente os dados que queremos usar nas aulas e nos projetos que vocês vão elaborar. Importante então é compartilhar onde pode achar os dados que eles têm disponíveis:  https://gapminder.org/data/. Existem lá muitas bases de dados, todas em Excel e todas bem curadas.
