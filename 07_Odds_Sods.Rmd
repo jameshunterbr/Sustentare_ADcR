@@ -11,7 +11,7 @@ options(scipen = 10)
 
 # *Odds & Sods* 1
 
-> Esta expressão da Inglaterra quer dizer *miudezas* e seria útil em que estou tentando de entregar este material para vocês, mas sempre penso que existe mais uma coisa que quero comunicar. Nesta versão da material, vou escrever vários pequenos capítulos que contem idéias que não consegui colocar no texto principal quando estava escrevendo-lo. 
+> Esta expressão da Inglaterra quer dizer *miudezas*. Quero entregar esta matéria para você mais rápido possível. Mas, sempre lembre no dia seguinte de algo mais que quis comunicar. Assim, vou pôr esses pensamentos em pequenos capítulos com este nome. Eles conterá idéias que não consegui colocar no texto principal quando estava escrevendo-lo. Na próxima versão do livro (sim, estes capítulos tornará um livro e-book), vou incorporar estes *Odds & Sods* e, com certeza, pensarei em outros.
 
 ## Resumo Rápido de `dplyr`
 
@@ -20,6 +20,9 @@ Já falei várias vezes das funções do pacote `dpylr` e vou falar muito mais d
 ### Funções como Verbos
 
 Em `dplyr`, é sempre conveniente de pensar que as funções têm a mesma função que os verbos em frases em português. São palavras de ação. Eles contam para você o que o programa vai fazer. Já vimos `filter()`, `select()`. Eles fazem exatamente o que a palavra diz: filtrar linhas e selecionar colunas para inclusão ou exclusão num dataframe ou tibble. Todos as funções em `dplyr` têm esta caraterística: elas escrevem ações. Esse foi intencional na parte de Hadley Wickham e sua equipe. Eles estão tentando estabelecer uma **gramática** de manipulação dos dados, ou seja, uma maneira ou estrutura formal para preparar dados para análise. Ele tinha usado este conceito no primeiro grande pacote do *tidyverse* `ggplot`, que cujas letras iniciais querem dizer *a grammar of graphics*.
+
+Combinando os verbos com o *pipe* (`>%>`) permite que podemos pensar nos comandos complexos do *tidyverse* como frases com a estrutura:
+"Começa com esses dados. Depois fazer isto. Depois disso, fazer isto, etc., etc." Em comparação a base R, facilita muito o entendimento do que está sendo programado. E, em comparação com Python, C++ ou Java, é bem mais compreensível.
 
 ### Agrupamento dos Dataframes/Tibbles
 
@@ -33,6 +36,59 @@ who_mod2 <- who_mod1 %>%
 ```
 
 Este habilidade de organizar os dados para contar (neste caso) ou fazer outra operação nos dados agrupados em subgrupos é altamente poderoso e uma que você vai usar frequentemente.
+
+### Resumo dos Comandos (Verbos) de *Tidyverse* que Já Aprendemos
+
+**VSS** Não esqueça de consultar os *cheatsheets* de R Studio para ver os detalhes dessas funções num format bem simples a entender.
+
+* Importação dos Dados (esp. de Excel)
+  1.  `readr::read_csv()` -- produz um tibble
+  2.  `base::readRDS()` -- ler um arquivo R no formato binário
+  3.  `readxl::read_excel()` -- importar da planilha a tibble
+  
+* Limpeza/Manipulação dos Dados
+  1.  `dplyr::slice()` -- ficar com as linhas especificadas
+  
+  2.  `dplyr::filter()` -- usar um teste lógico para determinar as linhas a incluir
+  
+  3.  `dplyr::select()` -- selecionar colunas
+  
+  4.  `dplyr::mutate()` -- criar uma nova variável ou mudar os valores das existentes
+  
+  5.  `dplyr::group_by()` -- agrupar as observações segundo os valores das variáveis categóricas
+  
+  6.  `dplyr::ungroup()`  -- reverter a operação de `group_by()`
+  
+  7.  `dplyr::arrange()`  -- pôr as observações em ordem segundo os valores de uma ou mais variáveis
+  
+  8.  `dplyr::left_join()` -- juntar variáveis de uma dataframe para um outro já especificada segundo um critério
+  
+  9.  `dplyr::summarise()` -- criar uma nova base com valores resumidos das variáveis no original
+  
+  10: `tibble::tibble()` -- criar um tibble
+  
+  11: `tibble::glimpse()` -- produzir um relatório com informação sobre os tipos e valores das variáveis
+  
+  12: `tibble::add_row()` -- acrescentar uma nova fila para um tibble
+  
+  13: `tidyr::gather()` -- mudar o formato de um dataframe de largo (como planilha) até *tidy* utilizando pares de chaves:valores
+  
+  14. `purrr::map_dbl()` -- aplicar uma função a um numéro das variáveis em um dataframe/tibble; existem vários tipos das funções `map` 
+
+* Visualizar Dados em Forma Gráfica
+  1.  `ggpubr::ggbarplot()` -- fazer um gráfico de barras utlizando o sistema `ggplot`
+  2.  `ggpubr::ggboxplot()` -- fazer uma plotagem de caixas e suas extensões
+  3.  `ggplubr::ggline()` -- fazer um gráfico com linhas e pontos
+  
+* Tabelas
+  1.  `knitr::kable()` -- criar uma tabela ou lista de um dataframe/tibble formatada
+  
+* Outras Funções fora do *Tidyverse*
+  1.  `base::set_seed()` -- estabelecer um ponto incial para o gerador dos numéros aleatórios
+  2.  `stats::runif()` -- selecionar uma série de numéros aleatórios da distribuição uniforme
+  3.  `stats::rnorm()` -- selecionar uma série de numéros aleatórios da distribuição normal (gaussiana)
+  4.  `triangle::rtriangle()` -- selecionar uma série de numéros aleatórios da distribuição triangular
+  5.  `scales::percent()` -- apresentar os numéros no formato porcentual
 
 ## Gapminder
 
@@ -58,6 +114,7 @@ Esta semana, li um blog post do site françês, *ThinkR*, na tradução inglês,
   * Se você tem variáveis para gênero, use `homem/mulher`, não `1/2`. 
   
 5a. Você não codificará variáveis com cores -- **JAMAIS**
+
   * O R não pode entender cores mesmo que este é um artifício preferido dos Excelistas
   
 6.  A base de dados deve conter somente dados
@@ -71,8 +128,8 @@ Esta semana, li um blog post do site françês, *ThinkR*, na tradução inglês,
 8.  Você sempre respeitará a qualidade numérica das variáveis numéricas
   * Exemplo: idade sempre estará um número ('25'), não texto e número ('25anos') e datas sempre na forma aceita internacionalmente YYYY-MM-DD.
   
-9.  Guarde o anonimato de seus pacientes/respondentes/clientes
+9.  Proteja o anonimato de seus pacientes/respondentes/clientes
   * Use números ou outros identificadores para as pessoas e guardar a correspondência num lugar seguro.
   
-10. Use nomes de variáveis compreensíveis pelos seres humanos
+10. Utilize nomes de variáveis compreensíveis pelos seres humanos
   * Algum dia no futuro, você ou um outro vai querer entender o que quer dizer o nome de variável `G6`, e você não vai lembrar que refere a "glicemia em mês 6".
