@@ -1,0 +1,137 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(scipen = 10)
+```
+
+# Exercícios -- Funções Financeiras
+
+Nestes exercícios, nós vamos criar uma série das funções em R que vocês podem aplicar no seu trabalho prático. Quase todos nós usamos as funções para calcular resultados financeiras segundo os conceitos do **valor do dinheiro no tempo** (*time value of money*). Vou dar para você aqui algumas formulas desses valores e você pode programar eles em R. Na aula presencial, nós vamos fazer uma revisão das funções para tirar qualquer dúvidas que você tem.
+
+Provavelmente, você se lembra dessas funções e mesmo trabalha com eles no dia-a-dia.
+
+## Valor Futuro
+
+Para esta primeira função, vou mostrar o processo que gostaria que você segue nos outras.
+
+O valor futuro ("VF") mostra a capitalização de um valor que você tem hoje. Quanto uma conta de investimentos de R$10000 valeria em dois anos se a taxa de capitalização fica em 8% por ano?
+
+A equação para esta função é o seguinte:
+
+$$FV=PV*(1+I)^N$$
+
+Ou seja, o valor futuro (FV) é igual ao valor presente (PV) vezes a taxa de juros (I) mais 1 elevado ao exponente de número de períodos (N). 
+
+Para traduzir isso para R é relativamente simples porque só aplicações das operações aritméticas. A equação em si pode ser escrita assim:
+
+```{r pv1, echo = TRUE, eval = FALSE}
+fv <- pv * (1 + i)^n
+```
+
+Vamos testar ela com os dados no exemplo:
+
+```{r pv2, echo = TRUE}
+pv <- 10000 #valor da conta de investimentos
+i <- .08 #taxa de juros
+n <- 2 #numéro dos anos
+fv <- pv * (1 + i)^n
+fv
+
+```
+
+Mas, esta forma da equação assume que juros são compostos só uma vez por ano, que não reflete realidade. No planejamento dos projetos, por exemplo, normalmente faz cálculos mês-a-mês. E, se você está trabalhando com poupança brasileira, você terá taxas de rendimento mensais, como mostra esta porção da tela principal do Banco Central.
+
+```{r poupan, echo = FALSE, fig.align='center', fig.cap = "Cotação da Poupança"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/poupanca_quote.png")
+```
+
+Aqui, a taxa mensal de 0,3715% traduz para `r 12 * 0.003715`% ao ano. Precisamos ajustar nossa formula para aceitar essa e outras possibilidades. Existe uma versão da formula para valor futuro que toma conta dos períodos. Ela introduz uma nova variável,
+$m$, que representa os períodos. Se queremos saber quanto nosso investimento rende se investimos à taxa de poupança de hoje em dois anos, composto mensalmente (como está escrito a taxa), temos que ajustar a formula. Anote que $i$ deve ser a taxa de juros **anual** porque vai ajustar ele para outros períodos com $m$.
+
+$$ FV=PV*\left(1+\frac{i}{m}\right)^{mn}$$
+
+Agora, utilizando o modelo acima, podemos programar uma nova versão da formula.
+
+```{r pv3, echo = TRUE}
+pv <- 10000 #valor da conta de investimentos
+i <- 0.003715 * 12 #taxa de juros anual
+n <- 2 #numéro dos anos
+m <- 12 #numéro de períodos por ano
+fv <- pv * (1 + i/m)^(n*m)
+fv
+
+```
+
+Agora, que a formula está funcionando, nós podemos tornar ela em uma função para que podemos aplicar a qualquer mistura de `pv`s, `i`s, tempos e períodos. 
+
+### Funções
+
+Já falei um pouco sobre funções, mas aqui vamos construir que você pode aplicar. Uma função generaliza uma formula. Por isso, você precisa trocar valores exatas para variáveis que o corpo da função vai executar. Uma função tem duas partes. A primeira é uma lista das variáveis que vai usar nos cálculos e vai especificar na hora de executar a função. A segunda é o corpo da função que tem linhas de programação que calcula o resultado que você procura. Nosso exemplo vai esclarecer esta explicação teórica.
+
+O formato de nosso função seria
+
+```{r func_pv, echo = TRUE}
+fv <- function(pv, i, n, m) {
+  pv * (1 + i/m)^(n*m)
+}
+```
+
+Quando você executa este bloco de código, R grava a função `fv` e coloca ela no `environment` com a indicação das variáveis que a função precisa para calcular sem erro.
+
+```{r fv_env, echo = FALSE, fig.align='center', fig.cap = "Função fv no Environment"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/func_fv.png")
+```
+
+Agora, vamos calcular o resultado de nossos dados para confirmar que a função produz o mesmo resultado que a versão especifica que calculamos acima. Para chamar uma função, simplesmente cita o nome da função e preencher os parâmetros dela.
+
+```{r }
+poup <- fv(pv, i, n, m)
+poup
+```
+
+Agora, podemos usar ele para qualquer problema que queremos.
+
+Nos próximos exemplos, vou dar para você a formula para calcular as quantidades e você programa uma função para executá-la. Na aula, vamos tentar problemas juntos e ver a qualidade dos resultados. Sugiro que você continua usar os nomes `pv`, `fv`, `i`, `n` e `m` para as variáveis para os resultados que determinamos na aula têm a mesma aparência.
+
+## Valor Futuro -- Continuo
+
+Em alguns casos, você vê cálculos do valor futuro baseado na composição continuo dos juros. Neste caso, a variável `m` dos períodos é infinito. O calculo do valor futuro continuo usa uma formula diferente:
+
+$$fv_{continuo}=pv*e^{i*n}$$
+Nesta formula, $e$ é a base dos logaritmos naturais ou neperianos e $e=2.7183$. Em R, usamos a função `exp()` para este valor.
+
+```{r eexp, echo = TRUE}
+exp(1)
+```
+
+Agora, você pode traduzir esta formula em R e calcular o valor de nossa conta de poupança ao final do segundo ano com composição continua.
+
+## Todas as Funções São Relacionadas
+
+Se sabemos três dos valores de `pv`, `fv`, `i` e `n`, sempre podemos calcular o quarto porque são realmente análogos algebraicos. Manipulação algebraica usa os três valores conhecidos para calcular o quarto.
+
+Para facilitar o seu trabalho, aqui são os 3 outras formulas.
+
+* Valor Presente (`pv`)
+
+$$pv = \frac{fv}{(1+i)^n}$$
+
+* Taxa de Juros (`i`)
+
+$$i=\left(\frac{fv}{pv}\right)^{\frac{1}{n}}-1$$
+
+* Número dos anos/meses/períodos (`n`)
+
+$$n=\frac{ln(fv/pv)}{ln(1+i)}$$
+
+## Pieter Minuit e a Compra da Ilha de Manhattan
+
+Em 1626, o holandês Pieter Minuit "comprou" a ilha de Manhattan pelo equivalente de US$24 em bugigangas dos índios que habitavam o lugar. Quanto esta "compra" valeria hoje (2018) se a taxa de juros média durante este intervalo fosse 4%? E também, se fosse 2%, 6% ou 8%?
+
+
+
