@@ -1,0 +1,293 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(scipen = 10)
+```
+
+# Algoritmos e a Estrutura de Programação
+
+> Adaptado e traduzido do blog post de meu blog: https://madstatbr.wordpress.com/2018/03/13/learning-about-algorithms-and-program-structure/
+
+O fundamento de qualquer exercício de programação é a elaboração ou aplicação de um **algoritmo**, uma maneira ou protocolo que vai usar para alcançar o objetivo de seu programa. Aqui vamos desenvolver um algoritmo que faz algo útil e ao mesmo tempo ilustra conceitos chaves de programação em R. Nós vamos elaborar passo a passo um método para procurar um item de uma lista utilizando o método de **pesquisa binária** (*binary search*).
+
+Eu cresci em Nova York nos EUA. Nos tempos antigos quando morei lá, para achar o número de telefone de alguém, precisávamos utilizar uma lista telefônica. Estes volumes foram imensos! O livro para o Manhattan, uma das partes de Nova York, estava estupidamente grosso e pesado. Esta foto abaixo mostra o livro da Páginas Amarelas de 10 anos atrás para Manhattan. A lista simples, só com nomes, endereços e números de telefone foi igualmente pesado.
+
+```{r manphbk, echo = FALSE, fig.align='center', fig.cap = "Páginas Amarelas Manhattan"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/manhattan_phone_book.jpg")
+```
+
+Como você acharia o número de telefone de um amigo nesta monstruosidade de milhares de páginas? Ou, para pôr a mesma pergunta na linguagem da ciência de computação, como podemos desenhar um algoritmo para achar o número de nosso amigo?
+
+## O Que É um Algoritmo?
+
+"Algoritmo" é uma palavra que significa um método de solução, os passos que nós seguimos para solucionar um problema. Frequentemente, colocamos tal solução num programa de computador como nós vamos fazer aqui. Todavia, antes de fazer isso, nós vamos conceitualizar o problema e tentar encontrar um método **eficiente** para resolver o problema.
+
+## Uma Abordagem Ingênua
+
+Podemos simplesmente começar nossa busca ao início da lista, a primeira página, e ir página por página até encontramos o nome de nosso amigo. Se o seu sobrenome fosse "Zuleika", este processo pode demorar. Não está muito eficiente.
+
+## Segunda Abordagem Inútil
+
+Uma outra maneira para achar o nome de seu amigo é para abrir a lista aleatoriamente e examinar a página aberta. Se o nome não está aí, você fecha e abre a lista a uma nova página aleatória. E você continua assim até você finalmente achar a página que contem o nome. Talvez este método pode ser ainda pior que o primeiro método porque podemos acabar verificando a mesma página várias vezes.
+
+## Uma Abordagem Mais Razoavel (e Comum)
+
+Sempre pergunto para as turmas de estatística, pesquisa operacional e programação como eles lidariam com este problema. Descobri que a maioria das pessoas começam por sugerir que você abra a lista no meio e ver se o nome do amigo fica nessa página. Boa ideia!
+
+Só existe uma pequena probabilidade que o nome seria lá se o livro tem o tamanho da lista telefônica de Manhattan. Se não fosse lá, você pode anotar se o nome vem antes ou depois a página em que você abriu o livro. Invés de fechar o livro e tenta de novo, como na segunda abordagem, agora você mostra que você aprendeu alguma coisa com sua primeira pesquisa. Se o nome vem antes o ponto onde você abriu o livro, você pode esquecer a segunda metade do livro. O nome não pode ficar aí. Pode jogar essa parte do livro fora; ela não pode ajudar mais na solução do problema. De mesma forma, se o nome vem depois desse ponto, pode jogar fora a primeira metade do livro.
+
+Literalmente, você cortou o tamanho do problema no meio. Agora, invés de achar seu amigo numa lista de 1.000 páginas, você só precisa liderar com 500 páginas.
+
+Nos dias quando listas telefônicas ainda eram ferramentas importantes na vida dia-à-dia, professores ilustraram este método literalmente rasgando uma lista telefônica no meio. Porque não temos mais elas, não posso demonstrar isso, mas se você segue o link seguinte, Prof. David Malan de Harvard faz isso para seu curso básico de computação, CS50, um curso que eu recomendo fortemente.
+
+[link to CS50 video](https://www.youtube.com/watch?v=o2LqhHoAXxI)
+
+Você pode executar este processo várias vezes, cada vez cortando o problema no meio, até você acha a página que você precisa. Por exemplo, no pior dos casos, você pode procurar um nome numa lista de 1.000 páginas em um máximo de 11 iterações.[^1]
+
+[^1]: Sempre utilizando números inteiros porque não pode rasgar frações de uma página.
+
+$$ 1.000 > 500 > 250 > 125 > 63 > 32 > 16 > 8 > 4 > 2 > 1 $$
+
+Este é o algoritmo **pesquisa binária**. Nós podemos efetuar isso num programa.
+
+## Planejando Nosso Programa Pesquisa Binária -- Pseudo-Código
+
+A primeira fase na preparação de qualquer programa é planejar ele. Escrevemos uma versão do programa em nossa idioma natural: português, inglês, qualquer que seja. Assim, antes de tentar traduzir nossas idéias em código de computação, nós entendemos claramente quais são essas idéias.
+
+### Carregando os Dados
+
+Nossa primeira tarefa é identificar a lista onde estamos procurando o nome e pôr ela na memoria do computador. Para este exemplo, vamos usar uma lista de 500 sobrenomes dos jogadores profissionais de beisebol americano[^2] que tirei da base de dados famosa de estatísticas de beisebol de Lahman.[^3] A lista está gravada num arquivo de dados R, `players_list.rds`. Nós vamos ler este arquivo e instalar o conteúdo na memoria como `jogadores`.
+
+[^2]: Vocês vão ver beisebol várias vezes no curso. Eu sou fanático sobre o esporte. Também o esporte é provavelmente o mais matemático de todos os esportes profissionais e o uso dele ajuda no ensino de estatística e matérias aliadas.
+
+[^3]: Lahman, S. (2017) Lahman's Baseball Database, 1871-2016, Main page, http://www.seanlahman.com/baseball-archive/statistics/
+
+Em pseudo-código, podemos descrever o primeiro passo:
+
+> 1. Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+
+Para entender como proceder deste ponto, vamos dar uma olhada na lista para ver sua estrutura e o conteúdo.
+
+```{r eda_list, echo = FALSE, message = FALSE}
+jogadores <- readRDS("players_list.rds")
+str(jogadores)
+```
+
+### Pre-processamento dos Dados
+
+`jogadores` é um vetor de caráteres, um grupo de 500 sobre nomes dos jogadores de beisebol. Para tornar nosso exemplo um pouco mais concreto, vamos buscar o nome "Mantle", o sobrenome de um dos meus heróis da infância, Mickey Mantle dos New York Yankees. 
+
+`jogadores` tem a mesma características que os sobrenomes de uma lista telefônica? O que precisamos fazer para preparar a lista para execução do algoritmo **pesquisa binária**? Numa lista telefônica, os nomes ficam em ordem alfabética. Este fato dá para você a habilidade de rasgá-lo no meio e saber que a metade restante **deve** ter o nome que buscamos. Se estou procurando o nome "Mantle" e eu rasgo a lista telefônica no meio a letra "N", eu sei que posso jogar fora a segunda metade do livro ("N" - "Z") porque "Mantle" não pode ficar nesta metade. A pesquisa binária pressupõe que a lista que está sendo pesquisada, na verdade, estando em ordem.
+
+Nossa lista dos nomes fica em ordem aleatória. Nossa próxima tarefa é pôr ele em ordem alfabética. Podemos fazer isso com a função `arrange()` do `dplyr` ou com `sort()` de base R.
+
+Nosso pseudo-código com os dois passos:
+
+> 1. Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+> 2. Colocar `jogadores` em ordem alfabética com `dplyr::arrange()`
+
+### Pesquisa Binária
+
+Em pesquisa binária, temos de identificar a entrada de meio em nossa lista. Este ponto será o ponto divisório entre as metades da lista. Para dividir a lista no meio, podemos dividir o número dos nomes por 2, utilizando divisão inteira. Divisão inteira força qualquer resultado não inteiro para "piso", ou seja, para número inteiro menor. Aliás, ela simplesmente deixa cair a parte decimal do número. Não importa se nós arredondamos o número para cima ou para baixo nas pesquisas binárias porque estamos ainda dividindo a lista restante na metade.
+
+> 1. Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+> 2. Colocar `jogadores` em ordem alfabética com `dplyr::arrange()`
+> 3. Contar as entradas na lista e fazer divisão inteira desse total por 2
+
+Agora, podemos verificar se a entrada que nós selecionamos é "Mantle". Se for, terminamos e podemos parar.
+
+> 1. Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+> 2. Colocar `jogadores` em ordem alfabética com `dplyr::arrange()`
+> 3. Contar as entradas na lista e fazer divisão inteira desse total por 2
+> 4. Se a entrada que escolhemos é "Mantle", relatar o resultado e terminar o programa.
+
+### Cortando a Lista
+
+Se não for "Mantle", temos que achar um novo meio. Primeiro temos que decidir se vamos lidar com a primeira metade ou segunda metade da lista. Se "Mantle" vem depois do ponto do corte no alfabeto, podemos redefinir os limites da lista para começar com a próxima entrada para cima que a entrada que examinamos e terminar com a última entrada da lista. Se "Mantle" vem antes da entrada onde cortamos a lista, escolheríamos a primeira entrada da lista até a entrada que vem antes da entrada que tínhamos escolhida.
+
+Por exemplo, se tivermos uma lista com sete nomes:
+
+
+$$ Baker, Carter, George, Katz, Landis, Mantle, Taylor$$
+
+primeiro, selecionaríamos o nome no meio, "Katz", e ver se foi igual com "Mantle". Como não, compraríamos "Katz" e "Mantle". "Mantle" cai depois "Katz" no alfabeto. Então, definiríamos a nova lista como "Landis" até "Taylor" porque "Mantle" deve ser localizado lá.
+
+Por outro lado, se tivéssemos a lista seguinte:
+
+$$ Baker, Mantle, Nixon, Parker, Rosen, Smith, Taylor$$
+
+começaríamos com o nome "Parker", comparar o nome a "Mantle", ver que "Mantle" veio antes de "Parker" e assim começar a nova lista à primeira entrada ("Baker") e ir para "Nixon". Este sequência das ações define um novo passo no programa, aquele de estabelecer uma nova lista baseada numa estrutura lógica "if ... then ... else" que implantamos quando traduzimos o pseudo-código a código de R.
+
+> 1. Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+> 2. Colocar `jogadores` em ordem alfabética com `dplyr::arrange()`
+> 3. Contar as entradas na lista e fazer divisão inteira desse total por 2
+> 4. Se a entrada que escolhemos é "Mantle", relatar o resultado e terminar o programa.
+> 5. Se "Mantle" vem depois do item escolhido, definir uma nova lista como o item escolhido + 1 até o final da lista original ou se "Mantle" vem antes do item escolhido, definir uma nova lista como o início da lista original até o item escolhido - 1
+
+Agora, temos que repetir passos 3 até 5 até chegamos no ponto onde passo 4 retorna `TRUE`, ou seja, o ponto que achámos "Mantle" e todo que resta a fazer é retorna o resultado.
+
+Este é nosso programa em pseudo-código. Agora, temos que tornar ele em código da linguagem R e testar ele.
+
+## Traduzir o Programa em Código R 
+
+Para elaborar nosso programa, nós vamos usar "blocos" de código: pequenos grupos de linhas que cumprir uma função. Assim, teremos controle maior sobre a execução do programa, especialmente na fase de desenvolvimento. Normalmente, o primeiro bloco de código que escrevemos especifica os pacotes das funções de R que facilitarão nossa programação. Nós só vamos usar funções base R. 
+
+Neste programa, eu enfatizarei os comentários. Eles são muito importantes para explicar o seu código para outros e para você. A melhor forma dos comentários é para escrever observações que explicam porque você fez o código nessa maneira. Quando você volta para seu programa depois de seis meses trabalhando num outro projeto, os comentários ajudarão fazer você entender o que você fez e quais escolhas você fez. O primeiro passo é para pôr seu pseudo-código no programa para servir como um resumo dos passos que seu program segue.
+
+### Bloco 1 -- Ler os Dados
+
+```{r readdata, echo = TRUE}
+# Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+jogadores <- readRDS("players_list.rds")
+# Dar uma olhada na estrutura de jogadores
+str(jogadores)
+```
+
+Como tinha dito acima, `jogadores` é um vetor de caráteres que contem 500 nomes. Tecnicamente, você precisa pôr todo o caminho (*path*) das pastas começando com o *working directory* até a pasta onde você colocou `players_list.rds`. Para fazer as coisas mais simples aqui, coloquei os dados na mesma pasta que o programa.
+
+### Bloco 2 -- Arrumar a Lista em Ordem Alfabética
+
+```{r sort_players, echo = TRUE}
+# Colocar `jogadores` em ordem alfabética com `sort`
+jogadores <- sort(jogadores)
+```
+
+Em R, você pode redefinir um objeto com `jogadores` para conter uma versão transformada de si. Em algumas linguagens, você precisa dar para ele um novo nome e depois designar o nome original para o objeto. Em R, pode fazer a transformação diretamente.
+
+### Bloco 3 -- Achar a Entrada de Meio
+
+```{r meio, echo = TRUE}
+tamanho <- length(jogadores)
+limite_baixo <- 1 # para uso tardio
+limite_cima <- tamanho # para uso tardio
+entrada_meio <- tamanho %/% 2
+```
+
+### Bloco 4 -- Testar a Entrada contra o Nome "Mantle"
+
+```{r testar, echo = TRUE}
+
+#  Se a entrada igual "Mantle", relatar o resultado
+#  e terminar o programa
+#  Definir Mickey Mantle como o  `alvo`
+alvo <- "Mantle"
+terminado <- FALSE # variável lógica para marcar terminação
+if(jogadores[entrada_meio] == "Mantle") {
+  print(paste("Mantle é entrada número", entrada_meio, "na lista."))
+  terminado = TRUE
+}
+```
+
+Quando você utiliza uma construção "if ... then" para estabelecer um teste lógico e você quer que o programa faz várias subetapas, você precisa colocar as linhas de código em chaves `{}`. É importante também de anotar que nós vamos lidar com a implementação de um termino do programa quando construímos um loop para repetir a busca. Neste bloco, designei a variável `alvo` para conter o conteúdo "Mantle". Este vai permitir que possamos procurar qualquer pessoa sem precisar reescrever muitas linhas de código quando temos uma nova pessoa que queremos procurar na lista.
+
+### Bloco 5 -- Determinar a Nova Metade da Lista
+
+```{r half_list, echo = TRUE}
+# A. Se "Mantle" > que o item escolhido, definir nova lista 
+#    como item escolhido + 1 até o final da lista
+# B. Se "Mantle" < que o item escolhido, definir nova lista 
+#    como início da lista até item escolhido - 1
+ifelse(alvo > jogadores[entrada_meio], 
+                       limite_baixo <- entrada_meio + 1,
+                       limite_cima <- entrada_meio - 1)
+tamanho_novo <- limite_cima - limite_baixo + 1 
+# precisa 1 para incluir ambos os finais
+entrada_meio <- tamanho_novo %/% 2
+```
+
+Estou criando os passos para definir cada interação para você pode seguir o lógico melhor. Hão maneiras mais rápidos para fazer o código deste bloco, mas acho que você como um aluno precisa uma demonstração mais clara do que está acontecendo.
+
+Entretanto, usei um atalho. `ifelse` é uma versão eficiente de uma construção "if ... then ... else". Aqui, usei para redefinir os limites da lista que ainda queremos considerar. O teste condicional mostra se "Mantle" vem depois o jogador que definimos como o `entrada_meio`. Se for, ajustamos o limite para baixo para ser 1 entrada maior que o jogador que acabamos de considerar. Se ele vem antes aquele jogador, ajustamos o limite superior para estar 1 ao menos que a jogador testado. Começando com esses novos limites, podemos calcular o tamanho da nova lista e determinar um novo ponto meio (`entrada_meio`).
+
+`jogadores` ainda fica na memoria na forma original com 500 entradas. Mas, estamos usando porções dele para conduzir nossa busca para Mickey Mantle.
+
+## Mas, Ainda Não Terminamos
+
+Não, `terminado` ainda é `FALSE`. Nós só fizemos uma iteração da programa. Agora, precisamos modificar ele para ele pode fazer as iterações na lista até ele acha o nome "Mantle". 
+
+Já mostrei *loops* em R para você. Eles existem em R, tanto quanto a maioria das linguagens de programação. Eles permitem que podemos processar dados numa escala industrial. *Loops* fazem iterações através um corpo de dados, como nossa lista de  `players`. Existem duas variedades dos *loops* -- `for` *loops* e `while` *loops*. As linguagens processam `for` *loops* um número certo das vezes que o programador define dentro de uma variável. O programa aplicará as linhas dentro do *loop* para os dados exatamente o número das vezes que o programador especifica. `while` *loops* operam enquanto uma condição fica com o valor `TRUE`. O programa continuará executando o código dentro do *loop* até a condição se torna `FALSE`.
+
+Em nosso caso, não sabemos quanto iterações nossa busca vai precisar até ele acha "Mantle" na lista dos jogadores. Então, um `for` *loop* não é apropriado. Entretanto, podemos usar nossa variável `terminado` como uma condição para definir um `while` *loop*. Nós vamos colocar blocos de código 3, 4 e 5 dentro do *loop* porque eles contêm os passos do programa que nós queremos usar nas iterações. 
+
+## Revisão do Pseudo-Código
+
+Porque precisamos pôr o *loop* em nosso programa, vamos voltar ao pseudo-código e incorporar a estrutura para o *loop*. É muito comum para fazer revisões do pseudo-código para ajudar você entender o que você quis fazer quando você (ou outra pessoa) examina o código mais tarde.
+
+Os primeiros três blocos de código são bons. Mas, precisaremos definir um *loop* em bloco 4 e criar uma série de subetapas que executará o *loop*. Temos a maioria dessas etapas definidas em blocos 4 e 5. Primeiro executaremos o teste para ver se achamos "Mantle". Senão, definiremos de novo os limites na maneira que fizemos em bloco 5 acima e fazer novas iterações até a variável `terminado` fica `TRUE`. Depois, vamos imprimir o resultado e uma contagem para mostrar quantas iterações a pesquisa binária precisou para achar "Mantle".
+
+1. Ler o arquivo `players_list.rds` e colocar na memoria como `jogadores`
+2. Colocar `jogadores` em ordem alfabética com `dplyr::arrange()`
+3. Contar as entradas na lista e fazer divisão inteira desse total por 2
+4. Começar um `while` *loop* que continua até `terminado` torna `TRUE`  
+  a. Testar para ver se a `entrada_meio` == "Mantle". Se for, mostrar o resultado e terminar o programa
+  b. Se "Mantle" > que o item escolhido, definir um novo `limite_baixo` da lista como o item escolhido + 1 e deixar o `limite_cima` como estava
+  c. Se "Mantle" < que o item escolhido, deixar o `limite_baixo` o mesmo e mudar o valor do `limite_cima` para ser o item escolhido -1 
+  d. Calcular o novo tamanho da lista restante
+  e. Calcular o novo `entrada_meio` para testar em 4a  
+  f. Atualizar as entradas testadas pela pesquisa binária na variável `tentativa`  
+  g. Repetir o *loop* até `terminado` é `TRUE`. 
+
+Agora, podemos ir em frente para escrever o código incorporando as linhas de código da velha estrutura do programa. Anote que repeti algumas da inicializações das variáveis que tinha feito na versão original acima para este bloco integrado pode funcionar corretamente sem referência aos blocos 4 e 5 acima.
+
+### Bloco 4 Revisado -- Estrutura de *Loop*
+
+```{r loop, echo = TRUE}
+
+# Initialização das variáveis 
+tamanho <- length(jogadores)
+limite_baixo <- 1 # para uso tardio
+limite_cima <- tamanho # para uso tardio
+entrada_meio <- tamanho %/% 2
+terminado <- FALSE
+iter <- 1
+tentativa <- entrada_meio
+
+# loop
+while (!terminado) { # repetir até terminado == TRUE
+  if (jogadores[entrada_meio] == alvo) { # passa teste; vá para final
+    print(paste(alvo, "é entrada", entrada_meio, "da lista."))
+    print(paste("Usamos", iter, "iterações para achar o alvo."))
+    terminado <- TRUE
+  }
+  else { # precisa iteração adicional
+    iter <- iter + 1 # aumentar contagem das iterações
+    ifelse(alvo > jogadores[entrada_meio],                # teste
+                       limite_baixo <- entrada_meio + 1,  # TRUE
+                       limite_cima <- entrada_meio - 1)   # FALSE
+    tamanho_novo <- limite_cima - limite_baixo + 1 
+    # precisa 1 para incluir ambos os finais
+    entrada_meio <- limite_baixo + (tamanho_novo %/% 2)
+    tentativa <- c(tentativa, entrada_meio) # quais entradas escolhidas
+  }
+}
+```
+
+Anote que na definição do *loop* usei um ponto de exclamação ("!"). Este quer dizer em R "não". Então a definição quer dizer "enquanto não `terminado`", ou seja, "enquanto terminado é `FALSE`".
+
+## Yippee! Conseguimos!
+
+Achamos meu herói de infância em nossa lista dos jogadores. Levou `r iter` iterações para chegar no nome. As tentativas estavam `r tentativa`. Se você executa este programa no seu sistema, vai achar que ele roda muito rápido. Entretanto, é muito ineficiente. Optei para dar para você clareza invés de rapidez em todos os casos possíveis para você entender melhor como construir um programa. Também, eu podia ter encapsulado os procedimentos em funções que faz o uso dos blocos mais fácil a gerenciar. Normalmente, se preciso repetir código mais de duas vezes, encapsulo o código numa função.
+
+Mas, como conseguir programação mais rápido e eficiente é um assunto para uma matéria mais avançada.
+
+## Se Você Quer Fazer Mais com Este Programa
+
+Se você quer explorar mais este código, recomendo duas opções. Primeiro, dê uma olhada nos nomes na lista com o comando `jogadores`. Este vai mostrar na tela a lista completa de 500 nomes. Escolhe um, modifique a variável `alvo` para esse nome. Depois, executa a versão revisada de bloco 4 de novo e ver quantas iterações levou para achar o nome que você escolheu.
+
+A segunda opção é trocar a lista com 500 nomes para uma lista maior, com 5.000 nomes. Troque a linha de código que lê o arquivo para o seguinte.
+
+`jogadores <- readRDS("big_player_list.rds")`
+
+Depois, vê quantas iterações leva para achar "Mantle" ou qualquer outro jogador que lhe interesse e aparece na lista. Quanto tempo levou para achar "Mantle" nessa lista 10 vezes maior?
+
+
+## Resumo
+
+Neste capitulo, aprendemos como estruturar um programa e progressar de uma ideia ("pesquisa binária") através do pseudo-código até código R. Vemos como funciona um `while` *loop* e conduzimos um número de testes lógicos.
+
+Agora, você experimente com este código e fazer ele serve suas necessidades. Curte-se.
