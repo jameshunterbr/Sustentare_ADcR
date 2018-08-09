@@ -6,7 +6,7 @@ output:
 
 ```{r global_options, include = FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-options(scipen = 10)
+options(scipen = 5)
 ```
 
 # Regressão Linear -- Simples e Múltipla
@@ -110,4 +110,118 @@ Esses são as variáveis. Vamos ver uma explicação um pouco mais completa.
 - `price` - valor em US$
 - `latitude` e `longitude` - localização geográfica (não usadas em nossa análise)
 
-Para 
+Para focar nossa análise de regressão simples, vamos só ficar com as variáveis de `sqft` e `price` e ver se podemos prever preços só com o tamanho de habitação. Apesar que este é um cenário muito pouco provável, mostra numa forma simplificada como construir um regressão de qualquer tamanho. 
+
+```{r mod_sac_data_slr, echo = TRUE}
+suppressMessages(library(tidyverse))
+suppressPackageStartupMessages(library(DescTools))
+suppressPackageStartupMessages(library(ggpubr)) # fazer gráficos
+sac_mod <- Sacramento %>% 
+  select(sqft, price)
+glimpse(sac_mod)
+```
+
+### Exploração dos Dados
+
+O próximo passo em qualquer análise é explorar e tentar entender as variáveis e se precisamos modificar alguns pontos de dados para possibilitar a análise. Um característica de regressão é que ela depende que as variáveis têm uma distribuição normal. Então, vamos olhar nelas com `Desc` e vamos fazer um gráfico (*scatter plot*) da relação entre as variáveis.
+
+```{r}
+Desc(sac_mod, plotit = TRUE)
+gr_price_sf <- ggplot(data = sac_mod, aes(x = sqft, y = price)) 
+gr_price_sf <- gr_price_sf + geom_point(shape = 20) 
+gr_price_sf <- gr_price_sf + labs(x = "Tamanho em pés quadrados", 
+                                  y = "Preço em US$", 
+                                  title = "Sacramento - Preços de Habitação")
+gr_price_sf
+```
+
+Como o gráfico assim, parece que uma relação existe ente o tamanho (`sqft`) e preço. Maior o tamanho da habitação, maior seria o preço de venda. Também, o conjunto tem bem mais que 35 casos e nós podemos confiar que a teorema de limite central permite o uso de testes e técnicas parâmetricas. Para testar se qual tipo de relação existe entre `sqft` e `price`, podemos calcular o coeficiente de corelação ($\rho$) para estas variáveis.
+
+```{r corr_test, echo = TRUE}
+cor(sac_mod$sqft, sac_mod$price)
+```
+
+Utilizando a função `cor`, que calcula este coeficiente, podemos ver que existe uma relação positivo forte entre as duas variáveis. Agora, podemos usar regressão para determinar como calcular esta relação.
+
+## Divisão do Conjunto com `caret`
+
+O pacote `caret`
+
+```{r traintest}
+set.seed(42)
+indice <- createDataPartition(sac_mod$price, p = 0.5, list = FALSE)
+train_data <- sac_mod[indice, ]
+test_data <- sac_mod[-indice, ]
+```
+
+
+```{r testsplit}
+rbind(data.frame(group = "train", train_data),
+      data.frame(group = "test", test_data)) %>% 
+  ggplot(aes(x = price, color = group, fill = group)) +
+    geom_density(alpha = 0.3) 
+
+```
+
+O gráfico mostra que a esquema de particão dos dados criou novos data frames com distribuições quase iguais. Assim, quando fazemos o modelo com o dataframe `train_data`, só o modelo em si vai causar resultados diferentes com o dataframe `test_data`.
+
+## Regressão Simples em R
+
+Usamos a função `lm` para executar uma regressão. `lm` significa *linear model*. Em `lm`, nós especificamos uma formula com as variáveis, indicar o dataframe onde elas residem e especificar alguns outros parâmetros. Na forma resumida, `lm` precisa ter a forma seguinte:
+
+- `lm(formula, data, subset, weights, na.action, method = "qr", model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE, contrasts = NULL, offset, ...)`
+- Os importantes são `formula`, `data`, `subset`, `weights`, `na.action`
+- `formula`:  onde mostra quais variáveis você está modelando
+- Variável dependente vem primeiro
+- Separada da independente(s) por “ ~ ”
+- Para os `sac_mod`: `price ~ sqft`
+- `data`: data frame  ou tibble que contem as variáveis
+- `subset`, `weights`: parâmetros que permitem que você customizar tratamento das variáveis
+- `na.action`: como vai tratar os dados missing na base de dados
+
+Para nosso dataframe, a especificação da regressão seria o seguinte:
+
+> fit <- lm(price ~ sqft, data = sac_mod)
+
+Os outros parâmetros não são necessários aqui. `lm` produz uma lista de 12 itens em um formato especial e dar para você
+
+```{r slr_exec}
+fit <- lm(price ~ sqft, data = sac_mod)
+summary(fit)
+```
+
+Mas, nós vamos realmente criar o modelo com train_data, não todos os dados e nós vamos usar *cross validation* para fortalecer a capacidade do modelo para prever com novos casos.
+
+## Criando Modelo com `train_data`
+
+Invés de usar `lm` diretamente, nós vamos usar a função `caret::train` que permite que especificamos os detalhes do processo que queremos usar.
+
+```{r train_price}
+set.seed(42)
+model1 <- caret::train(price ~ sqft,
+                       method = "lm",
+                       data = sac_mod,
+                       trControl = trainControl(method = "repeatedcv",
+                                                number = 5,
+                                                repeats = 10,
+                                                savePredictions = "final",
+                                                verboseIter = FALSE))
+model1
+summary(model1)
+```
+
+## Fazer Previsões Usando o Modelo e `test_data`
+
+```{r}
+# previsões
+prv <- predict(model1, test_data)
+# comparar para preços observados
+data.frame(obs = test_data$price,
+           previs = prv) %>% 
+  ggplot(aes(x = obs, y = previs)) +
+    geom_jitter() +
+    geom_smooth(method = "lm") +
+    labs(x = "Preço observado", y = "Preço previsto")
+```
+
+
