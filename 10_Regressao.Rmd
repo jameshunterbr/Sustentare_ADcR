@@ -9,10 +9,105 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 options(scipen = 10)
 ```
 
-# Regressão Linear -- Simples e Múltpla
+# Regressão Linear -- Simples e Múltipla
 
 A primeira técnica de *machine learning* que vamos aprender no módulo é **regressão linear**. É uma das técnicas mais geralmente usadas desde a aula inicial que tudo mundo estuda de estatística. Mas, diferentemente do jeito que em que você aprendeu regressão na aula de estatística, aqui nós vamos abordar a técnica como uma ferramenta de *machine learning* invés da teoria estatística. Esse quer dizer que vamos aprender aplicar regressão para problemas de projeção e tomada de decisão.
 
-## Problema para Aplicação da Regressão
+## Problema para Resolver com a Regressão Linear
 
-O dataset principal que nós vamos usar neste capítulo 
+Tudo mundo quer saber o valor da casa própria. Este é um problema muito apto para resolução com regressão linear. Podemos desenvolver um modelo que relaciona os preços das casas vendidas numa região com características dessas casas e usar este modelo para prever preços de outras casas com características semelhantes. Vamos ver como este processo funciona com dados sobre Sacramento, Califórnia. Sacramento é a capital do Estado de Califórnia e fica uma hora para a norte da Sean Francisco. Estes dados vêm do pacote   `caret`. A documentação da `caret` não dá a data em que os dados foram colecionados. Baseado nos preços, são velhos porque são bem abaixo dos preços dos imoveis em Sacramento na época em que eu morei lá há 25 anos. Mas, este processo aplica para qualquer tipo de regressão que você quer usar para fazer previsões sobre o preço de outros imoveis baseados nos preços na região.
+
+## *Machine Learning*
+
+*Machine learning* é a aplicação de inteligência artificial ("AI") aos problemas de dados. Nessas técnicas, nós desenhamos modelos baseados em dados. Esses modelos são algoritmos que  **aprendem** por treinamento com dados observados e depois fazer previsões com casos desconhecidos. Muitas vezes, *machine learning* envolvem grades conjuntos de dados com milhares, milhões ou até bilhões de casos (realmente *Big Data*).
+
+### Tipos de *Machine Learning*[^1]
+
+[^1]: Muito desses materiais sobre machine learning vem do webinar excelente da Dra. Shirin Glander. Os slides do webinar podem ser achados no GitHub:  https://github.com/ShirinG/Webinar_ISDS/blob/master/Webinar_slides.pdf
+
+### Supervisionado vs. Não-supervisionado
+
+Técnicas de *machine learning* vêm em vários sabores. A primeira classificação é *supervisionado* ou *não-supervisionado*. *Machine learning* supervisionado quer dizer que nós temos uma variável dependente, um valor ou característica que queremos prever. *Machine learning* não-superivisonado quer dizer que não temos uma variável dependente, só informação sobre as características dos objetos que queremos classificar em grupos ou *clusters*. Mais tarde, nós vamos ver *cluster analysis* como uma técnica de *machine learning* não-supervisionado. 
+
+
+```{r supnosup, echo = FALSE, fig.align='center', fig.cap = "Glander--Supervisionado v. Não-Supervisionado"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/sup_vs_unsup.png")
+```
+
+Entre as modalidades de *machine learning* supervisionado, existe uma distinção entre *classificação* e *regressão*. Classificação tenta alocar todos os casos em categorias importantes baseada nos valores das variáveis e prever em qual classe novos casos cairia. Regressão tenta de prever um valor para casos que não 
+fizeram parte da especificação ou cálculo do modelo original. Regressão linear, que aprenderemos agora, é este tipo de *machine learning*. Nós vamos primeiro calcular um modelo que descreve os preços das casas em Sacramento baseados na localização dela dentro da região, número de quartos e banheiros, tamanho e tipo de habitação. 
+
+### Objetivo de Machine Learning e Overfitting
+
+Nosso objetivo é desenvolver um modelo que pode prever corretamente os valores dos casos que não foram incluídos na especificação do modelo. Para fazer isso, tipicamente dividimos nossa amostra em duas partes. A parte de *training*, nós usamos para especificar o modelo, e a parte de *testing* (que pode ser chamada validação), nós usamos para testar se o modelo pode prever corretamente os valores de casas que o modelo nunca tinha visto. Tipicamente, quando temos um conjunto de dados grande, usamos uma proporção entre 50% - 70% para *training* e 30% - 50% para *testing*. Os casos para *training* e para *testing* devem ser diferentes. Nós dividiremos o conjunto em duas partes diferentes. 
+
+**VSS  NUNCA, JAMAIS, USE OS MESMOS CASOS PARA TESTES QUE VOCÊ USOU PARA TREINAMENTO**
+
+Porque o conjunto de Sacramento tem 932 casos, podemos usar a proporção 50% - 50% e não perder muita informação. Dividindo o dataset também evita que caímos na armadilha de *overfitting* os dados. Esse quer dizer que o modelo só é capaz de prever com corretamente casos que vêm do grupo dos casos na parte *training* do conjunto mas tem um desempenho instável sobre outros casos. A figura seguinte mostra um caso de *overfitting* em que o objetivo é de distinguir entre os pontinhos azuis e vermelhos. A curve verde não tem nenhum erro nos dados treinados, mas não sabemos como vai tratar dados ainda não conhecidos. A curve preto é muito mais simples (2 dimensões invés de não sei quantas dimensões) e fez alguns erros com os dados de treinamento. Mas, provavelmente vai ter um resultado melhor nos casos ainda não vistos. Também, é muito mais simples a explicar para um cliente ou em um paper.
+
+```{r overfit, echo = FALSE, fig.align='center', fig.cap = "Glander--Overfitting"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/overfit_diag.png")
+```
+
+### *Features* -- Covariáveis
+
+As variáveis independentes, as covariáveis, são aqueles que usamos para determinar um valor da variável dependente. São frequentemente chamadas *features*. São as variáveis usados para treinar o modelo. Regressão linear simples só tem uma covariável. Regressão múltipla tem várias. É importante que escolhemos as variáveis certas que realmente têm um impacto na variável dependente. Nós vamos ver alguns testes que podemos usar para avaliar nossa seleção das variáveis e uma técnica que podemos usar (*Principal Components*) para reduzir o número das covariáveis sem perder informação sobre o movimento da variável dependente. Ter mais features não é necessariamente uma coisa boa. Ter features demais é uma das causas de *overfitting*.
+
+### *Cross-Validation* (*k-fold*)
+
+Para fortalecer a capacidade do modelo para prever resultados com dados desconhecidos, nós podemos implantar uma serie de técnicas de reamostragem, chamada *Bootstrap*. Reamostragem quer dizer que nós vamos criar várias sub-amostras de nossos dados de treinamento (e só eles, nenhuns dos dados de testes). Na técnica de *cross-validation*, nós dividimos aleatoriamente os dados em `k` grupos (chamados *folds*) tamanho igual. Construímos o modelo usando todos os folds menos 1. Depois, o algoritmo testa o modelo com os casos que forma reservados. O algoritmo calcula o diferença (erro) entre as previsões com o modelo e os valores da variável dependente observados. Ele repete até todos os folds foram excluídos uma vez e depois calcula a média dos erros. Entre o `k` modelos que você construiu, o algoritmo sugere o modelo com a média do erro menor como o melhor adaptação do modelos aos dados observados. Nós vamos aplicar esta técnica quando exploramos regressão múltipla, ou seja, regressão com mais de uma covariável.
+
+## Regressão Simples Linear 
+
+Nós vamos explorar regressão simples do ponto de vista de análise de dados invés de estatística pura. A maioria de vocês estudaram este tópico na primeiro ou segundo matéria de estatística ou em ensino médio ou na graduação. Muitos dos recursos recomendados para esta matéria têm explicações boas sobre a estatística de regressão. Deixa-me só fazer referência a um número de pontos e vamos diretamente para os dados de Sacramento.
+
+### Historia da Regressão
+
+O termo "regressão" vem do estudo das características raciais dos ingleses fomentado por Sir Francis Galton (também conhecido como o primo de segundo grau de Charles Darwin). Esta pseudo-ciência, *eugenics*, foi uma das justificações para as teorias de superioridade ou inferioridade das raças diferentes das pessoas que ainda afligem humanidade. Especificamente, Galton estudou as alturas das famílias e observou que crianças de pais altos tendiam de ser mais baixo de que os pais e crianças de pais baixos tendiam de ser mais altos que os pais. Ele chamou essa tendência "regressão à média". 
+
+### Método de Mínimos Quadrados
+
+Regressão usa o método de *mínimos quadrados* para determinar o modelo ótimo. O método foi inventado pelo matemático alemão Carl Freidrich Gauss. O modelo constrói uma equação linear que minimiza as divergências entre os valores lineares previstos e os valores observados dos dados. Assim o modelo consegue o melhor relação entre a variável de resultado e as variáveis prognosticas. 
+
+Mas, é importante que "melhor" não necessariamente quer dizer "bom". **Melhor** depende do método. **Bom** depende da qualidade e suficiência dos dados.
+
+### Modelo de Regressão em Termos Matématicos
+
+Para lembrar o que é um modelo ou uma equação de regressão e seus termos, vamos olhar numa modelo teórico. A equação descreve uma linha reta da forma seguinte:
+
+$$Y_i=\beta_0+\beta_1X_i+\epsilon_i$$
+onde:
+
+- $\beta_1$ = inclinação da linha (*slope*)
+- $\beta_0$ = intercepto (onde cruza o eixo $Y$)
+- $X_i$ = valor da variável independente
+- $\epsilon_i$ = termo de erro de cada caso
+
+Com estes dois parâmetros, mínimos quadrados determina a reta que melhor prevê o valor da variável dependente dado o valor da variável independente. A figura seguinte mostra a forma gráfica da regressão que testa a relação entre dois índices do desempenho do mercado BOVESPA.
+
+```{r regress_ex, echo = FALSE, fig.align='center', fig.cap = "Exemplo da Regressão"}
+knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/regress_IBX.png")
+```
+
+## Dados de Preço de Habitação em Sacramento
+
+O primeiro passo em qualquer análise de dados é conhecer os dados. Vamos então dar uma olhada em que temos para este conjunto dos dados.
+
+```{r sac_dados_1, echo = TRUE}
+library(caret)
+data(Sacramento)
+tibble::glimpse(Sacramento)
+```
+
+Esses são as variáveis. Vamos ver uma explicação um pouco mais completa.
+
+- `city`  - cidade na região de Sacramento
+- `zip`   - código postal
+- `beds`  - número dos quartos na habitação
+- `baths` - número dos banheiros na habitação
+- `sqft`  - tamanho de habitação em pés (ft) quadrados (1 $m^2$ = 10.76 $ft^2$)
+- `type`  - tipo de habitação: `Condo` = Condomínio, `Multi_Family` = Apartamento, `Residential` = Casa
+- `price` - valor em US$
+- `latitude` e `longitude` - localização geográfica (não usadas em nossa análise)
+
+Para 
