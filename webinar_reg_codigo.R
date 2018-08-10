@@ -78,3 +78,16 @@ data.frame(obs = test_data$price,
   geom_smooth(method = "lm") +
   labs(x = "Preço observado", y = "Preço previsto")
 
+## Bloco 10 (novo)
+
+# Calcular Diferença entre Preços observados e previstos
+
+res <- data.frame(obs = test_data$price, 
+                  previs = prv) %>% 
+  mutate(dif = abs(obs - previs), 
+         pctdif = 100 * (dif - previs)/previs)
+Desc(res$dif)
+ggplot(data = res, aes(x = obs, y = pctdif)) +
+  geom_jitter() +
+  geom_smooth(method = "lm") +
+  labs(x = "Preço observado", y = "Diferença(%)")
