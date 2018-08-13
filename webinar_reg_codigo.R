@@ -80,14 +80,15 @@ data.frame(obs = test_data$price,
 
 ## Bloco 10 (novo)
 
-# Calcular Diferença entre Preços observados e previstos
+# Calcular Diferença entre tamanho da residência e valor previsto
 
 res <- data.frame(obs = test_data$price, 
-                  previs = prv) %>% 
-  mutate(dif = abs(obs - previs), 
-         pctdif = 100 * (dif - previs)/previs)
+                  previs = prv,
+                  sqft = test_data$sqft) %>% 
+  mutate(dif = (obs - previs), 
+         pctdif = 100 * dif/previs)
 Desc(res$dif)
-ggplot(data = res, aes(x = obs, y = pctdif)) +
+ggplot(data = res, aes(x = sqft, y = dif)) +
   geom_jitter() +
-  geom_smooth(method = "lm") +
-  labs(x = "Preço observado", y = "Diferença(%)")
+  geom_smooth(method = "lm")  +
+  labs(x = "Tamanho em pés quadrados", y = "Diferença(%)")

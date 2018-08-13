@@ -9,13 +9,13 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 options(scipen = 5)
 ```
 
-# Regressão Linear -- Simples e Múltipla
+# Regressão Linear Simples e *Machine Learning*
 
 A primeira técnica de *machine learning* que vamos aprender no módulo é **regressão linear**. É uma das técnicas mais geralmente usadas desde a aula inicial que tudo mundo estuda de estatística. Mas, diferentemente do jeito que em que você aprendeu regressão na aula de estatística, aqui nós vamos abordar a técnica como uma ferramenta de *machine learning* invés da teoria estatística. Esse quer dizer que vamos aprender aplicar regressão para problemas de projeção e tomada de decisão.
 
 ## Problema para Resolver com a Regressão Linear
 
-Tudo mundo quer saber o valor da casa própria. Este é um problema muito apto para resolução com regressão linear. Podemos desenvolver um modelo que relaciona os preços das casas vendidas numa região com características dessas casas e usar este modelo para prever preços de outras casas com características semelhantes. Vamos ver como este processo funciona com dados sobre Sacramento, Califórnia. Sacramento é a capital do Estado de Califórnia e fica uma hora para a norte da Sean Francisco. Estes dados vêm do pacote   `caret`. A documentação da `caret` não dá a data em que os dados foram colecionados. Baseado nos preços, são velhos porque são bem abaixo dos preços dos imoveis em Sacramento na época em que eu morei lá há 25 anos. Mas, este processo aplica para qualquer tipo de regressão que você quer usar para fazer previsões sobre o preço de outros imoveis baseados nos preços na região.
+Tudo mundo quer saber o valor da casa própria. Este é um problema muito apto para resolução com regressão linear. Podemos desenvolver um modelo que relaciona os preços das casas vendidas numa região com características dessas casas e usar este modelo para prever preços de outras casas com características semelhantes. Vamos ver como este processo funciona com dados sobre Sacramento, Califórnia. Sacramento é a capital do Estado de Califórnia e fica uma hora para a norte da San Francisco. Estes dados vêm do pacote `caret`. A documentação da `caret` não dá a data em que os dados foram colecionados. Baseado nos preços, são velhos porque são bem abaixo dos preços dos imoveis em Sacramento na época em que eu morei lá há 25 anos. Mas, este processo aplica para qualquer tipo de regressão que você quer usar para fazer previsões sobre o preço de outros imoveis baseados nos preços na região.
 
 ## *Machine Learning*
 
@@ -94,7 +94,7 @@ knitr::include_graphics("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/regre
 O primeiro passo em qualquer análise de dados é conhecer os dados. Vamos então dar uma olhada em que temos para este conjunto dos dados.
 
 ```{r sac_dados_1, echo = TRUE}
-library(caret)
+suppressPackageStartupMessages(library(caret))
 data(Sacramento)
 tibble::glimpse(Sacramento)
 ```
@@ -145,7 +145,14 @@ Utilizando a função `cor`, que calcula este coeficiente, podemos ver que exist
 
 ## Divisão do Conjunto com `caret`
 
-O pacote `caret`
+Além da função central do `caret`, que elabora o modelo que você quer construir, existem várias funções que facilita a construção do modelo. Ele funciona como uma guia para todo o processo de especificar um modelo preditivo. Para ajudar você com a gramatica do `caret`, existe um *cheat sheet* entre aqueles do RStudio. Você pode achar ele aqui: https://www.rstudio.com/resources/cheatsheets/ entre os "contributed cheat sheets" para fundo da página. 
+
+Aqui, precisamos dividir o dataset em partes de treinamento e de testagem. Fazemos isso com a função `createDataPartition()`. Você dá para a função a variável dependente, `sac_mod$price` neste caso e a proporção que você quer usar para o treinamento (o nome do argumento: `p`--50% para Sacramento). Além disso, pode usar alguns outros argumentos entre que o único de interesse aqui é de não pôr o resultado em uma lista. A função retorna um 
+vetor com os indices dos casos que caem na parte de treinamento. Mas, ainda é só os indices. Para estabelecer o data frame para treinamento (que chamei aqui `train_data`), é necessário especificar esses casos usando a notação dos colchetes: `train_data <- sac_mod[indice, ]`. 
+
+**VSS** É importante lembrar a colocar uma virgula depois do nome do vetor dos indices (`indice`) antes de fechar os colchetes. Assim, você está instruido R para incluir todos as colunas do dataframe `sac_mod`.
+
+Para criar o dataframe `test_data`, você quer nomear todos os casos que não são incluídos em `indice`. Este podemos fazer facilmente com um sinal de menos antes da palavra `indice` assim: `test_data <- sac_mod[-indice, ]`. 
 
 ```{r traintest}
 set.seed(42)
@@ -154,6 +161,7 @@ train_data <- sac_mod[indice, ]
 test_data <- sac_mod[-indice, ]
 ```
 
+Se as duas partes têm distribuições bem diferentes, não vão produzir previsões muitos exatas. Nós podemos verificar que `train_data` e `test_data` são semelhante graficamente com uma plotagem de densidade, utilizando a geométria `geom_density()` de `ggplot`. Especifiquei uma alpha muito baixo para fazer as camadas mais transparentes para nós termos uma ideia melhor da relação. Como o gráfico seguinte mostra, as distribuições são quase iguais. Podemos supôr que as previsões vão ter relação com o conteúdo do modelo e não com a divisão do dataset original.
 
 ```{r testsplit}
 rbind(data.frame(group = "train", train_data),
@@ -162,8 +170,6 @@ rbind(data.frame(group = "train", train_data),
     geom_density(alpha = 0.3) 
 
 ```
-
-O gráfico mostra que a esquema de particão dos dados criou novos data frames com distribuições quase iguais. Assim, quando fazemos o modelo com o dataframe `train_data`, só o modelo em si vai causar resultados diferentes com o dataframe `test_data`.
 
 ## Regressão Simples em R
 
@@ -183,24 +189,34 @@ Para nosso dataframe, a especificação da regressão seria o seguinte:
 
 > fit <- lm(price ~ sqft, data = sac_mod)
 
-Os outros parâmetros não são necessários aqui. `lm` produz uma lista de 12 itens em um formato especial e dar para você
+Os outros parâmetros não são necessários aqui. Você pode consultar as páginas de ajuda para descobrir o uso deles. `lm` produz uma lista de 12 itens em um formato especial e dar para você informacão sobre as estátisticas da regressão em si e os parámetros beta.
 
 ```{r slr_exec}
 fit <- lm(price ~ sqft, data = sac_mod)
 summary(fit)
 ```
 
-Mas, nós vamos realmente criar o modelo com train_data, não todos os dados e nós vamos usar *cross validation* para fortalecer a capacidade do modelo para prever com novos casos.
+Mas, nós vamos realmente criar o modelo com `train_data`, não todos os dados. Vamos usar *cross validation* para fortalecer a capacidade do modelo para prever com novos casos.
 
 ## Criando Modelo com `train_data`
 
-Invés de usar `lm` diretamente, nós vamos usar a função `caret::train` que permite que especificamos os detalhes do processo que queremos usar.
+Invés de usar `lm` diretamente, nós vamos usar a função `caret::train` que permite que especificamos os detalhes do processo da modelagem. 
+
+Primeiro, usei `set.seed()` para vocês podem obter os mesmos resultados que eu mostro aqui. Segundo, precisa dar para `train` a formula que você quer usar como a base do modelo (`price ~ sqft`), o método que vai usar para construir o modelo, aqui um modelo linear (`lm`) e onde ficam as variáveis na formula (`data = train_data`). `lm` é só um de alguns 40 métodos ou tipos de algoritmos de machine learning que pode usar. Esses são os argumentos essenciais. 
+
+**VSS** Tem que lembrar de usar os dados de treinamento e não o dataframe com todos os dados. Este é um erro muito comum (que quer dizer que eu faço as vezes).
+
+No resultado, você pode ver a linha "No pre-processing". `train` oferece a oportunidade de fazer vários tipos de transformações das covariáveis que não usei aqui. Em outros modelos, nós vamos ver o efeito de centralizar e normalizar os variáveis $x$. 
+
+O passo seguinte para nos é de especificar o *cross-validation* (a reamostragem) que queremos usar. Nós vamos usar *cross-validation* repetitivamente (10 vezes) para criar parâmetros do modelo mais robustos. Ao final, só queremos salvar na memoria a última grupo das previsões que o sistema de *cross-validation* desenvolve e não queremos ver na tela todas as iterações de todas as repetições.
+
+`train` vai fazer 50 treinamentos do modelo, dez vezes para omissão de cada *fold*. Ao final, vai produzir um resultado que mostra quão exato foi o modelo prevendo os valores dos casos no `train_data` e vai gravar no resultado (`model1`) todos os resultados para usar em testes de validação. Podemos também chamar `summary(model1)` para mostrar a mesma tabela que `lm` mostrou no caso em que fizemos a modelagem com todos os dados
 
 ```{r train_price}
 set.seed(42)
 model1 <- caret::train(price ~ sqft,
                        method = "lm",
-                       data = sac_mod,
+                       data = train_data,
                        trControl = trainControl(method = "repeatedcv",
                                                 number = 5,
                                                 repeats = 10,
@@ -210,7 +226,26 @@ model1
 summary(model1)
 ```
 
+## Quanto Vale Minha Casa de 2.000 pés quadrados?
+
+Podemos usar este modelo para a previsão do valor de outras casas. Por exemplo, supondo que tenho uma casa de 2.000 pés quadrados (sqft), quanto esta casa valeria em Sacramento? Precisamos extrair os parâmetros da linha reta do resultado e ver o resultado com 2.000 no valor de X. A segunda linha de código no bloco seguinte tira do objeto `model1` os coeficientes (parâmetros) $\beta_0$ e $\beta_1$, ou o intercepto e a inclinação da varíavel independente. 
+
+```{r minha_casa}
+casa <- 2000
+# extrair os parâmetros do modelo model1
+betas <- coef(summary(model1))[,1]
+beta0 <- betas[1] 
+beta1 <- betas[2]
+valor <- unname(beta0 + beta1 * casa)
+valor
+```
+
+O valor de uma casa de 2000 pés quadrados em Sacramento parece de ser `r paste0("US$", prettyNum(valor, big.mark = ",", nsmall = 2))` se o modelo reflete bem o mercado verdadeiro.
+
+
 ## Fazer Previsões Usando o Modelo e `test_data`
+
+Mas, ainda não sabemos se o modelo descreve bem ou não a relação entre `sqft` e `price`, ou seja, se o modelo realmente cumpre o próposito seu. Por isso, precisamos uma serie dos valores onde sabemos o valor da casa verdadeiro para comparar o valor previsto. Temos o `test_data` para avaliar o desempenho do modelo para saber se as previsões que ele faz são confiáveis. Usamos a função `predict` para prever os valores reservados no `test_data`. A função vem do base R e precisa dois argumentos: o objeto do modelo e os dados usados para a base das previsões. Quando temos a previsões (o objeto `prv`), podemos visualizar eles em um gráfico simples. Para constuir o gráfico que compara os valores previstos com os valores reais observados, primeiro é necessário de pôr as duas quantidades em em dataframe e construir o gráfico com `ggplot`. 
 
 ```{r}
 # previsões
@@ -223,5 +258,23 @@ data.frame(obs = test_data$price,
     geom_smooth(method = "lm") +
     labs(x = "Preço observado", y = "Preço previsto")
 ```
+
+Voce pode ver neste gráfico que com o aumento nos preços observados, os preços previstos divergem da linha da unidade. Também é útil olhar no tamanho de diferenças entre preços observados e previstos contra o tamanho das residências. O gráfico abaixo mostra esta relação.
+
+```{r}
+res <- data.frame(obs = test_data$price, 
+                  previs = prv,
+                  sqft = test_data$sqft) %>% 
+  mutate(dif = (obs - previs)) # data frame 
+(summ <- summary(res$dif)) 
+ggplot(data = res, aes(x = sqft, y = dif)) +
+  geom_jitter() +
+  geom_smooth(method = "lm")  +
+  labs(x = "Tamanho em pés quadrados", y = "Diferença")
+
+```
+
+Este gráfico mostra que as diferenças são mais ou menos constantes através da gama dos tamanhos e fica centradas em 0 (linha quase horizontal azul), mas que existem diferenças muito grandes, acima de 50000 dolares em `r 100 * sum(abs(res$dif) > 50000)/nrow(res)`% dos casos, uma proporção que pode distorcer uma previsão que um dono da casa ou imobilário quis usar. Este reforça o valor não muito forte do coeficiente de determinção ($R^2$), `r prettyNum(model1$results$Rsquared, digits = 4)` e mostra que precisamos um modelo mais exato para criar uma ferramenta preditiva útil. Isto vamos fazer com regressão linear múltipla. 
+
 
 
