@@ -1,0 +1,297 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(scipen = 5)
+```
+
+# Regressão Linear Múltipla
+
+Tendo aprendido como funciona regressão linear simples e como utilizar `caret` para criar modelos de *machine learning*, podemos expandir nossa pesquisa nos dados sobre o preço de alojamento em Sacramento para incluir mais variáveis independentes -- *regressão linear múltipla*. Nosso objetivo: melhorar as previsões acima da exatidão que conseguimos com regressão simples. Também, vamos aqui introduzir alguns testes que usamos para testar se o modelo realmente tem validade para medir e por isso prever valores das residências em Sacramento. 
+
+## Carregar Pacotes e Dados
+
+Vamos começar este capitulo por carregar os dados de Sacramento de novo e os vários pacotes que vamos usar para analisar eles. Os pacotes vão incluir, como sempre, as ferramentas de tidyverse. `ggpubr` cria gráficos mais avançados. `caret` tem o conjunto dos dados e as funções para construir o modelo. Você também está acostumado com `DescTools`. Mais, nós vamos usar testes de normalidade que vêm do pacote `nortest` e algumas ferramentas do pacote `car`, que especializa em funções úteis para regressão. `broom` tem funções que permite que nós comparamos modelos facilmente colocando os resultados de vários modelos em um tibble. Finalmente, `mosaic` é um pacote que tem muitas funções úteis dos quais nós vamos usar algumas para extrair valores dos objetos dos resultados das análises. 
+
+Você anota que uso a função de R base `suppressMessages()` e `suppressPackageStartupMessages()` simplesmente para simplificar o que aparece na tela.
+
+```{r carr_modulos, echo = TRUE}
+suppressMessages(library(tidyverse))
+suppressPackageStartupMessages(library(ggpubr))
+suppressPackageStartupMessages(library(caret))
+suppressPackageStartupMessages(library(DescTools))
+suppressPackageStartupMessages(library(nortest))
+suppressPackageStartupMessages(library(car))
+suppressPackageStartupMessages(library(broom))
+suppressMessages(library(mosaic))
+data(Sacramento)
+# Tirar de Sacramento longitude e latitude
+sac_mod <- Sacramento %>% 
+  select(-c(longitude, latitude))
+glimpse(sac_mod)
+```
+
+## Exploração dos Dados
+
+### Fatores vs. Caracteres
+
+`city` e `zip` já estão gravados como **fatores** "`<fct>`", que é um tipo especial de vetor de caracteres. Um vetor normal de caracteres está gravado na memoria de R na forma de caracteres em si. Por exemplo, "Sustentare" é uma sequência das letras que seria gravada como 10 caracteres. Se você converte para um `factor`, R grava um número inteiro e dá para este "nível" da variável o valor "Sustentare". Este sistema é muito útil para variáveis categóricas (como `city` e `zip`) que têm números grandes de níveis (cidades diferentes ou códigos postais diferentes) em termos de economia da memoria e tempo de processamento dos comandos.
+
+Um pequeno exemplo vai ajudar você entender a diferença melhor. Vamos começar com um vetor de caracteres `x`, que contem três valores: "a", "b" e "c". Vou converter isso para um fator utilizando a função `factor()`. Você vai ver que esta variável `x_fct` tem três números inteiros cada um associado com um "nível", que é a letra da variável original. R grava números inteiros muito mais eficientemente e assim precisa gravar "a", "b" e "c" uma vez, substituindo 1, 2 e 3 no lugar delas no uso.
+
+```{r fct_ex, echo = TRUE}
+x <- c("a", "b", "c")
+str(x)
+x_fct <- factor(x)
+str(x_fct)
+
+```
+
+R também tem funções que permite que você controle os nomes (níveis) dos fatores e os rótulos que vai pôr na tela, nos relatórios e nos gráficos. Nós vamos acessar essas funções no pacote `forcats`, no sistema tidyverse que trata de funções que são ferramentas para a manipulação das variáveis categóricas.
+
+### Resumo das Variáveis
+
+Como vimos no último capitulo, estes são as variáveis. 
+
+- `city`  - cidade na região de Sacramento
+- `zip`   - código postal
+- `beds`  - número dos quartos na habitação 
+- `baths` - número dos banheiros na habitação
+- `sqft`  - tamanho de habitação em pés (ft) quadrados (1 $m^2$ = 10.76 $ft^2$)
+- `type`  - tipo de habitação: `Condo` = Condomínio, `Multi_Family` = Apartamento, `Residential` = Casa
+- `price` - valor em US$ (variável dependente)
+
+Porque nós vamos usar todas as variáveis, seria uma boa ideia de conhecer elas melhor e fazer, se for necessário, mudanças nelas. 
+
+Para a primeira variável, `city`, vamos ver quantos cidades na região têm valores gravados no conjunto.
+
+```{r city_concent, echo = TRUE}
+table(sac_mod$city)
+
+```
+
+Podemos ver que a cidade de Sacramento tem quase metade dos casos e existem várias cidades com 15 ou menos residências no conjunto. 10 residências representa `r 100 * 15/nrow(sac_mod)`% dos casos. Vamos criar uma nova variável que agrupa as pequenas cidades num grupo de `Outras`. Podemos fazer isso com uma função de `forcats` chamada `fct_lump()` que usa a proporção dos casos que queremos preservar para colocar todos as outras níveis ou categorias do fator num grupo de outro.
+
+```{r city_mod, echo = TRUE}
+sac_mod2 <- sac_mod %>% 
+  mutate(city = forcats::fct_lump(city, prop = 15/nrow(sac_mod), other_level = "OUTRO"))
+forcats::fct_count(sac_mod2$city)
+```
+
+Agora, a lista das cidades é mais compreensível.
+
+A segunda variável, o código postal (`zip`) tem um "z" em frente de todos os números. Quem fez o conjunto de dados originalmente colocou lá para não confundir o código postal, um rotulo, não um número, com um número que pode ser usados em cálculos. Mas, já temos ele gravado como um fator. Então, o "z" é desnecessário e podemos tirar ele. Para fazer isso, podemos usar uma função de `stringr`, também um elemento do tidyverse para tirar esse "z" inicial dos `zips`. Neste caso, vamos colocar o sub-string que começa com o segundo caractere até o fim do string no lugar do string original. `str_sub()` é a função que identifica e manipula sub-strings.  
+
+```{r }
+sac_mod2 <- sac_mod2 %>% 
+  mutate(zip = factor(stringr::str_sub(zip, 2, )))
+
+```
+
+Próxima é a variável de número de quartos. A função `glimpse()` disse que atualmente que este é uma variável de número inteiro. Mas, é realmente uma variável categórica. Apesar que 2 quartos é mais que 1 quarto, a escala em termos de tamanho não é igual através de todas as casas. Alguns quartos são maiores que outros. Então não queremos fazer cálculos com este quarto porque 1 quarto ou 2 quartos não tem a mesma significação em todos os casos. A mesma coisa acontece com banhos (`baths`). Queremos transformar as duas variáveis em fatores e para isso, podemos usar `factor()` de base R. Aqui, eu quis pôr os quartos e banheiros em ordem numérica, que consegui fazer com o vetor dos níveis (`levels`). Naturalmente, `factor()` colocaria os níveis na ordem que ela encontra eles. Aqui, teria sido "2", "3", "1", etc.
+
+Uma mudança final nos quartos e banheiros vai ser de reduzir o número de categorias. As categorias maiores (5, 6 e 8 quartos, 4 ou mais banheiros) têm um número pequeno dos casos e porque cada categoria adicional representa uma variável *dummy* (como vai ser explicado abaixo) adicional, é melhor de combinar algumas.
+
+Deve anotar que nos EUA, é o costume de anotar um lavabo como um meio-banheiro. Uma residência com 1.5 banheiros tem um banheiro mais um lavabo. Você vai ver nos banheiros contagens com isso.
+
+```{r bedbath, echo = TRUE}
+sac_mod3 <- sac_mod2 %>% 
+  mutate(beds2 = factor(as.character(beds), 
+          levels = c("1", "2", "3", "4", "5", "6", "8")), 
+         baths2 = factor(as.character(baths), 
+          levels = c("1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"))) 
+sac_mod4 <- sac_mod3 %>%   
+  mutate(beds = fct_other(beds2, drop = c("5", "6", "8"), other_level = "mais_de_4"),
+         baths = fct_other(baths2, drop = c("4", "4.5", "5"), other_level = "4_ou_mais")) %>% 
+  select(-beds2, -baths2)
+print("Quartos")
+fct_count(sac_mod4$beds)
+print("Banheiros")
+fct_count(sac_mod4$baths)
+
+```
+
+A variável `type` já está na forma do fator, com os três níveis mencionados na tabela acima. Assim não precisamos fazer mais nada com ele neste momento. Mas, é importante de ver a distribuição dela também.
+
+```{r typedist, echo = TRUE}
+fct_count(sac_mod4$type, sort = TRUE)
+```
+
+Pode ver que a categoria de `Residential` domina o conjunto dos dados. Vai ser importante de ver se esse tem impacto sobre o modelo. Talvez, realmente existem 2 ou 3 modelos diferentes que precisamos construir. Este vai ser um experimento que podemos fazer.
+
+`sqft` e `price` são variáveis numéricas, e usamos elas no último capitulo. Vamos olhar de novo no gráfico de scatter delas, esta vez usando o pacote `ggpubr` que facilita a construção das plotagens de `ggplot`.
+
+
+```{r gr_preco, echo = TRUE}
+gr_price_sf <- sac_mod4 %>% 
+  ggscatter(x = "sqft", y = "price", color = "type",
+            palette = "aaas",
+            title = "Sacramento - Preços de Habitação",
+            xlab = "Tamanho em pés quadrados", 
+            ylab = "Preço em US$",
+            shape = 20,
+            add = "reg.line",
+            cor.coef = TRUE,
+            ggtheme = theme_gray())
+gr_price_sf
+```
+
+Este gráfico mostra que as unidades `Multi_Family` (ou seja, apartamentos) tem uma curva de regressão diferente dos outros (`Condo` e `Residential`) e também tem um número de casos muito menor (13). E, apesar que a correlação entre o tamanho e o preços é forte e positivo (0.77), esta relação não descreve exatamente a relação para os casos `Multi_Family`. 
+
+### Testes de Normalidade
+
+Um dos requisitos da regressão linear é que as variáveis numéricas têm distribuições normais ou gaussianas. Como indiquei antes, com um número de casos grande como neste conjunto, podemos confiar na teorema de limite central para usar regressão e outras técnicas paramétricos. Entretanto, vamos fazer um teste de normalidade. Existem vários; vou mostrar dois aqui. O teste Shapiro-Wilks tende de ter uma definição de normalidade mais restrita que o outro teste, Anderson-Darling. Historicamente, eu normalmente usei Anderson-Darling porque o padrão um pouco mais relaxado dele não criou dificuldades em estudos anteriores. Podemos achar Shapiro-Wilks na função de R base `shapiro.test` e para usar o teste Anderson-Darling, usamos a função `nortest::ad.test()`. Vamos aplicar esses dois testes às variáveis numéricas `sqft` e `price` e mostrar eles com uma plotagem de densidade de cada variável. Um teste de normalidade diz que a distribuição é normal se o valor p fica **acima** de 0.05. A hipótese nula neste caso é que a distribuição é normal. Valor p abaixo de 0.05 indica que varia desta hipótese.
+
+```{r gr_dens, echo = TRUE}
+## gráfico de densidade
+options(scipen = 10)
+densPlot <- function(numvar) {
+  titulo <- paste0("Variável ", numvar)
+  sac_mod4 %>% 
+    ggdensity(x = numvar, 
+              title = titulo,
+              xvar = FALSE,
+              add = "mean",
+              rug = TRUE,
+              ggtheme = theme_gray())
+}
+densPlot("price")
+densPlot("sqft")
+shapiro.test(sac_mod4$sqft)
+shapiro.test(sac_mod4$price)
+nortest::ad.test(sac_mod4$sqft)
+nortest::ad.test(sac_mod4$price)
+```
+
+Como pode ser visto neste caso, as duas variáveis não são normais, mas os gráficos de densidade mostram que este não normalidade não é por causa da forma da curva, mas porque o pico dos valores (o "modo" da distribuição) fica assimétrico a esquerda da média. Um das características de uma distribuição normal é que fica centralizada na média. Com `caret`, podemos corrigir este problema com o *pre-processing* dos dados, que vai normalizar eles.
+
+Tem uma outra transformação que podemos usar nesta situação que pode retornar uma distribuição a normalidade. Podemos usar um logaritmo da variável. Um logaritmo, como $log_{10}$ simplesmente re-escala os valores para modelagem e você pode traduzir de novo as previsões para pôr ele de volta na escala dos dólares fazendo o anti-log ou o exponente do valor logarítmico.[^1] Mas, aqui nós vamos fazer a transformação na construção de modelo.
+
+[^1]: É típico de usar o logaritmo de base 10, mas qualquer outro logaritmo também serve: base 2, base neperiano ($e$). 
+
+## Variáveis Categóricas em Regressão
+
+Estamos trabalhando com uma combinação das variáveis numéricas e categóricas. Até agora, só vimos regressão aplicada às variáveis numéricas (no último capitulo). Mas, regressão funciona também com variáveis independentes categóricas. Mas, eles recebem um tratamento especial.
+
+Para receber este tratamento especial, todas as variáveis devem está convertidas em fatores. Em nosso conjunto, `sac_mod4`, já estão nesta forma, conforme a `str()` abaixo:
+
+```{r str_mod4}
+str(sac_mod4)
+```
+
+Quando incluímos `type` ou outra variável categórica numa formula de modelo em R, o programa automaticamente cria covariáveis chamados `contrasts` para os níveis da variável. Podemos ver esses `contrasts` no formato do matriz do modelo do `type`, ou seja, o formato em que o programa trata dos níveis da variável. Aqui, mostro só alguns casos. (Regressão linear está calculado dentro do R no formato de matrizes usando álgebra linear dentro do programa. Esta é uma das poucas vezes que vou mostrar o que acontece dentro da "caixa preta".)
+
+```{r modmat, echo = TRUE}
+knitr::kable(with(sac_mod4, model.matrix(~ type)[c(1:10, 105:115),]))
+```
+
+A primeira coluna do matriz é todos 1's. Esta coluna representa o intercepto do modelo. As outras colunas representam variáveis "dummy" que o software criou para executar o modelo. Normalmente, quando temos fatores, nós usamos uma técnica de estatística chamado Analise de Variância (ANOVA). Mas, ANOVA e regressão são primas de primeiro grau e podemos executar nosso modelo no formato de regressão.
+
+Aqui, podemos ver que caso 1 tem um 0 na coluna de `typeMulti_Family` e um 1 na coluna de `typeResidential`. Este quer dizer que esta residência é um `Residential`. No caso 109, pode ver que `typeResidential` agora é 0 e `typeMulti_Family` é 1, indicando que este caso é um `Multi_Family`. Não tem coluna para `typeCondo` porque este é o primeiro nível da variável e está considerado o *base case*, o caso fundamental. Para indicar que o caso (como no caso 6) é um `typeCondo`, ambos `typeMulti_Family` e `typeResidential` tem 0.
+ 
+## Modelo de Regressão Múltipla 
+
+Agora estamos prontos para construir um modelo usando as outras variáveis não numéricas na regressão. O método de construir o modelo é o mesmo que antes. Nós dividiremos o conjunto em um grupo de treinamento e outro de teste, especificar o modelo e o tipo do modelo (`lm`), fazer o *pre-processing* que vai corrigir a assimetria dos dados. Para incluir mais que uma variável no modelo, só precisamos juntar elas com um sinal de mais ($+$). 
+
+O pre-processamento que este modelo tem tem 2 componentes que criam uma variável normalizada estatística dos dados. `center` subtrai a média de todos os valores das variáveis independentes numéricas (aqui, `sqft`). `scale` divide este valor centrado pelo desvio padrão da variável. Essas duas operações definam "normalização".
+
+```{r fit2, echo = TRUE, warning = FALSE}
+# criar train_data e test_data
+set.seed(42)
+indice <- createDataPartition(sac_mod4$price, p = 0.5, list = FALSE)
+train_data <- sac_mod4[indice, ]
+test_data <- sac_mod4[-indice, ]
+# modelo
+modelo2 <- caret::train(price ~ sqft + city + beds + baths + type,
+                        method = "lm",
+                        data = train_data,
+                        preProc = c("center", "scale"),
+                        trControl = trainControl(method = "repeatedcv",
+                                                 number = 5,
+                                                 repeats = 10,
+                                                 savePredictions = "none",
+                                                 verboseIter = FALSE))
+summary(modelo2)
+```
+
+## Resultados do Modelo 2
+
+Você pode ver que o $R^2$ do modelo subiu de 0.59 para 0.69 com a adição das novas variáveis categóricas. Este não é um aumento muito grande e sugere que ainda temos mais trabalho a fazer para usar este modelo como uma ferramenta prática para orientar donos da casa e imobiliários. Mas, para o fim de entender o mercado de Sacramento melhor, nós podemos aprender várias coisas sobre alojamento na região. 
+
+```{r prev_mod2, echo = TRUE}
+# previsões
+prv <- predict(modelo2, test_data)
+# comparar para preços observados
+data.frame(obs = test_data$price,
+           previs = prv,
+           type = test_data$type) %>% 
+  ggplot(aes(x = obs, y = previs, color = type)) +
+    geom_jitter(shape = 20) +
+    geom_smooth(method = "lm") +
+    labs(x = "Preço observado", y = "Preço previsto")
+```
+
+Como fizemos com a regressão simples, comparamos as previsões do preço com o preço verdadeiro. Ainda pode ver muito divergência entre as dois preços, especialmente quando os valores chegam aos níveis acima de um meio-milhão de dólares. Neste versão, mostrei as tendências para os três tipos e você pode ver que os preços previstos para as unidades `Multi_Family` caem enquanto os valores verdadeiros estão subindo. Então, num modelo dominado por casas (tipo `Residential`), os casos de `Multi_Family` não cabem bem. Uma sugestão para um modelo futuro seria de tirar os casos de `Multi_Family` deste modelo e construir um modelo separado para eles.
+
+```{r gr_dif_mod2, echo = TRUE}
+res <- data.frame(obs = test_data$price, 
+                  previs = prv,
+                  sqft = test_data$sqft) %>% 
+  mutate(dif = (obs - previs)) # data frame 
+(summ <- summary(res$dif)) 
+ggplot(data = res, aes(x = sqft, y = dif)) +
+  geom_jitter(shape = 20) +
+  geom_smooth(method = "lm")  +
+  labs(x = "Tamanho em pés quadrados", y = "Diferença")
+
+```
+
+Em termos de tamanho das unidades, a diferença entre os preços estimados e os preços do mercado não variam muito com tamanho. As divergências tem pouco relação ao tamanho da unidade. Porque a inclinação da linha azul no gráfico é quase 0.
+
+Se nós queremos usar este modelo como uma ferramenta em prática, uma grande maioria das previsões devem estar dentro de uma tolerância razoável do valor verdadeiro. Se decidimos que estimativas que erram por mais de US$50000 não são aceitáveis, o que podemos concluir sobre este modelo. Abaixo, testei quantos entre os 465 valores de grupo de testes ficou dentro deste limite do tolerância.
+
+```{r aval_mod, echo = TRUE}
+res <- res %>%
+  mutate(bom = ifelse(abs(dif) <=50000, "bom", "ruim"))
+table(res$bom)
+(pct <- 100 * sum(res$bom == "bom")/nrow(res))
+```
+
+Só `r round(pct, 2)`% das previsões ficaram dentro de nosso limite. Este seria aceitável à comunidade imobiliário lá. Este reforça a opinião que o modelo ainda precisa trabalho para chegar ao nível comercialmente viável.
+
+## Importância das Variáveis
+
+Um fator no modelo que pode estar atrapalhando o desempenho dele é o número de variáveis nele. Agora temos as cidades e cada nível de quarto e banheiro criam um modelo que precisa dividir a variância dele através de muitos fontes. Todas as variáveis são importantes? `caret` tem um função que ajuda de medir quais são e quais não são: `varImp()` que usa os valores da estatística $t$ das betas das variáveis para classificar as variáveis de mais alta (100) até a mais baixa (0). 
+
+```{r vars, echo = TRUE}
+varImp(modelo2)
+```
+
+Ainda `sqft` é por muito a variável mais importante, residências com muitos quartos (mais de 4) perto e um número  das cidades.[^2] Seguindo as cidades são os tipos de residência. O tipo `Condo` não aparece na lista, nem na tabela do resumo do modelo porque a regressão usa a primeira categoria das variáveis categóricas como referência. Abaixo disso, todos os índices são abaixo das 10. Com esta informação, nós podemos criar um novo modelo com menos variáveis, focando só nas mais importantes categorias das outras.
+
+[^2]: Essas cidades são localizadas geralmente a nordeste do capital e são as cidades mais ricas da região. 
+
+Nós devemos testar também as premissas de regressão, especialmente normalidade. Isso, fazemos com um gráfico `qqplot`, ou seja, uma plotagem das resíduos contra as quantis teóricas que eles devem ocupar. Para fazer isso, devemos recalcular os parâmetros da equação da regressão utilizando `lm` porque o objeto `train` de `caret` não grava os resíduos numa forma que a função `qqPlot` pode facilmente ler. `qqPlot` vem do pacote `car` mencionado ao início do capitulo. Também podemos olhar na normalidade das previsões com uma outra forma de `qqplot` que usa funções de `ggplot2`.
+
+```{r qq}
+qqPlot(lm(price ~ sqft + city + beds + baths + type, data = sac_mod4), 
+       main = "qqPlot do Modelo2")
+ggplot(res, aes(sample=previs)) + 
+  stat_qq() + stat_qq_line() + 
+  labs(title = "qqplot dos Preços Previstos")
+```
+
+As duas curvas têm formas semelhantes. No meio, em volta do 0 no eixo $x$, elas ficam na linha de unidade, mas nos extremos do eixo eles divergem bastante. Divergência nos finais da curva acontece muito, mas esses são um pouco extremo, mais uma evidência que este modelo ainda precisa ser revisado para melhor reflete a realidade dos preços das residências.
+
+## Exercício para Semana 2
+
+Usando toda essa informação, vocês vão elaborar `modelo3`. Este modelo deve as seguintes mudanças:
+
+1.  Tirar os casos de `Multi_family` do modelo principal
+2.  Reduzir o número de categorias de cidades para aqueles que ficam acima do `typeResidential` na tabela de importância das variáveis. Use `forcats::fct_other` para reagrupar as categorias.
+3.  Ficar com os quartos de banheiros.
+4.  Elaborar o modelo com `caret` e fazer os testes que fiz aqui para ver se avançamos na qualidade do modelo ou não.
