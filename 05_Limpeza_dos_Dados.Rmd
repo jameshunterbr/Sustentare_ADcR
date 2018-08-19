@@ -169,7 +169,7 @@ Antes de declarar que você tinha limpado os dados com êxito, é importante de 
 
 ### Pacotes para Descrever Dados
 
-R contem vários pacotes que têm funções para examinar. Entretanto, eu tenho uma preferência forte para um deles: `DescTools` e `Hmisc` -- e algumas funções simples que você pode escrever mesmo utilizando `dplyr`. Para gráficos, usaremos o pacote `ggpubr`. Este pacote simplifica as funções de um dos pacotes centrais do tidyverse, `ggplot`, e faz elas mais accessíveis. `ggplot` implementa a arquitetura de gráficos chamada *Grammar of Graphics* que fornece um consistente maneira para especificar parâmetros de gráficos de todos os tipos. Mas, a especificação de um gráfico de `ggplot` pode ser um pouco complicado. `ggpubr` facilita o processo.
+R contem vários pacotes que têm funções para examinar dados. Entretanto, eu tenho uma preferência forte para dois deles: `DescTools` e `Hmisc` -- e algumas funções simples que você pode escrever mesmo utilizando `dplyr`. Para gráficos, usaremos o pacote `ggpubr`. Este pacote simplifica as funções de um dos pacotes centrais do tidyverse, `ggplot`, e faz elas mais accessíveis. `ggplot` implementa a arquitetura de gráficos chamada *Grammar of Graphics* que fornece um consistente maneira para especificar parâmetros de gráficos de todos os tipos. Mas, a especificação de um gráfico de `ggplot` pode ser um pouco complicado. `ggpubr` facilita o processo.
 
 ### Resumo dos Dados
 
@@ -335,7 +335,7 @@ print(paste("Com dado de 2005: média =",
 
 Agora, temos 10 valores para Rússia e o valor para 2005 cai diretamente dentro da sequência dos números. Porque Rússia teve um aumento brusco entre 2006 e 2007, a média para Rússia vai mudar, mas não por causa do novo valor que acrescentamos. 
 
-### Índia 2007 - *Outlier*?
+## Índia 2007 - *Outlier*?
 
 Destaquei este valor alto para a Índia em 2007. Uma tabela dos valores com a mudança porcentual de ano em ano para a Índia mostra o problema:
 
@@ -426,7 +426,7 @@ Agora, não tem mais outlier para a Índia. Todos os valores ficam dentro de 1,5
 
 ### Escala da China e Índia
 
-China e Índia são os dois países maiores da planeta com pelo menos 1,25 bilhões de pessoas cada um em 2011. África de Sul tem uma população que é só 4% da população da China. Mesmo o Brasil tem 15% do número das pessoas China. Mas, estamos contando casos. O fato de simplesmente contar sugere que as populações são iguais. Não seria melhor medir a incidência dos casos de tuberculose em termos de casos per capita, ou é mais comum, casos per 100.000 pessoas. Talvez este daria um retrato da epidemiologia da tuberculose mais preciso. 
+China e Índia são os dois países maiores da planeta com pelo menos 1,25 bilhões de pessoas cada um em 2011. África de Sul tem uma população que é só 4% da população da China. Mesmo o Brasil tem 15% do número das pessoas da China. Mas, estamos contando casos. O fato de simplesmente contar sugere que as populações são iguais. Não seria melhor medir a incidência dos casos de tuberculose em termos de casos per capita, ou é mais comum, casos per 100.000 pessoas. Talvez este daria um retrato da epidemiologia da tuberculose mais preciso. 
 
 A planilha da OMS que é a fonte deste tibble também tem a população para todos os anos de interesse para nosso estudo. Já coloquei esses dados em R no arquivo `popTB.rds`.  [^7] O formato `rds` é um formato compacto de R para gravação de um objeto em R. Quando lemos um arquivo deste tipo, precisamos designar um nome do objeto que vai receber os dados. O que vamos fazer é primeiro olhar nos dados e segundo usar as funções `join` para integrar esses dados no tibble de incidência (que agora carregará o nome `who_mod5`).
 
