@@ -270,6 +270,7 @@ res <- data.frame(obs = test_data$price,
 ggplot(data = res, aes(x = sqft, y = dif)) +
   geom_jitter() +
   geom_smooth(method = "lm")  +
+  theme_ipsum_rc() +
   labs(x = "Tamanho em pés quadrados", y = "Diferença")
 
 ```

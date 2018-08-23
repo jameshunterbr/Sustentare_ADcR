@@ -261,7 +261,7 @@ table(res$bom)
 (pct <- 100 * sum(res$bom == "bom")/nrow(res))
 ```
 
-Só `r round(pct, 2)`% das previsões ficaram dentro de nosso limite. Este seria aceitável à comunidade imobiliário lá. Este reforça a opinião que o modelo ainda precisa trabalho para chegar ao nível comercialmente viável.
+Só `r round(pct, 2)`% das previsões ficaram dentro de nosso limite. Este seria aceitável à comunidade imobiliário lá? Provavelmente, não. Este reforça a opinião que o modelo ainda precisa trabalho para chegar ao nível comercialmente viável.
 
 ## Importância das Variáveis
 
@@ -289,7 +289,7 @@ As duas curvas têm formas semelhantes. No meio, em volta do 0 no eixo $x$, elas
 
 ## Exercício para Semana 2
 
-Usando toda essa informação, vocês vão elaborar `modelo3`. Este modelo deve as seguintes mudanças:
+Usando toda essa informação, vocês vão elaborar `modelo3`. Este modelo deve ter as seguintes mudanças:
 
 1.  Tirar os casos de `Multi_family` do modelo principal
 2.  Reduzir o número de categorias de cidades para aqueles que ficam acima do `typeResidential` na tabela de importância das variáveis. Use `forcats::fct_other` para reagrupar as categorias.

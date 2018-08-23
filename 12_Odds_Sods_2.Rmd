@@ -1,0 +1,139 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+options(scipen = 10)
+```
+
+# *Odds & Sods* 2
+
+Espero que vocês gostaram da primeira semana do curso. Tem mais para aparecer este fim de semana. Hoje gostaria de falar sobre dois assuntos sobre R que podem ajudar sua aprendizagem da linguagem.
+
+## Vetores e Coerção
+
+Você tem uma variável numérica, mas você quer usar ela como uma variável de caractere. Não importa a você as operações matemáticas com a variável. Como você pode forçar ela para a classe `character`? E como nós sabemos o que é a classe de nossas variáveis? R e o tidyverse têm funções que fazem isso. O processo de forçar uma variável a adotar uma classe diferente é chamada **coerção**.[^1] 
+
+### Vetores em Geral
+
+Antes de aprender como manipular eles, temos que aprender um pouco sobre vetores, o elemento fundamental de R. Vetores vem em dois sabores -- *vetores atômicos* e *lists*. Até números escalares (números únicos) são vetores; são vetores de um elemento. A diferença entre vetores atômicos e lists é que vetores atômicos são *homogéneros*, ou seja, eles só podem ter elementos da mesma classe. Todos os elementos devem ser caracteres ou numéricos, ou uma das outras classes. Mas, eles não podem misturar as classes dentro de um vetor. Uma lista pode ser *heterogénera*. Ela pode ter elementos de várias classes. 
+
+Um outro objeto, `NULL` é a ausência de um vetor. Assim, é diferente de `NA`, que é a ausência de um valor em um elemento de um vetor. `NULL` é um vetor que tem o tamanho (`length`) de 0. 
+
+### Vetores Atômicos
+
+Os tipos mais importantes de vetores atômicos são:
+
+1.  Lógico
+2.  Numérico
+  a.  Inteiros (números inteiros)
+  b.  Dobro (números reais)
+3.  Caractere
+
+Vetores **lógicos** (`logical`) só podem aceitar três valores diferentes: `TRUE`, `FALSE` e `NA`. Você pode criar vetores lógicos diretamente, declarando uma variável com um desses valores: `logic <- TRUE` ou `logic <- c(TRUE, FALSE, TRUE)`. Também, você pode criar eles por comparações. Você pode comparar duas quantidades. Se eles satisfazem as condições do teste de comparação, o valor seria `TRUE` e senão, seria `FALSE`. No próximo exemplo, os números impares teriam o resultado `FALSE` e os números pares, `TRUE`. O valor `NA` só ocorre se falta um dado no elemento do vetor.
+
+```{r log_vetor}
+x <- 1:10
+x
+x %% 2 == 0
+```
+
+Vetores **numéricos** (`numeric`) tem dois subtipos: **números inteiros** (`integer`) e **números dobros** (`double`). Inteiros são valores exatos. Também, em muitos casos tem a letra `L` depois do número. Também você precisa usar o `L` se você quer especificar um número inteiro. Número dobros são chamados em inglês "double" porque eles usam mais memoria que um número inteiro e tem casas decimais. Também são números de ponto flutuante ("floating point numbers"). A representação dos números `double` na tela pode ser uma aproximação invés de um número exato por causa da maneira em que está gravada na memoria.
+
+Todos os números pode ter o valor `NA` quando um valor especifico está faltando. Números dobros podem ter os valores especiais de `NaN`, `Inf` e `-Inf`. Esses valores ocorrem normalmente como o resultado de uma operação de divisão que não produz um valor distinto. 
+
+Nos exemplos seguintes, você pode ver os dois tipos de números e como R representa eles. Também, tem um exemplo de um desses valores especiais.
+
+```{r vetor_num}
+x1 <- 1:10
+x1
+class(x1)
+x2 <- 1.5:10.5
+x2
+class(x2)
+typeof(x2)
+5/0
+-5/0
+```
+
+A função `class()` mostra `x2` como um membro da classe `numeric` mas a função `typeof()` vai um pouco mais profundo para mostrar que é uma variável dobro. Ao final, dividindo por 0, que não é possível, produz o resultado `Inf`.
+
+Vetores **caracteres** (`character`) são mais complexos que os tipos anteriores porque cada elemento pode ser uma cadeia de caracteres ("string") e pode conter uma quantidade arbitrária dos dados. Uma cadeia de caracteres pode ter um caractere ou múltiplas (uma cadeia) conforme os exemplos abaixo.
+
+```{r vetor_chr}
+suppressMessages(library(tidyverse)) # começar de usar funções 
+x <- "a"
+x
+xx <- "Este é uma cadeia de caracteres"
+xx
+length(x) # número de elementos no objeto
+length(xx)
+nchar(x) # número de caracteres no objeto
+nchar(xx) 
+```
+
+Você pode ver que ambos os objetos têm tamanho 1. Este quer dizer que os dois têm um elemento cada um. Mas o número de caracteres é bastante diferente, `r nchar(x)` para `x` e `r nchar(xx)` para `xx`.
+
+### Funções de Teste do Tipo de Vetor
+
+R inclui funções que pode usar para testar qual tipo de vetor você tem. Além de `class()` e `typeof()`, o pacote `purrr` do Tidyverse contem uma série de funções para testar o tipo de fator. Essas funções têm as letras iniciais `is_*` com o tipo de vetor no lugar do asterisco. Elas são
+
+- `is_logical()`
+- `is_integer()`
+- `is_double()`
+- `is_numeric()`
+- `is_character()`
+- `is_vector()`
+
+### Funções `as.*` -- Coerção Explicito
+
+Tem um tipo de função que coloca `as.*` em frente de um nome de um tipo de vetor atômico. Essas funções vêm de base R. São
+
+- `as.logical()`
+- `as.integer()`
+- `as.double()`
+- `as.character()`
+
+Essas funções convertem um vetor para um outro tipo. Olhe nos exemplos seguintes.
+
+```{r as_ex}
+log_var <- c(TRUE, FALSE, TRUE)
+int_var <- c(1L, 20L, 2000L)
+doub_var <- c(10.5, 20.8, 30)
+car_var <- c("gato", "cao", "y")
+
+## coerção
+x <- as.integer(log_var)
+x
+sum(x) # contexto que usamos esta coerção antes
+
+y <- as.double(int_var)
+y
+yy <- int_var/2.5 # coerção implicito
+yy
+class(yy)
+
+z <- as.character(c(log_var, int_var, doub_var))
+z   # anote as aspas; são todas caracteres agora
+zz <- c(car_var, int_var)
+class(zz)
+```
+
+Além da coerção explicito, quando você combinam ou usam vetores das classes diferentes no mesmo vetor, como em `yy` e `zz` acima, esta operação forçaria implicitamente todos os elementos para tipo mais geral, ou mais complexo. Se você tenta converter um vetor para um tipo mais simples, como `character` a `logical`, você terá como resultado um `NA` ou outro valor problemático.
+
+```{r erro}
+as.logical(car_var)
+as.integer(doub_var)
+
+```
+
+No primeiro caso, porque caracteres não fazem parte dos valores permitidos em vetores lógicos, os três resultados são `NA`. No segundo caso, a conversão cortou os valores decimais. Então os resultados são simplesmente errados. Coerção é uma ferramenta importante e poderosa. Mas, também pode criar resultados inesperados se não for usada cuidosamente.
+
+## Exercício de Limpeza de Dados
+
+Estou colocando uma planilha de Excel no SER e no GitHub. Está chamada `attendance.xls`. Trata de presença em escolas públicas nos EUA. Nós vamos tentar tornar ela *tidy* na aula. Mas, talvez vocês querem começar de decidir uma estratégia para conseguir fazer a limpeza antes da minha chegada. Nós vamos fazer primeiro um outro exercício de limpeza que envolve *scrape* dados da internet. Um exercício de *data mining* e da limpeza.
+
+[^1]: Este tópico está derivado do capitulo 20 de Wickham & Grolemund, **R for Data Science**.
