@@ -1,0 +1,686 @@
+---
+title: "Slides sobre Machine Learning"
+author: "James R. Hunter"
+institute:  "UNIFESP/Sustentare"
+date: "24-25 de agosto de 2018"
+output: 
+  beamer_presentation:
+    fig_caption: no
+theme: "Boadilla"
+colortheme: "whale"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.height = 3, fig.width = 5)
+knitr::knit_hooks$set(mysize = function(before, options, envir) {
+  if (before) 
+    return(options$size)
+})
+```
+
+```{r loadmods, echo = FALSE}
+  suppressMessages(library(tidyverse))
+  suppressPackageStartupMessages(library(DescTools))
+  suppressPackageStartupMessages(library(knitr))
+  suppressPackageStartupMessages(library(caret))
+  suppressPackageStartupMessages(library(mice))  ## novo pacote
+  suppressPackageStartupMessages(library(corrr)) ## novo pacote
+  suppressPackageStartupMessages(library(ROCR)) ## novo pacote
+  suppressPackageStartupMessages(library(pROC)) ## novo pacote
+  suppressPackageStartupMessages(library(rpart)) ## novo pacote
+  suppressPackageStartupMessages(library(rpart.plot)) ## novo pacote
+  suppressPackageStartupMessages(library(randomForest)) ## novo pacote
+  suppressMessages(library(mosaic))
+  options(scipen = 10)
+```
+
+## Fonte  
+
+  - Dr. Sharin Glander, Univ. de Münster, Alemanha
+    - Webinar excelente recente
+    - "Building meaningful machine learning models for disease prediction"
+    - https://github.com/ShirinG
+    
+  - Dados
+    - UCI Machine Learning Repository
+      - U. de Wisconsin dados sobre câncer de mama
+      - Arquivo "breast-cancer-wisconsin-data.txt"
+
+## Machine Learning em Modelagem das Doenças
+
+  - Tipicamente, projetos com "big data"
+  - Modelo pode fornecer informação rapidamente e corretamente
+    - Médicos podem usar a informação para desenhar tratamentos ou diagnósticos
+  - Aplicação para medicina personalizada de precisão
+  - Exemplo:
+    - Diagnostico de câncer de mama com ajuda de modelo informatizado
+
+##  Podemos Ter Confiança nos Modelos de Machine Learning?
+
+  - Algoritmos de ML modelam interações de alto grau enter as variáveis
+  - Interpretação dos resultados de ML pode ser difícil 
+  - A "caixa preta" dos algoritmos de ML escondem como eles fazem escolhas
+  - Assim, *precisamos modelos que significam algo* para os 
+    - Arquitetos
+    - Usadores
+  - "Meaningful Models"
+
+## O Que Faz um Modelo um "Meaningful Model"
+
+  - Poder generalizar baseado no modelo
+  - Responde à pergunta original
+  - ... com suficiente precisão para ser confiável
+  - Grau de precisão depende no problema
+  
+## Features -- Covariáveis
+
+  - Variáveis para treinar o modelo
+  - Selecionar as variáveis certas -- **crucial**
+  - Mais features não necessariamente bom
+    - Perigo de "overfitting"
+
+# Vamos Pôr as Mãos na Massa
+
+## Dados
+
+  - Explicarei o modelo mas nós vamos focar na interpretação dos resultados
+  - Vêm de Wisconsin dados sobre câncer de mama
+  - Características dos tumores de mama 
+  - Variável dependente: diagnose (`diag`)
+  
+## Covariáveis - Caracteristicas dos Tumores
+
+  - Características
+    - Sample ID (code number) 
+    - Clump thickness 
+    - Uniformity of cell size 
+    - Uniformity of cell shape 
+    - Marginal adhesion
+    - Single epithelial cell size 
+    - Number of bare nuclei 
+    - Bland chromatin 
+    - Number of normal nuclei 
+    - Mitosis
+
+## Carregar Dados
+```{r loaddata, echo = TRUE, mysize=TRUE, size='\\tiny'}
+bc_data <- read.table("~/Documents/Sustentare/Data_Analysis_with_R/dawR1/breast-cancer-wisconsin-data.txt", 
+                      header = FALSE,
+                      sep = ",",
+                      na.strings = "?")
+colnames(bc_data) <- c("sample_code_number", 
+                       "clump_thickness", 
+                       "uniformity_of_cell_size", 
+                       "uniformity_of_cell_shape", 
+                       "marginal_adhesion", 
+                       "single_epithelial_cell_size", 
+                       "bare_nuclei", 
+                       "bland_chromatin", 
+                       "normal_nucleoli", 
+                       "mitosis", 
+                       "diag")
+
+bc_data$diag <- ifelse(bc_data$diag == "2", "benigno",
+                          ifelse(bc_data$diag == "4", "maligno", NA))
+
+```
+
+## Dados
+
+```{r dads, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+glimpse(bc_data)
+```
+
+## Analise de NAs -- Decisão sobre o Que Fazer com Eles
+
+  - Quantas NAs estão nos dados?
+
+```{r nas, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+length(which(is.na(bc_data)))
+```
+  
+  - Quantas amostras perdemos se retiraram os NAs?
+  
+```{r nas2, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+nrow(bc_data[is.na(bc_data), ])
+```
+
+## Imputar Valores de NAs
+
+  - Pacote e função `mice`
+    - Multivariate Imputation by Chained Equations 
+  - Cria dados imputados para dados incompletos multivariados
+    - Gibbs Sampling (técnica Bayesiana)
+    - Gera valores plausíveis sintéticos dado as outras colunas no dataset
+  - Imputação introduza mais incerteza no modelo
+
+## 
+```{r namice, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+summary(bc_data$bare_nuclei)
+bc_data[,2:10] <- apply(bc_data[, 2:10], 2, function(x) 
+  X = as.numeric(as.character(x)))
+dataset_impute <- mice(bc_data[, 2:10],  print = FALSE)
+bc_data <- cbind(bc_data[, 11, drop = FALSE], mice::complete(dataset_impute, 1))
+summary(bc_data$bare_nuclei)
+```
+
+## Resumo das Diagnoses
+
+  - Converter `diag` para um `factor`
+  - Quantos casos de benigno e maligna têm?
+  
+```{r explor, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+bc_data$diag <- as.factor(bc_data$diag)
+ summary(bc_data$diag)
+```
+
+## Classes de `diag` Desequilibradas
+
+  - Normalmente precisa um ajuste para tratar dessa desequilibração
+  - Não vamos fazer isso aqui
+
+## Criar as Bases Treinamento e Testes
+
+```{r ind, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+set.seed(42)
+indice <- createDataPartition(bc_data$diag, p = 0.7, list = FALSE)
+train_data <- bc_data[indice, ] # use os índices para o treinamento
+test_data <- bc_data[-indice, ] # use os outros para testes
+```
+
+## as Bases Refletem os Mesmos Dados?
+
+```{r grtesttr, echo = FALSE}
+rbind(data.frame(group = "train", train_data),
+    data.frame(group = "test", test_data)) %>%
+  gather(x, y, clump_thickness:mitosis) %>%
+  ggplot(aes(x = y, color = group, fill = group)) +
+    geom_density(alpha = 0.3) +
+  facet_wrap( ~ x, scales = "free", ncol = 3)
+```
+
+## Exemplos dos Tipos de Modelos
+
+  - Regressão Linear
+    - Ex: GLM
+    - com `caret`
+  - Classificação com Arvores
+    - Árvores recursivas de particionamento e regressão (pacote `rpart`)
+    - Florestas Aleatórias ("Random Forests")
+  - Todos com `caret`
+  
+## Controle de Treinamento
+
+  - Antes de iniciar o passo de treinar o modelos, precisamos decidir qual tipo de validação queremos usar
+    - bootstrap, k-fold cross validation
+  - Especificar através da função `caret::trainControl()`
+  - Queremos usar *10-fold cross validation*
+  - Se pudermos repetir o processo de cross validation, faz a seleção do modelo ainda mais forte
+    - Repetiremos 10 vezes
+  
+## `trainControl()`
+
+```{r cont, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+set.seed(42)
+control <- trainControl(method = "repeatedcv",
+                       number = 10,
+                       repeats = 10,
+                       savePredictions = TRUE,
+                       verboseIter = FALSE)
+```
+
+## Variável Dependente: *benign* ou *malignant*
+
+>-  Qual tipo de análise mais relacionado?
+>-  Regressão logistica
+
+## Treinamento do Modelo -- Regressão Logistica
+
+```{r train, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+model_glm <- caret::train(diag ~ .,
+                          data = train_data,
+                          method = "glm",
+                          preProcess = c("scale", "center"),
+                          trControl = control)
+```
+
+## Modelo
+
+```{r mod, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+model_glm
+```
+
+## Resumo dos Resultados do Modelo
+
+```{r mod2, echo = TRUE, mysize=TRUE, size='\\tiny'}
+summary(model_glm)
+```
+
+## O Modelo Pode Predizer os Resultados de Treinamento e de Teste?
+
+  - Função `predict()`
+    - com modelo e valores para ser usados para previsão
+  - Aplicado a base de `train` como exemplo
+  - Mais interessante -- base de `test`
+    - Modelo nunca viu esses dados antes
+  - **Teste ácido**
+
+## Previsões
+
+```{r prev, echo = TRUE, mysize=TRUE, size='\\tiny'}
+predtr <- predict(model_glm, train_data)
+predtest <- predict(model_glm, test_data) 
+prop.table(table(predtest))
+prop.table(table(predtr))
+```
+
+## Quais Variáveis Têm Importância para o Modelo
+
+```{r varfitgr1, echo = TRUE, mysize=TRUE, size='\\tiny'}
+plot(caret::varImp(model_glm))
+```
+
+## Previsões com os Dados de Teste -- Matriz de Confusão
+
+```{r cfm1, echo = TRUE, mysize=TRUE, size='\\tiny'}
+confusionMatrix(predtest, test_data$diag)
+```
+
+## Previsões com os Dados de Treinamento -- Matriz de Confusão
+
+```{r cfm2, echo = TRUE, mysize=TRUE, size='\\tiny'}
+confusionMatrix(predtr, train_data$diag)
+```
+
+## "Receiver Operating Characteristic" (ROC) Validação do Modelo
+
+  - Desenvolvido ao início da WWII para determinar o que foi o sinal recebido pela nova tecnologia, *radar*
+    - Avião ou pássaro
+  - Mede *sensibilidade* vs. *especificidade* de um modelo
+  - *Sensibilidade* = % do resultado positivo correto
+    - Teste mede % dos resultados positivos das pessoas com uma doença
+    - Taxa de previsões positivas certas ("True positive rate", TPR)
+  - *Especificidade* = % do resultado negativo correto
+    - Teste mede % dos resultados negativos das pessoas sem uma doença
+    - Taxa de previsões positivas erradas ("False positive rate", FPR)
+    - Visualização da troca entre alta sensibilidade do modelo vs. alta especificidade
+    - Não pode ter os 2 juntos
+    
+## AUC (Área abaixo da Curva)
+
+  - AUC mede quanto porcentagem da área do gráfico a curva do modelo cobre
+  - 100% quer dizer que o modelo é perfeitamente sensível e especifico
+  - 50% quer dizer que o resultado é puramente aleatório
+  - Modelos com AUC maiores prevêm melhor que eles com AUC menores
+  - Pergunta:
+    - Como calcular área abaixo de uma curva qualquer em matemática?
+  
+## ROC em R
+
+  - 2 Pacotes
+    - `pROC`
+    - `ROCR`
+  - Iguais (basicamente)
+  - Começamos com `pROC`
+    - Comando principal -- `roc`
+
+## `pROC::roc()`
+
+  - Compara as previsões contra as observações
+  - Previsões precisam ser numéricas (não `factor`)
+  - Use as opções seguintes:
+    - `plot = TRUE, percent = TRUE, ci = TRUE, grid = TRUE`
+  - Produz um gráfico e dados sobre o AUC
+
+## Chamada e Estatísticas
+
+```{r roctest, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+## colocar predtest na faixa de 0:1 (atualmente 1:2)
+predtestroc <- as.numeric(predtest) - 1 # para curva ROC números devem ser 1 e 0
+rocteste <- roc(response = test_data$diag, 
+                predictor = predtestroc, 
+                levels = c("benigno", "maligno"), 
+                plot = FALSE, percent = TRUE, 
+                ci = TRUE, grid = TRUE)
+rocteste
+```
+
+## Gráfico
+
+```{r rocgr1, echo = FALSE }
+plot(rocteste)
+```
+
+## Procedimento com `ROCR`
+
+- `ROCR` quer os dados num formato específico 
+  - Precisa refazer a previsão utilizando a função deste pacote
+  - Função usará uma versão numérica das previsões `predtest`
+  - Depois calcular os valores da curva e fazer o gráfico
+  - `ROCR` utiliza a terminologia "tpr" e "fpr" para gráfico ROC
+  - Pode imprimir sensibilidade e especificidade com `sens`, `spec`
+  
+```{r rocrparam, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+## Fazer previsão do modelo com ROCR
+ROCRpred <- prediction(as.numeric(predtestroc), test_data$diag)
+ROCRperf <- performance(ROCRpred, "tpr", "fpr")
+```
+
+## Gráfico
+
+```{r ROCRgr1, echo = FALSE}
+plot(ROCRperf)
+```
+
+## Gráfico com Cores
+
+```{r ROCRgr2, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+plot(ROCRperf, colorize = TRUE)
+```
+
+## Limites da Decisão sobre `diag`
+  
+  - Onde no gráfico fica a troca ótima?
+    - No ponto mais para cima e para esquerda
+  - `pROC::coords()` pode calcular este ponto
+  - Precisa dar as seguintes informações a função:
+    - nome de objeto de ROC
+    - Palavra "best"
+    - Coordenados para retornar a você ("threshold")
+
+## Limites de Nosso Modelo
+
+```{r lims, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+coords(rocteste, "best", ret = "threshold")
+```
+
+## Gráfico com Cores
+
+```{r ROCRgr2a, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+plot(ROCRperf, colorize = TRUE)
+```
+
+## Novo Modelo -- Modelos de Arvore -- `rpart`
+
+  - Modelos que constroem arvores de decisão
+  - Excelentes para problemas de classificação
+  - Pacote `rpart`
+  - Gráficos mostra como escolha das classes está sendo feita
+    - Gráfico vem do pacote `rpart.plot`
+
+## Como Funciona uma Arvore
+
+  - Cf. Kuhn & Johnson, *Applied Predictive Modeling* (2013)
+  - Feita de *nodos* e *ramos*
+  - Ramos conectam nodos até que chegar num nodo terminal
+  - Algoritmo cria uma serie de partilhas (divisões) baseado em testes lógicos aninhados
+  - Os testes lógicos definem a previsão que o modelo faria com novos dados
+  
+## Exemplo de uma Regra de uma Arvore
+
+```
+if Predictor A >= 1.7 then
+|   if Predictor B >= 202.1 then Outcome = 1.3
+|   else Outcome = 5.6
+else Outcome 2.5
+```
+
+## Arvores São uma Técnica de Machine Learning Popular
+
+  - Interpretação fácil
+  - Podem lidar com muitas convariáveis de vários tipos
+  - Não precisa descrever exatamente a relação entre
+    - Variável dependente
+    - Variáveis independentes
+  - NA's não criam problemas
+  - Mas, tem desvantagens também
+    - São instáveis (pequena mudança numa variável pode cause grande mudança no resultado)
+    - Exatidão de previsões não tão boa que outros tipos de modelos
+
+## Funcionamento do Modelo de Arvore
+
+  - Algoritmo divide os dados em grupos menores que são mais homogêneos com a dependente
+  - 3 Critérios para divisão
+    - Qual variável de previsão para usar para o "split"
+    - Profundidade da arvore
+    - A equação de previsão nos nodos terminais
+  - Metodologia de `rpart` vem de Breiman et. al (1984)
+    - Classification and regression tree (CART)
+    
+## Paramétros Chaves para `rpart`
+
+  - `method`
+    - Para classificação: "class"
+    - Para regressão: "anova"
+  - `control`
+    - Vai chamar `rpart.control` explicito
+    - `xval`: número de cross-validations
+    - `minbucket`: número mínimo de observações em um nodo terminal
+  - `parms` -- parâmetros para dividindo os casos
+    - Só usado para classificação
+    - `information`
+    
+## Vamos Construir Um Modelo de Câncer de Mama
+
+```{r treemod, echo = TRUE, mysize=TRUE, size='\\footnotesize'}
+set.seed(42)
+fitree1 <- rpart(diag ~ .,
+            data = train_data,
+            method = "class",
+            control = rpart.control(xval = 10, 
+                                    minbucket = 2, 
+                                    cp = 0), 
+             parms = list(split = "information"))
+```
+
+## Arvore
+
+```{r}
+rpart.plot(fitree1, extra = 100)
+```
+
+## Resumo do Modelo de `rpart`
+
+```{r summtree, echo = TRUE, mysize=TRUE, size='\\tiny'}
+summary(fitree1, cp = 1)
+```
+
+## Previsões com a Arvore
+
+```{r prevarv, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+predtest <- predict(fitree1, newdata = test_data, type = "class")
+prop.table(table(predtest))
+```
+
+## Confusion Matrix -- Arvore
+
+```{r cmarv, echo = TRUE, mysize=TRUE, size='\\tiny'}
+confusionMatrix(predtest, test_data$diag)
+```
+
+## ROC Dados
+
+```{r roctest2, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+## colocar predtest na faixa de 0:1 (atualmente 1:2)
+predtestroc <- as.numeric(predtest) -1
+rocteste <- roc(response = test_data$diag, 
+                predictor = predtestroc, 
+                levels = c("benigno", "maligno"), 
+                plot = FALSE, percent = TRUE, 
+                ci = TRUE, grid = TRUE)
+rocteste
+suppressMessages(coords(rocteste, "best", ret = "threshold"))
+```
+
+## Gráfico
+
+```{r rocgr2, echo = FALSE }
+plot(rocteste)
+```
+
+## Arvores Mais Robustas -- Random Forests
+
+  - Random Forests elaborado como algoritmo por Breiman em 2000
+  - Ideia básica:  Combinando resultados de muitas arvores vai produzir uma arvore final melhor
+
+> Grow many deep regression trees to randomized versions of the training data, and average them. *Efron & Hastie, 2016*
+
+  - "Randomized versions" -- pode ser bootstrapping ou outras técnicas de re-amostragem
+  
+## Random Forests em R
+
+  - Pacote `randomForest`
+  - Formato:
+  
+```
+randomForest(y ~ xvars, data = dados, ntrees = 1000, 
+             importance = TRUE)
+```
+  - `y` deve ser expressa como `factor` para classificação
+  - Argumentos chaves:
+    - `ntrees`: número de arvores para a calcular; deve ser muito maior que o número das covariáveis 
+    - `importance = TRUE`: para calcular os valores para importância dos variáveis
+  
+## Random Forests Aplicado ao Câncer de Mama
+
+```{r rf, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+arvores = 100
+rffit <- randomForest(as.factor(diag) ~ ., data = train_data, 
+                      ntree = arvores, importance = TRUE, proximity = TRUE)
+rffit
+```
+
+Confusion Matrix aqui é dos dados de *treinamento*
+
+## OOB Error????
+
+  - "Out of Bag"
+    - Para todos as arvores, os erros associados com os valores não utilizados no treinamento do modelo
+    - Como fizemos com cross-validation
+
+## Previsões com a Random Forest
+
+```{r prevrf, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+predtest <- predict(rffit, newdata = test_data, type = "class")
+prop.table(table(predtest))
+```
+## Desempenho de Random Forest
+
+```{r cmrf, echo = TRUE, mysize=TRUE, size='\\tiny'}
+confusionMatrix(predtest, test_data$diag)
+```
+
+## Importância das Variáveis
+
+```{r rfvarimp, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+randomForest::varImpPlot(rffit, type = 1)  ## NB, função dentro de randomForest
+```
+
+## O Que Quer Dizer "Mean Decrease Accuracy"
+
+  -  Através de todos as arvores
+    - A variável causa uma perda de precisão no modelo
+  - Variáveis que podem causar perda de precisõ são mais importantes
+  - Exemplos:
+    - "bare nuclei" é a mais importante porque pode causar mais perda
+    - "mitosis" é o menos importante, porque qualquer valor que assuma não vai afetar o resultado do modelo, `diag`
+
+## Controle de Erros
+
+  - Gráfico de redução de MSE com o número de arvores calculadas
+  
+```{r rfgr1,  echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+plot(rffit, log = 'y')
+```
+
+## Curva ROC e AUC para Random Forests
+
+```{r roctest3, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+## colocar predtest na faixa de 0:1 (atualmente 1:2)
+predtestroc <- as.numeric(predtest) - 1
+rocteste <- roc(response = test_data$diag, 
+                predictor = predtestroc, 
+                levels = c("benigno", "maligno"), 
+                plot = FALSE, percent = TRUE, 
+                ci = TRUE, grid = TRUE)
+rocteste
+suppressMessages(coords(rocteste, "best", ret = "threshold"))
+```
+
+##
+
+```{r rocgr3, echo = FALSE }
+plot(rocteste)
+```
+
+## Fazer Random Forests com `caret`
+
+  - Só precisa mudar o a especificação de `train` 
+  - `method = "rf"`
+  - `caret` chama `randomForest` para fazer os calculos
+    - *wrapper* função
+  - Aqui vamos fazer `set.seed(42)` para ser consistente com os outros métodos
+
+## Calcular os Random Forests
+
+```{r carrf, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+set.seed(42)
+model_rf <- caret::train(diag ~ .,
+                         data = train_data,
+                         method = "rf",
+                         preProcess = c("scale", "center"),
+                         trControl = control)
+```
+
+## Resultados Básicos -- RF -- `caret`
+
+```{r resmodrf, echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+model_rf
+```
+
+## Calcular as Variáveis Importantes
+
+```{r rfvarimp2,  echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+imp <- model_rf$finalModel$importance # Guarda em unidades originais
+importance <- varImp(model_rf, scale = TRUE) # Scale coloca em escala de 100 -> 0
+```
+
+## Variáveis Importantes -- Escala Original
+
+  - % das arvores em que a variável aparece (eu acho??)
+```{r rfvarimp2a,  echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+imp[order(imp, decreasing = TRUE), ] 
+```
+
+## Variáveis Importantes - Escala 100 -> 0
+
+```{r rfvarimp2b,  echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+importance
+```
+
+## Variáveis Importantes -- Gráfico
+
+```{r rfvarimp2c,  echo = TRUE, mysize=TRUE, size='\\scriptsize'}
+plot(importance)
+```
+
+## Previsões do Modelo de RF de `caret`
+
+```{r rfpredcar, echo = TRUE, mysize=TRUE, size='\\tiny'}
+predrfx <- predict(model_rf, test_data)
+confusionMatrix(predrfx, test_data$diag)
+```
+
+## Previsões no Formato de Probabilidades
+
+  - `type = "prob"` de `predict() põe os valores em probabilidades
+  - Deixa você decidir qual seria o limite para diferenciar entre "benign" e "malignant"
+    - Até agora, sempre foi 0.5
+
+```{r rfpredprob, echo = TRUE, mysize=TRUE, size='\\tiny'}
+results <- data.frame(actual = test_data$diag, predict(model_rf, test_data, type = "prob"))
+results$prediction <- ifelse(results$benign > 0.5, "benign", 
+                             ifelse(results$malignant > 0.5, "malignant", NA))
+kable(head(results, 8))
+```
