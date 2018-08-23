@@ -1,0 +1,301 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+options(scipen = 10)
+```
+
+# Regressão Lógistica
+
+Examinaremos **regressão logística**, uma forma de regressão que usamos freqüentemente em bioestatística. Como regressão polinomial, regressão logística é uma extensão do conceito da regressão linear. Porém, em regressão logística, reduzimos o extenso da variável dependente para forma **binomial**. 
+
+Ou seja, desenvolvemos um modelo que tenta predizer se uma condição existe ou não existe. Baseado nas condições genotípicos e fenotípicos, nós tentamos prever se um paciente tem ou não tem uma doença. Um exemplo especifico: uma aluna quer entender se um paciente terá o tropismo R5 ou X4 baseado nos níveis de vários fatores. Em outras palavras, trabalhamos com uma variável dependente com dois estados, 0 ou 1. O modelo em si medirá a probabilidade que o estado 1 aconteceria.
+
+Como podemos torcer o modelo de regressão linear para acomodar o limite de `TRUE` ou `FALSE`, `1` ou `0`, `infetado` ou `não infetado`? Lembrando regressão polinomial, onde aumentamos um ou mais termos para a parte independente do modelo, nós transformávamos uma curva não linear numa *expressão* linear que satisfazia as premissas de regressão, especialmente o requisito que o modelo seja linear.
+
+Em regressão logística, nós fazemos uma coisa parecida. Aplicamos uma função "link" para converter probabilidades em uma linha. Esta função, chamada a `logit` está aplicada para os valores da variável Y (a dependente). Este expressa o modelo logística na forma do inverso do logaritmo da relação de odds ("inverted log odds ratio") que o evento dependente ocorrerá.  
+
+## Regressão Linear (usando a notação de matrizes)
+
+$$y=X\beta + \epsilon_i$$
+
+Este quer dizer que um matriz de valores $X$ está sendo multiplicado por um vetor de coeficientes $\beta$. Sabemos isso porque $X$ fica em maiúsculo e $\beta$ em minúsculo, a anotação tradicional para álgebra linear.
+
+## Regressão Logística
+
+$$p(y_i = 1) = logit^{-1} (X_i {\beta}) + \epsilon_i$$
+
+Esta equação diz que estamos procurando a probabilidade que a variável dependente ter o estado de '1' e que este depende nos variáveis independentes (no matriz X), transformados pela função `logit`. O `logit` de uma probabilidade é o logaritmo dos odds da variável assumindo o valor 1.
+
+A função `logit` invertido (a versão que usamos; veja o "-1" como o expoente na formula) tem a forma que limite os valores para os limites naturais de probabilidades: 0 e 1. Alias, a função em si pode assumir qualquer valor real, mas a probabilidade sempre sempre cairá no intervalo [0, 1].
+
+$$logit^{-1}(x)= \frac{1}{1+e^{-x}}$$
+
+## Modelos Lineares Gerais (*General Linear Models*)
+
+Uma regressão logística faz parte de uma classe dos modelos chamados *general linear models (GLM)*, ou seja, eles manipulam os matrizes dos parâmetros numa maneira diferente dos modelos lineares simples, que são um caso especifico de GLM. Como em regressão linear múltipla, o modelo usa uma combinação linear de variáveis independentes (também chamadas "covariates").
+
+Esses modelos usam a função `glm` invés  de `lm` para os cálculos, mas o output dos modelos parece quase parecido com o output dos modelos lineares que vimos até agora.
+
+### Cálculos dos Coeficientes nos GLM
+
+Lembramos que a regressão linear usou o método de *mínimos quadrados* para determinar os coeficientes dos modelos. Com regressão logística, precisamos utilizar outro método porque agora nosso objetivo não é minimizar a diferenças entre os valores de Y calculados e os observados. Agora, queremos maximizar a probabilidade de obter os valores da variável dependente observados. O software avalia a contribuição de cada caso para o probabilidade (*likelihood*) que Y ficaria igual a 1. Porque os valores dependentes são binomiais e são determinados independentemente, a probabilidade ($l(\beta)$) é o produto ($\prod$) das probabilidades dos casos: 
+
+$$l(\beta)=\prod_{i=1}^{n}p(x_i)^{y_i}(1-p(x_i))^{1-y_i}$$
+
+Usando esta função, o software maximiza as probabilidades fazendo iterações até que chega numa probabilidade máxima.
+
+## Nosso Primeiro Problema em Regressão Lógistica
+
+Primeiro, nós consideraremos um caso simples. Este é um estudo de 100 pacientes que ou têm ou não têm doença cardíaca coronária -- "coronary heart disease" (CHD). O estudo está interessado na relação entre a idade do paciente e a CHD.[^1] 
+
+[^1]: Esses dados vêm de Hosmer & Lemeshow, *Applied Logistic Regression* (2a Ed.), 2000, p.2 
+
+### Carregar os Pacotes Necessários
+
+```{r loadmods, echo = TRUE}
+  suppressMessages(library(tidyverse))
+  suppressPackageStartupMessages(library(DescTools))
+  suppressPackageStartupMessages(library(knitr))
+  suppressPackageStartupMessages(library(car))
+  suppressPackageStartupMessages(library(psych))
+  suppressPackageStartupMessages(library(broom))
+  suppressPackageStartupMessages(library(nortest))
+  suppressPackageStartupMessages(library(hrbrthemes))
+  suppressMessages(library(mosaic))
+```
+
+```{r loaddata}
+chdage <- read_csv("chdage.csv")
+```
+
+## Estrutura do `chdage`
+
+Vamos ver quais variáveis são disponíveis para julgar se precisa-se desta renda para ocupar uma casa listado na sondagem. Podemos também fazer um estudo rápido exploratório dos dados para ver se podemos perceber uma tendência nos dados.
+
+```{r str}
+glimpse(chdage)
+Desc(chd ~ idade, data = chdage, plotit = FALSE)
+chdscat <- ggplot(data = chdage, aes(y = chd, x = idade)) + 
+  geom_point() + theme_ipsum_rc()
+chdscat
+chdbox <- ggplot(data = chdage, aes(x = chd, y = idade, group = chd))
+chdbox <- chdbox + geom_boxplot() + theme_ipsum_rc()
+chdbox
+```
+
+Nós podemos também usar um gráfico de densidade condicional ("Conditional Density Plot") para entender como a CHD varia com idade. O gráfico seguinte mostra que começando com mais ou menos 35 anos, os pacientes teve mais ocorrências de CHD e depois de 50 anos a proporção dos pacientes sofrendo CHD supera 50%, aumentando para 80% antes de 67 (a idade máximo dos pacientes na amostra).
+
+```{r}
+cdplot(factor(chd) ~ idade, data = chdage, 
+       main = "Densidade Condicional de Idade sobre CHD",
+       xlab = "Idade", ylab = "Presença (1) ou Ausência (0) de CHD")
+```
+
+A análise indica que a idade média com CHD parece mais alta que a idade que não sofrem da doença. O scatterplot tradicional não mostra isso claramente porque todos os pontos são agrupados em 0 e 1 no eixo Y, os únicos valores que existem. Então um boxplot mostra melhor a diferença em idade. Mas, também a grande variabilidade em CHD entre as idades atrapalha uma visão clara da relação entre idade e CHD.
+
+Uma maneira que podemos controlar essa variabilidade melhor é criar intervalos (grupos de idade) para variável independente e olhar na proporção em cada grupo que sofre CHD. Nós vamos criar uma variável `idgrp` que vai agrupar idades nas categorias seguintes utilizando a função `Recode` de pacote `car` que oferece mais flexibilidade na especificação das substituições que `recode` de `dplyr`:
+
+  - 20 - 29 anos
+  - 30 - 34 anos
+  - 35 - 39 anos
+  - 40 - 44 anos
+  - 45 - 49 anos
+  - 50 - 54 anos
+  - 55 - 59 anos
+  - 60 - 69 anos
+
+```{r idgrupo}
+chdage$idgrp <- Recode(chdage$idade, "20:29 = '20-29'; 30:34 = '30-34'; 
+                       35:39 = '35-39'; 40:44 = '40-44'; 45:49 = '45-49';
+                       50:54 = '50-54'; 55:59 = '55-59'; 60:69 = '60-69'",
+                       as.factor = TRUE) 
+
+```
+
+```{r}
+kable(table(chdage$idgrp, chdage$chd))
+gmodels::CrossTable(chdage$idgrp, chdage$chd, chisq = TRUE, 
+                    prop.c = FALSE, prop.t = FALSE, 
+                    prop.chisq = FALSE, format = "SPSS")
+
+```
+
+A segunda tabela, um `CrossTable` do pacote `gmodels` mostra as proporções de cada fileira da tabela no mesmo formato que o SPSS usa. 
+
+Podemos agora construir o modelo, que vamos fazer em duas versões, em como idade na forma numérica e outra na forma categórica.
+
+## O Modelo
+
+A `glm` usa a mesmo formato de formula para especificar as variáveis que a `lm`. Separamos a variável dependente do independente com um til `~` e os várias variáveis independentes com sinais de mais `+` (que não precisamos neste caso). Depois de avisar o modelo em que data frame para achar as variáveis (`data =`), nós vamos especificar uma família de dos modelos gerais que queremos usar e qual seria a função "link" para determinar como o modelo deve ser calculado. Neste caso, nossa função link é a função `logit` que descrevi antes. O que a função "link" faz é de ligar a variável dependente que tem a forma *binomial* às variáveis independentes. 
+
+
+
+### Versão 1 -- `idade` como uma variável numérica
+
+
+```{r mod1}
+chdfit1 <- glm(chd ~  idade, data = chdage, 
+               family = binomial(link = "logit"))
+
+```
+
+### Versão 1 -- Resultados
+
+Olhamos nestes resultados. Na mesma maneira que precisamos imprimir o resumo do modelo para `lm`, assim precisamos fazer com `glm`. 
+
+```{r res, eval = FALSE}
+summary(chdfit1)
+```
+
+### Os Coeficientes
+
+A apresentação dos coeficientes é parecido com o que já conhecemos. Têm estimativa, erro padrão, valor-z e valor-p. Os valores p indicam que a contribuição da variável `idade` ao modelo foi significativo. Mas, como interpretá-los. 
+
+Os coeficientes em si representam o log odds que o resultado Y = 1. Em nosso caso, que a o paciente tem CHD. Para entender os coeficientes do modelo melhor, precisamos reverter o logit invertido e calcular o *logit inverso*. Nós vamos criar uma função para fazer este cálculo para os coeficientes.
+
+```{r func}
+invlogit <- function(x) {
+   1/(1 + exp(-x))
+}
+invlogit(coef(chdfit1)[2])
+```
+
+Nós podemos agora interpretar os coeficientes em termos de probabilidades. A idade tem uma probabilidade acima de 0.50. Com uma probabilidade acima de 0.50, podemos dizer que uma relação provavelmente existe entre idade e a presença de CHD (Y = 1). Mas, não oferece muito mais informação sobre quais são as probabilidades para cada grupo de idade.
+
+Vamos montar o modelo com os grupos que criávamos antes.
+
+### Versão 2 -- Modelo com `idgrp`
+
+```{r mod2}
+chdfit2 <- glm(chd ~  idgrp, data = chdage, 
+               family = binomial(link = "logit"))
+summary(chdfit2)
+
+```
+
+### Versão 2 -- Resultados
+
+Agora, os resultados oferecem mais informação. Os grupos de idade acima de 50 anos todos são significativos. O valor-p deles fica abaixo da $\alpha$ assumido de 0.05.
+Se nós convertemos os coeficientes desses grupos de idade significantes em probabilidades usando nossa função `invlogit`, podemos ver quais categorias têm uma probabilidade acima de 0.50 de ter CHD. 
+
+```{r probgrp}
+
+invlogit(coef(chdfit2)[6:8])
+
+```
+
+Como estes valores indicam, a probabilidade é muito alta que pessoas nessas faixas de idade teria CHD, se consideramos só esta variável independente.
+
+## Desvio Residual e AIC
+
+Também temos equivalentes ao $R^2$. Esses medem o poder explicativo do modelo, neste caso o **desvio residual** (*residual deviance*) e o **AIC** (*Akaike's Information Criterion*). São medidas da qualidade do modelo. Nós queremos um desvio residual menor que possível. O AIC combina vários elementos da qualidade do modelo para criar um valor que pode usar para comparar um modelo contra um outro. Você vai preferir o modelo com o menor AIC.
+
+Em nosso modelos, o desvio residual e o AIC são basicamente igual nos dois casos porque os modelos estão considerando os mesmos dados. No próximo exemplo, nós podemos ver que 
+
+## Exemplo com Múltiplas Variáveis Independentes
+
+Vamos considerar um outro dataset que trata de CHD. Neste caso, temos várias variáveis independentes que podemos usar para prever a aparência da doença. Neste caso, temos 65 casos em que os médicos gravaram as variáveis seguintes:
+
+  - id (Número de identificação do caso)
+  - idade (em anos)
+  - bmi (índice de massa corporal em $kg/m^2$)
+  - genero (0 = masculino, 1 = feminino)
+  - chd (Ocorrência ou não de um evento cardíaco)
+  
+A variável dependente é a `chd`. Primeiro, vamos colocar os dados na memoria. Os dados ficam num arquivo de R, `riscochd.RData`. Depois, fazermos um pequeno estudo exploratório.
+
+## Análise Exploratória
+
+```{r}
+load("riscochd.RData")
+Desc(riscochd$chd, plotit = FALSE)
+Desc(riscochd$idade, plotit = TRUE)
+Desc(riscochd$bmi, plotit = TRUE)
+Desc(riscochd$genero, plotit = FALSE)
+cdplot(factor(chd) ~ idade, data = riscochd, 
+       main = "Densidade Condicional de Idade sobre CHD",
+       xlab = "Idade", ylab = "Presença (1) ou Ausência (0) de CHD")
+cdplot(factor(chd) ~ bmi, data = riscochd, 
+       main = "Densidade Condicional de IMC sobre CHD",
+       xlab = "IMC", ylab = "Presença (1) ou Ausência (0) de CHD")
+```
+
+## Modelo 1 -- Todas as Variáveis Independentes
+
+```{r}
+chdfit3 <- glm(chd ~ idade + bmi + genero, data = riscochd)
+summary(chdfit3)
+```
+
+## Modelo 2 -- Usando Somente a Variável `idade`
+
+Idade é a variável mais importante no primeiro modelo. O que aconteceria se construímos um modelo com somente esta variável.
+
+```{r}
+chdfit4 <- glm(chd ~ idade, data = riscochd)
+summary(chdfit4)
+```
+
+Este modelo tem um AIC acima daquele do primeiro modelo (73.237 vs. 57.887). Também o desvio residual fica mais alto. Então podemos concluir que precisamos mais variáveis que `idade` para formar um modelo bom. 
+
+## Modelo 3 -- `idade` e `bmi`
+
+No primeiro modelo, `genero` não foi significativa. No último modelo, vamos eliminar esta variável e calcular o modelo.
+
+```{r}
+chdfit5 <- glm(chd ~ idade + bmi, data = riscochd)
+summary(chdfit5)
+```
+
+De todos os três modelos, este tem o melhor desempenho. O AIC fica abaixo daquela do primeiro e o desvio residual fica muito perto (mais um pouco mais alto) do desvio do primeiro. Então, um pesquisador pode ficar contente usando este modelo final para fazer previsões e afirmar que idade e IMC são importante para determinar o risco de CHD.
+
+Agora que decidimos qual modelo queremos usar, podemos ver os resultados traduzidos em odds e probabilidades.
+
+```{r}
+paste("Relação de Odds:")
+exp(coef(chdfit5)) # Calculate the odds
+paste("Intervalo de Confiança dos Odds:")
+exp(confint(chdfit5))
+paste("Probabilidade de Ocorrência:")
+invlogit(chdfit5$coefficients)
+```
+
+Esses números contam uma historia que apesar que o modelo seja significativo, a probabilidade de ocorrência de CHD dado cada condição (idade ou alto IMC) fica entorno de 0.5, ainda não uma clara indicação que uma ou outra pode causar a CHD. Provavelmente, há outras variáveis que não foram sondadas neste estudo que influenciam a CHD. 
+
+## Último Exemplo -- Uma Historia Mais Triste
+
+As vezes, regressão logística  não produz imediatamente resultados claros. Um projeto de uma colega nossa mostra isso. Ela tentou de ver o efeito de vários fatores ativantes sobre o tropismo do vírus HIV. Esses fatores podem causar o tropismo de vírus de estar CCR5 ou CXCR4. 
+
+## Modelo com Soma de Marcas Activantes com CD4+ como Controle
+
+```{r actmod, eval = FALSE}
+load(file = "studdat.Rda")
+actmodfit <- glm(tropismo ~ totr + cd4, 
+               data = dat2, family = "binomial")
+summary(actmodfit)
+paste("Relação de Odds:")
+exp(coef(actmodfit)) # Calculate the odds
+paste("Intervalo de Confiança dos Odds:")
+exp(confint(actmodfit))
+paste("Probabilidade de Ocorrência:")
+invlogit(actmodfit$coefficients)
+```
+
+## Bibliografia
+
+Esta apresentação deve muito aos livros seguintes:
+
+  - **R for Everyone** de Jared P. Lander. Este livro cobra muitos tópicos analíticos importantes numa forma clara com código para ajudar na aplicação.
+
+  - **Regression Models for Data Science in R** de Brian Caffo. Este é um texto avançado sobre os tipos de modelos de regressão e serve como texto do curso do Caffo sobre regressão na Coursera.
+  
+  - **Applied Logistic Regression** de David Hosmer e Stanley Lemeshow. Além de ser a referência para os estudos relatados nesta palestra, este livro é um dos livros mais importantes sobre regressão logística.
+  
+  - **OpenIntro Statistics (3a Ed.)** de Diez, Barr e Cetinkaya-Rundel. Um texto excelente introdutório sobre estatística.
+
+
